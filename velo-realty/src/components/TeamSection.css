@@ -1,0 +1,216 @@
+.team-innovative {
+  padding: 8rem 0;
+  background: var(--navy-900);
+  overflow: visible;
+}
+
+.team-display-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+  margin-top: 4rem;
+}
+
+.team-active-showcase {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+  min-height: 500px;
+}
+
+.active-portrait-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/5;
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.6);
+  transform: perspective(1000px) rotateY(-10deg);
+  transition: all 0.6s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.active-portrait-wrap:hover {
+  transform: perspective(1000px) rotateY(0deg);
+}
+
+.active-portrait {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: portraitScale 0.6s ease-out forwards;
+}
+
+@keyframes portraitScale {
+  from { transform: scale(1.1); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.portrait-glitch-layer {
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  z-index: 1;
+  mix-blend-mode: color-dodge;
+  opacity: 0;
+  pointer-events: none;
+  animation: glitchAnim 3s infinite linear;
+}
+
+@keyframes glitchAnim {
+  0% { opacity: 0; transform: translate(0); }
+  1% { opacity: 0.3; transform: translate(-5px, 5px); }
+  2% { opacity: 0; transform: translate(0); }
+  98% { opacity: 0; transform: translate(0); }
+  99% { opacity: 0.3; transform: translate(5px, -5px); }
+  100% { opacity: 0; transform: translate(0); }
+}
+
+.active-bio-panel {
+  padding: 3rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 30px;
+  backdrop-filter: blur(20px);
+  position: relative;
+  transform: translateX(-50px);
+  animation: bioSlide 0.6s 0.2s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes bioSlide {
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.member-rank {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--teal-500);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 1rem;
+}
+
+.member-name {
+  font-family: 'EB Garamond Custom', serif;
+  font-size: 3.5rem;
+  color: white;
+  margin: 0 0 1.5rem;
+  line-height: 1;
+}
+
+.member-bio-text {
+  font-size: 1.1rem;
+  color: var(--body-color);
+  line-height: 1.8;
+  margin-bottom: 2.5rem;
+}
+
+.bio-stats-visual {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.bio-stat span {
+  display: block;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.stat-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.stat-fill {
+  height: 100%;
+  background: var(--teal-500);
+  border-radius: 2px;
+  transition: width 1.5s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.team-selection-reel {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.selection-chip {
+  width: 100px;
+  height: 100px;
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.4s ease;
+  filter: grayscale(1);
+  opacity: 0.6;
+}
+
+.selection-chip.active,
+.selection-chip:hover {
+  filter: grayscale(0);
+  opacity: 1;
+  border-color: var(--teal-500);
+  transform: translateY(-10px);
+  box-shadow: 0 10px 30px rgba(0, 168, 150, 0.3);
+}
+
+.selection-chip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Light Theme Support */
+.page[data-theme='light'] .team-innovative {
+  background: var(--surface-50);
+}
+
+.page[data-theme='light'] .active-bio-panel {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.05);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.08);
+}
+
+.page[data-theme='light'] .member-name {
+  color: var(--navy-900);
+}
+
+.page[data-theme='light'] .member-bio-text {
+  color: var(--text-500);
+}
+
+.page[data-theme='light'] .bio-stat span {
+  color: var(--text-400);
+}
+
+.page[data-theme='light'] .stat-bar {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.page[data-theme='light'] .active-portrait-wrap {
+  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 900px) {
+  .team-active-showcase {
+    grid-template-columns: 1fr;
+  }
+  .active-bio-panel {
+    transform: none;
+    animation: none;
+    opacity: 1;
+  }
+  .member-name {
+    font-size: 2.5rem;
+  }
+}

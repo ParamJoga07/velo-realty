@@ -32,8 +32,9 @@ export function Footer() {
         </div>
 
         <div className="footer-bottom">
-          <p>© VELO Realty 2026</p>
-          <p>hello@velorealty.ae · +971 50 123 4567</p>
+          <p>© Velo Realty Pvt Ltd 2026</p>
+          <p>admin@velorealty.com · 7207214848</p>
+          <p className="footer-address">Divya Diamonds Buildings, 1st Floor, Kavuri Hills, Madhapur, Hyderabad, 500081</p>
         </div>
       </div>
     </footer>

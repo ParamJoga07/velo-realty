@@ -60,35 +60,35 @@ export function PropertyShowcase({
             <article key={item.id} className="property-card interactive-card" onClick={() => setSelectedProperty(item)}>
               <div className="card-image">
                 <img src={item.image} alt={item.title} className="property-bg-image" loading="lazy" />
-                <span className="badge">{item.status}</span>
-                <button
-                  type="button"
-                  className={favorites.has(item.id) ? 'fav-btn active' : 'fav-btn'}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onToggleFavorite(item.id)
-                  }}
-                  aria-label={favorites.has(item.id) ? 'Remove from shortlist' : 'Add to shortlist'}
-                >
-                  {favorites.has(item.id) ? '♥' : '♡'}
-                </button>
-                <span className="price-chip">{item.price}</span>
-                <div className="card-body card-overlay">
-                  <h3>{item.title}</h3>
-                  <p className="card-location">
-                    {item.location} · {item.community}
-                  </p>
-                  <p className="card-summary">
-                    {item.type} by {item.developer} with handover in {item.handover}.
-                  </p>
-                  <div className="meta">
-                    <span>{item.beds} Beds</span>
-                    <span>{item.baths} Baths</span>
-                    <span>{item.area} sq.ft</span>
+                <div className="card-luxury-overlay">
+                  <div className="card-luxury-header">
+                    <span className="badge-premium">{item.status}</span>
+                    <button
+                      type="button"
+                      className={favorites.has(item.id) ? 'fav-btn active' : 'fav-btn'}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onToggleFavorite(item.id)
+                      }}
+                    >
+                      {favorites.has(item.id) ? '♥' : '♡'}
+                    </button>
                   </div>
-                  <button className="book-btn" type="button" onClick={(e) => { e.stopPropagation(); /* Book logic */ }}>
-                    Book now
-                  </button>
+                  
+                  <div className="card-luxury-content">
+                    <div className="card-luxury-main">
+                      <h3>{item.title}</h3>
+                      <p className="card-luxury-loc">{item.location} Corridor</p>
+                    </div>
+                    <div className="card-luxury-footer">
+                      <div className="luxury-meta-strip">
+                        <span>{item.beds}B</span>
+                        <span>{item.baths}B</span>
+                        <span>{item.area}FT²</span>
+                      </div>
+                      <div className="luxury-price-tag">{item.price}</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </article>

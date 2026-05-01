@@ -12,8 +12,14 @@ type HeroSearchProps = {
   communities: Community[]
 }
 
-const listingTypes: ListingType[] = ['Buy', 'Rent', 'Off-plan', 'Ready']
-const propertyTypes: Array<PropertyType | 'Any Type'> = ['Any Type', 'Apartment', 'Villa', 'Townhouse']
+const listingTypes: ListingType[] = ['Pre-Launch', 'Off-Plan', 'Ready']
+const propertyTypes: Array<PropertyType | 'Any Type'> = [
+  'Any Type',
+  'Apartment',
+  'Villa',
+  'Commercial Space',
+  'Plot or Land',
+]
 
 export function HeroSearch({
   tab,
@@ -31,22 +37,27 @@ export function HeroSearch({
       <div className="hero-overlay" />
       <div className="container hero-content">
         <div className="hero-shell">
-          <p className="eyebrow">Luxury Real Estate Platform</p>
-          <h1>Discover skyline homes built for elevated living and long-term value.</h1>
+          <p className="eyebrow">Velo Realty Pvt. Ltd.</p>
+          <h1>Elevated Skyline Living Meets Accelerated Investment Discovery.</h1>
           <p className="hero-copy">
-            Explore premium properties, curated communities, and trusted developers with a faster investment discovery
-            experience.
+            Experience premium homes and curated communities from trusted developers, engineered for long-term value and
+            a faster path to your next great investment.
           </p>
           <div className="hero-leadbar">
             <input type="email" placeholder="Enter your email for curated launches" />
             <button className="btn btn-primary" type="button">
-              See a demo
+              Get Started
             </button>
           </div>
         </div>
         <div className="tabs" role="tablist" aria-label="Property intent tabs">
           {listingTypes.map((type) => (
-            <button key={type} className={type === tab ? 'tab active' : 'tab'} onClick={() => setTab(type)} type="button">
+            <button
+              key={type}
+              className={type === tab ? 'tab active' : 'tab'}
+              onClick={() => setTab(type)}
+              type="button"
+            >
               {type}
             </button>
           ))}
@@ -55,7 +66,7 @@ export function HeroSearch({
           <label>
             Location
             <select value={location} onChange={(event) => setLocation(event.target.value)}>
-              <option>All Locations</option>
+              <option>All Corridors</option>
               {communities.map((item) => (
                 <option key={item.name}>{item.name}</option>
               ))}
@@ -76,28 +87,28 @@ export function HeroSearch({
               <option>1</option>
               <option>2</option>
               <option>3</option>
-              <option>4</option>
+              <option>4+</option>
             </select>
           </label>
           <button className="btn btn-primary search-btn" type="button">
-            Search
+            Search Properties
           </button>
         </div>
         <div className="hero-metrics">
           <div>
-            <strong>250+</strong>
-            <span>Premium listings</span>
+            <strong>500+</strong>
+            <span>Curated Units</span>
           </div>
           <div>
-            <strong>35+</strong>
-            <span>Developer partners</span>
+            <strong>15+</strong>
+            <span>A-List Developers</span>
           </div>
           <div>
-            <strong>&lt; 2 min</strong>
-            <span>Average response time</span>
+            <strong>&lt; 24h</strong>
+            <span>Transaction Velocity</span>
           </div>
         </div>
-        <p className="search-note">Featured in Marina, Downtown, Palm Jumeirah, Dubai Hills</p>
+        <p className="search-note">Active in North, South, East, and West Growth Corridors</p>
       </div>
     </section>
   )

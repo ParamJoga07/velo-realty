@@ -1,8 +1,8 @@
-export type ListingType = 'Buy' | 'Rent' | 'Off-plan' | 'Ready'
+export type ListingType = 'Pre-Launch' | 'Off-Plan' | 'Ready'
 
 export type PropertyStatus = 'Featured' | 'New Launch' | 'Ready' | 'Sold Out'
 
-export type PropertyType = 'Apartment' | 'Villa' | 'Townhouse'
+export type PropertyType = 'Apartment' | 'Villa' | 'Commercial Space' | 'Plot or Land'
 
 export type Property = {
   id: number
@@ -37,4 +37,10 @@ export type Community = {
 export type Guide = {
   title: string
   description: string
+}
+
+export type AreaRate = {
+  area: string
+  price: string
+  cagr: string
 }

@@ -10,22 +10,12 @@ export function Navbar({ favoritesCount, theme, onThemeToggle }: NavbarProps) {
       <div className="container nav-wrap">
         <div className="nav-pill">
           <nav>
-            <a className="nav-link-with-caret" href="#products">
-              Products
-              <span aria-hidden="true">⌄</span>
-            </a>
-            <a className="nav-link-with-caret" href="#customers">
-              Customers
-              <span aria-hidden="true">⌄</span>
-            </a>
-            <a href="#careers">Careers</a>
+            <a href="#corridors">Corridors</a>
+            <a href="#developers">Developers</a>
+            <a href="#about">About</a>
           </nav>
-          <a className="logo-link" href="#" aria-label="VELO Realty home">
-            <img
-              className="logo-mark"
-              src="/Image%20(3).svg"
-              alt="VELO Realty"
-            />
+          <a className="logo-link" href="#" aria-label="Velo Realty home">
+            <img className="logo-mark" src="/Image%20(3).svg" alt="Velo Realty" />
           </a>
           <div className="nav-actions">
             <button className="btn theme-toggle-btn" onClick={onThemeToggle} type="button" aria-label="Toggle theme">
@@ -35,7 +25,7 @@ export function Navbar({ favoritesCount, theme, onThemeToggle }: NavbarProps) {
               Sign in
             </a>
             <a className="btn btn-primary nav-demo" href="#contact">
-              See a demo
+              Contact Us
               <svg
                 width="16"
                 height="16"
@@ -60,5 +50,5 @@ export function Navbar({ favoritesCount, theme, onThemeToggle }: NavbarProps) {
         </span>
       </div>
     </header>
-  );
+  )
 }
