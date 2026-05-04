@@ -8,15 +8,17 @@ export function Navbar({ favoritesCount, theme, onThemeToggle }: NavbarProps) {
   return (
     <header className="navbar">
       <div className="container nav-wrap">
+          
         <div className="nav-pill">
+          <a className="logo-link" href="#" aria-label="Velo Realty home">
+            <img className="logo-mark" src="/Velo Logo Single.png" alt="Velo Realty" />
+          </a>
           <nav>
             <a href="#corridors">Corridors</a>
             <a href="#developers">Developers</a>
             <a href="#about">About</a>
           </nav>
-          <a className="logo-link" href="#" aria-label="Velo Realty home">
-            <img className="logo-mark" src="/Image%20(3).svg" alt="Velo Realty" />
-          </a>
+        
           <div className="nav-actions">
             <button className="btn theme-toggle-btn" onClick={onThemeToggle} type="button" aria-label="Toggle theme">
               {theme === 'dark' ? 'Light' : 'Dark'}

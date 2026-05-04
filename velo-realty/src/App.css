@@ -53,7 +53,7 @@
 
 .navbar {
   position: fixed;
-  top: 32px;
+  /* top: 32px; */
   left: 50%;
   width: 70%;
   padding-top: 12px;
@@ -1837,8 +1837,8 @@ textarea {
     display: none;
   }
 
-  .nav-pill {
-    justify-content: space-between;
+  .nav-pill { 
+    justify-content: space-evenly;
     width: 100%;
     min-height: 46px;
     padding: 0.4rem 0;

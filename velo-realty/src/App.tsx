@@ -10,8 +10,7 @@ import { PriceTicker } from './components/PriceTicker'
 import { PropertyShowcase } from './components/PropertyShowcase'
 import { Sections } from './components/Sections'
 import { TeamSection } from './components/TeamSection'
-import { aboutStats, communities, developers, guides, partners, properties } from './data/siteData'
-import type { ListingType, Property } from './types'
+import type { ListingType, Property, Developer, Community, Guide } from './types'
 
 function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -28,11 +27,42 @@ function App() {
   const [showBackToTop, setShowBackToTop] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
+  const [properties, setProperties] = useState<Property[]>([])
+  const [developers, setDevelopers] = useState<Developer[]>([])
+  const [communities, setCommunities] = useState<Community[]>([])
+  const [guides, setGuides] = useState<Guide[]>([])
+  const [partners, setPartners] = useState<string[]>([])
+  const [aboutStats, setAboutStats] = useState<any[]>([])
+  const [areaRates, setAreaRates] = useState<any[]>([])
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 2500) // 2.5s to showcase the new high-end animation
-    return () => clearTimeout(timer)
+    const fetchData = async () => {
+      try {
+        const [propRes, devRes, commRes, guideRes, partRes, statRes, areaRes] = await Promise.all([
+          fetch('http://127.0.0.1:8000/api/properties'),
+          fetch('http://127.0.0.1:8000/api/developers'),
+          fetch('http://127.0.0.1:8000/api/communities'),
+          fetch('http://127.0.0.1:8000/api/guides'),
+          fetch('http://127.0.0.1:8000/api/partners'),
+          fetch('http://127.0.0.1:8000/api/stats'),
+          fetch('http://127.0.0.1:8000/api/area-rates')
+        ]);
+        setProperties(await propRes.json());
+        setDevelopers(await devRes.json());
+        setCommunities(await commRes.json());
+        setGuides(await guideRes.json());
+        setPartners(await partRes.json());
+        setAboutStats(await statRes.json());
+        setAreaRates(await areaRes.json());
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      } finally {
+        setTimeout(() => {
+          setIsLoading(false)
+        }, 1000) // Small delay for animation
+      }
+    };
+    fetchData();
   }, [])
 
   useEffect(() => {
@@ -113,13 +143,13 @@ function App() {
       }
       return rankByStatus[a.status] - rankByStatus[b.status]
     })
-  }, [tab, location, propertyType, bedrooms, sortBy])
+  }, [tab, location, propertyType, bedrooms, sortBy, properties])
 
   return (
     <div className="page" data-theme={theme}>
       <div className="theme-sweep" />
       {isLoading && <LoadingScreen />}
-      <PriceTicker />
+      <PriceTicker areaRates={areaRates} />
       <Navbar
         favoritesCount={favorites.size}
         theme={theme}

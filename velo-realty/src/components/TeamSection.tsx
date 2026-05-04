@@ -1,35 +1,25 @@
 import React from 'react';
 import './TeamSection.css';
 
-const teamMembers = [
-  {
-    name: 'Vikram Reddy',
-    role: 'Founder & CEO',
-    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxm4x8UVMEnLMBDlTCN2iFVCgLgJSQ6kjU6A&s',
-    bio: 'Visionary leader with 15+ years in Hyderabad real estate.',
-  },
-  {
-    name: 'Ananya Sharma',
-    role: 'Head of Growth Corridors',
-    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgTetWRyvPAWDHtX-MCel3C3oVx4WfCozCGb8HLq1h&s',
-    bio: 'Expert in local luxury investments and portfolio growth across Hyderabad.',
-  },
-  {
-    name: 'Siddharth Rao',
-    role: 'Chief Investment Officer',
-    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeXSvNvTy7Zowoep7o-MPuZVScrlVoZJQkwg&s',
-    bio: 'Data-driven strategist specializing in growth corridor analysis.',
-  },
-  {
-    name: 'Priya Kapoor',
-    role: 'Director of Client Relations',
-    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQS2M7ysn8HgsZcigyJhvNGAdAGB6c62NNV6g&s',
-    bio: 'Ensuring seamless transaction velocity for global investors.',
-  },
-];
+interface TeamMember {
+  name: string;
+  role: string;
+  image: string;
+  bio: string;
+}
 
 export function TeamSection() {
+  const [teamMembers, setTeamMembers] = React.useState<TeamMember[]>([]);
   const [activeMember, setActiveMember] = React.useState(0);
+
+  React.useEffect(() => {
+    fetch('http://127.0.0.1:8000/api/team')
+      .then(res => res.json())
+      .then(data => setTeamMembers(data))
+      .catch(err => console.error("Error fetching team members:", err));
+  }, []);
+
+  if (teamMembers.length === 0) return null;
 
   return (
     <section id="team" className="section team-innovative">

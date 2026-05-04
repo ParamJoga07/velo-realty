@@ -44,3 +44,61 @@ export type AreaRate = {
   price: string
   cagr: string
 }
+
+// --- NEW: Rich Developer & Project Types ---
+
+export type ProjectImage = {
+  id: number
+  image_url: string
+  caption: string | null
+  is_primary: boolean
+}
+
+export type ProjectSummary = {
+  id: number
+  name: string
+  slug: string
+  location: string
+  project_type: string
+  price_range: string | null
+  status: string | null
+  configurations: string | null
+  primary_image: string | null
+}
+
+export type DeveloperProfile = {
+  id: number
+  name: string
+  slug: string
+  about: string
+  founded_year: number | null
+  headquarters: string | null
+  logo_url: string | null
+  total_projects: number
+  projects: ProjectSummary[]
+}
+
+export type ProjectDetail = {
+  id: number
+  name: string
+  slug: string
+  developer_name: string | null
+  developer_slug: string | null
+  location: string
+  sub_location: string | null
+  project_type: string
+  land_area: string | null
+  structure: string | null
+  total_units: string | null
+  configurations: string | null
+  size_range: string | null
+  price_range: string | null
+  open_space: string | null
+  possession: string | null
+  status: string | null
+  clubhouse_size: string | null
+  description: string | null
+  highlights: string | null
+  connectivity: string | null
+  images: ProjectImage[]
+}

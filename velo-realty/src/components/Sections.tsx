@@ -16,9 +16,6 @@ export function Sections({ developers, communities, guides, partners, aboutStats
   const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
   const [showAllPartners, setShowAllPartners] = useState(false);
 
-  const developerProjects = allProperties.filter(p => p.developer === selectedDeveloper);
-  const communityProjects = allProperties.filter(p => p.community === selectedCommunity);
-
   if (showAllPartners) {
     return (
       <div className="all-partners-view animate-in">
@@ -61,7 +58,6 @@ export function Sections({ developers, communities, guides, partners, aboutStats
         {selectedDeveloper && (
           <DeveloperModal 
             developerName={selectedDeveloper}
-            projects={allProperties.filter(p => p.developer === selectedDeveloper)}
             onClose={() => setSelectedDeveloper(null)}
           />
         )}
@@ -369,14 +365,12 @@ export function Sections({ developers, communities, guides, partners, aboutStats
       {selectedDeveloper && (
         <DeveloperModal 
           developerName={selectedDeveloper}
-          projects={developerProjects}
           onClose={() => setSelectedDeveloper(null)}
         />
       )}
       {selectedCommunity && (
         <DeveloperModal 
           developerName={selectedCommunity}
-          projects={communityProjects}
           onClose={() => setSelectedCommunity(null)}
         />
       )}

@@ -1,8 +1,12 @@
 import React from 'react'
-import { areaRates } from '../data/siteData'
 import './PriceTicker.css'
 
-export const PriceTicker: React.FC = () => {
+interface PriceTickerProps {
+  areaRates: Array<{ area: string; cagr: string; price: string }>;
+}
+
+export const PriceTicker: React.FC<PriceTickerProps> = ({ areaRates = [] }) => {
+  if (areaRates.length === 0) return null;
   // Duplicate the rates to create a seamless loop
   const displayRates = [...areaRates, ...areaRates]
 
