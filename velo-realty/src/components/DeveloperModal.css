@@ -234,21 +234,33 @@
 
 /* ── Project Card ── */
 .dev-project-card {
-  background: var(--surface-alt);
-  border: 1px solid var(--border);
-  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.25rem;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
 }
 
 .dev-project-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-8px);
   border-color: var(--accent);
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.12),
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.2),
     0 0 0 1px var(--accent);
+}
+
+.light-mode .dev-project-card {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.light-mode .dev-project-card:hover {
+  background: rgba(0, 0, 0, 0.04);
 }
 
 /* Card Image */

@@ -43,7 +43,7 @@ export function Sections({ developers, communities, guides, partners, aboutStats
               >
                 <div className="card-image-wrap">
                   <img src={dev.image} alt={dev.name} />
-                  <div className="card-glass-layer"></div>
+                  <div className="card-overlay"></div>
                 </div>
                 <div className="card-content">
                   <div className="partner-status">Strategic Partner</div>

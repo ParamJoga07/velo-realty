@@ -12,7 +12,9 @@ from seed_projects_4 import P4
 
 ALL_PROJECTS = PROJECTS_BATCH_1 + P2 + P3 + P4
 
-# Create tables
+# Reset database schema
+Base.metadata.drop_all(bind=engine)
+# Create tables with new schema
 Base.metadata.create_all(bind=engine)
 
 def seed_database():

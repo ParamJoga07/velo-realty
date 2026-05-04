@@ -63,6 +63,8 @@ class ProjectModel(Base):
     open_space = Column(String, nullable=True)
     possession = Column(String, nullable=True)
     status = Column(String, nullable=True)
+    zone = Column(String, nullable=True)  # West, South, North, East, Central
+    category = Column(String, nullable=True) # Commercial, Villa, Apartment, Plot, etc.
     clubhouse_size = Column(String, nullable=True)
     description = Column(Text, nullable=True)
     highlights = Column(Text, nullable=True)
