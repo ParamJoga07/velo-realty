@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import type { Community, Developer, Guide, Property } from '../types'
+import type { Community, Developer, Guide } from '../types'
 import { Building2 } from 'lucide-react'
 import { CORRIDOR_MAPS } from './maps/CorridorMaps'
 
