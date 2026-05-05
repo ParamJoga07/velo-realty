@@ -202,15 +202,61 @@
 }
 
 @media (max-width: 900px) {
+  .team-innovative {
+    padding: 4rem 0;
+  }
+
   .team-active-showcase {
     grid-template-columns: 1fr;
+    gap: 2rem;
+    min-height: auto;
   }
+
+  .active-portrait-wrap {
+    aspect-ratio: 1/1;
+    border-radius: 24px;
+    transform: none !important;
+  }
+
   .active-bio-panel {
     transform: none;
     animation: none;
     opacity: 1;
+    padding: 2rem;
+    border-radius: 20px;
+    margin-top: -2rem;
+    z-index: 2;
+    background: rgba(20, 30, 45, 0.95);
   }
+
   .member-name {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+  }
+
+  .member-bio-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+
+  .team-selection-reel {
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding: 1rem 0.5rem 2rem;
+    gap: 1rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .team-selection-reel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .selection-chip {
+    width: 70px;
+    height: 70px;
+    flex-shrink: 0;
+    border-radius: 12px;
   }
 }

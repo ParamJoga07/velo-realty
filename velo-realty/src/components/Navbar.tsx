@@ -1,3 +1,5 @@
+import { Sun, Moon } from 'lucide-react';
+
 type NavbarProps = {
   favoritesCount: number;
   theme: 'light' | 'dark';
@@ -21,11 +23,8 @@ export function Navbar({ favoritesCount, theme, onThemeToggle, onSignInClick }: 
           </nav>
         
           <div className="nav-actions">
-            <button className="btn theme-toggle-btn" onClick={onThemeToggle} type="button" aria-label="Toggle theme">
-              {theme === 'dark' ? 'Light' : 'Dark'}
-            </button>
-            <button className="btn btn-ghost" onClick={onSignInClick}>
-              Sign in
+            <button className="btn theme-toggle-btn icon-btn" onClick={onThemeToggle} type="button" aria-label="Toggle theme">
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
             <a className="btn btn-primary nav-demo" href="#contact">
               Contact Us

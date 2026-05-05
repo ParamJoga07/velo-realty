@@ -10,7 +10,8 @@ import { PriceTicker } from './components/PriceTicker'
 import { PropertyShowcase } from './components/PropertyShowcase'
 import { Sections } from './components/Sections'
 import { TeamSection } from './components/TeamSection'
-import type { ListingType, Property, Developer, Community, Guide } from './types'
+import { DeveloperModal } from './components/DeveloperModal'
+import type { ListingType, Property, Developer, Community, Guide, Category, Zone } from './types'
 import { AdminDashboard } from './components/AdminDashboard'
 import { AdminLogin } from './components/AdminLogin'
 import API_BASE_URL from './config'
@@ -22,6 +23,8 @@ function App() {
   })
   const [tab, setTab] = useState<ListingType>('Pre-Launch')
   const [location, setLocation] = useState('All Locations')
+  const [zone, setZone] = useState('All Zones')
+  const [category, setCategory] = useState('All Categories')
   const [propertyType, setPropertyType] = useState('Any Type')
   const [bedrooms, setBedrooms] = useState('Any')
   const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'handover'>('featured')
@@ -37,22 +40,29 @@ function App() {
   const [partners, setPartners] = useState<string[]>([])
   const [aboutStats, setAboutStats] = useState<any[]>([])
   const [areaRates, setAreaRates] = useState<any[]>([])
+  const [dbCategories, setDbCategories] = useState<Category[]>([])
+  const [dbZones, setDbZones] = useState<Zone[]>([])
 
   // Admin States
   const [adminToken, setAdminToken] = useState<string | null>(() => window.localStorage.getItem('velo-admin-token'))
   const [showAdminLogin, setShowAdminLogin] = useState(false)
+  
+  // Developer Modal State
+  const [selectedDeveloperName, setSelectedDeveloperName] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [propRes, devRes, corrRes, guideRes, partRes, statRes, areaRes] = await Promise.all([
+        const [propRes, devRes, corrRes, guideRes, partRes, statRes, areaRes, catRes, zoneRes] = await Promise.all([
           fetch(`${API_BASE_URL}/api/properties`),
           fetch(`${API_BASE_URL}/api/developers`),
           fetch(`${API_BASE_URL}/api/corridors`),
           fetch(`${API_BASE_URL}/api/guides`),
           fetch(`${API_BASE_URL}/api/partners`),
           fetch(`${API_BASE_URL}/api/stats`),
-          fetch(`${API_BASE_URL}/api/area-rates`)
+          fetch(`${API_BASE_URL}/api/area-rates`),
+          fetch(`${API_BASE_URL}/api/categories`),
+          fetch(`${API_BASE_URL}/api/zones`)
         ]);
         setProperties(await propRes.json());
         setDevelopers(await devRes.json());
@@ -62,6 +72,8 @@ function App() {
         setPartners(await partRes.json());
         setAboutStats(await statRes.json());
         setAreaRates(await areaRes.json());
+        setDbCategories(await catRes.json());
+        setDbZones(await zoneRes.json());
       } catch (error) {
         console.error("Failed to fetch data:", error);
       } finally {
@@ -140,6 +152,8 @@ function App() {
       const locationMatch = location === 'All Locations' || location === 'All Corridors' || item.location === location
       const typeMatch = propertyType === 'Any Type' || item.type === propertyType
       const bedMatch = bedrooms === 'Any' || String(item.beds) === bedrooms
+      // Since PropertyModel doesn't have many-to-many populated in this view yet, we stick to basic filters
+      // but the UI will show these for the discovery module later
       return tabMatch && locationMatch && typeMatch && bedMatch
     })
 
@@ -187,11 +201,17 @@ function App() {
         setTab={setTab}
         location={location}
         setLocation={setLocation}
+        zone={zone}
+        setZone={setZone}
+        category={category}
+        setCategory={setCategory}
         propertyType={propertyType}
         setPropertyType={setPropertyType}
         bedrooms={bedrooms}
         setBedrooms={setBedrooms}
         communities={communities}
+        zones={dbZones}
+        categories={dbCategories}
       />
       <main>
         <PropertyShowcase
@@ -210,12 +230,20 @@ function App() {
           partners={partners}
           aboutStats={aboutStats}
           allProperties={properties}
+          onDeveloperClick={setSelectedDeveloperName}
         />
         <TeamSection />
         <ContactSection />
       </main>
-      <Footer />
+      <Footer onSignInClick={() => setShowAdminLogin(true)} />
       <BackToTop visible={showBackToTop} />
+
+      {selectedDeveloperName && (
+        <DeveloperModal 
+          developerName={selectedDeveloperName}
+          onClose={() => setSelectedDeveloperName(null)}
+        />
+      )}
     </div>
   )
 }

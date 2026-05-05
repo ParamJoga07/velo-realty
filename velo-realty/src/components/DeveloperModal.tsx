@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { Building2, MapPin, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { CORRIDOR_MAPS } from './maps/CorridorMaps';
 import type { DeveloperProfile, ProjectDetail } from '../types';
 import './DeveloperModal.css';
 
@@ -177,9 +179,18 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
         ) : profile ? (
           <>
             {/* Developer Header */}
-            <div className="dev-profile-header">
-              <div className="dev-profile-badge">{profile.type || 'A-List Developer'}</div>
-              <h2 className="dev-profile-name">{profile.name}</h2>
+            <div className={`dev-profile-header ${profile.type?.toLowerCase().includes('corridor') ? 'corridor-mode' : ''}`}>
+              <div className="dev-header-main">
+                {profile.image && !profile.type?.toLowerCase().includes('corridor') && (
+                  <div className="dev-header-image">
+                    <img src={profile.image} alt={profile.name} />
+                  </div>
+                )}
+                <div className="dev-header-text">
+                  <div className="dev-profile-badge">{profile.type || 'A-List Developer'}</div>
+                  <h2 className="dev-profile-name">{profile.name}</h2>
+                </div>
+              </div>
               <p className="dev-profile-about">{profile.about}</p>
               <div className="dev-profile-chips">
                 {profile.founded_year && <span className="dev-chip">🏛️ Est. {profile.founded_year}</span>}
@@ -188,46 +199,94 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
               </div>
             </div>
 
-            {/* Projects Grid */}
-            <div className="dev-projects-header">
-              <h3>Active Portfolio</h3>
-              <span className="dev-projects-count">{profile.projects.length} projects</span>
-            </div>
-            <div className="dev-projects-grid">
-              {profile.projects.map((project) => (
-                <div
-                  key={project.id}
-                  className="dev-project-card"
-                  onClick={() => fetchProjectDetail(project.slug)}
-                >
-                  <div className="dpc-image">
-                    {project.primary_image ? (
-                      <img src={project.primary_image} alt={project.name} />
-                    ) : (
-                      <div className="dpc-image-placeholder">
-                        <span>🏗️</span>
-                      </div>
-                    )}
-                    {project.status && (
-                      <span className={`dpc-badge ${(project.status).toLowerCase().replace(/\s+/g, '-')}`}>
-                        {project.status}
-                      </span>
-                    )}
-                    <div className="dpc-overlay">
-                      <span>View Details →</span>
+            {profile.type?.toLowerCase().includes('corridor') ? (
+              <div className="corridor-detail-split">
+                <div className="corridor-map-side">
+                  {CORRIDOR_MAPS[profile.slug] || CORRIDOR_MAPS[profile.name.toLowerCase().replace(/\s+/g, '-')] || (
+                    <div className="map-placeholder">
+                      <MapPin size={40} />
+                      <p>Map view for {profile.name}</p>
                     </div>
+                  )}
+                </div>
+                <div className="corridor-list-side">
+                  <div className="dev-projects-header">
+                    <h3>Active Properties</h3>
+                    <span className="dev-projects-count">{profile.projects.length} projects</span>
                   </div>
-                  <div className="dpc-body">
-                    <h4 className="dpc-name">{project.name}</h4>
-                    <p className="dpc-location">📍 {project.location}</p>
-                    <div className="dpc-footer">
-                      {project.price_range && <span className="dpc-price">{project.price_range}</span>}
-                      <span className="dpc-config">{project.configurations || project.project_type}</span>
-                    </div>
+                  <div className="dev-projects-grid corridor-grid">
+                    {profile.projects.map((project) => (
+                      <div
+                        key={project.id}
+                        className="dev-project-card"
+                        onClick={() => fetchProjectDetail(project.slug)}
+                      >
+                        <div className="dpc-image">
+                          {project.primary_image ? (
+                            <img src={project.primary_image} alt={project.name} />
+                          ) : (
+                            <div className="dpc-image-placeholder">🏢</div>
+                          )}
+                          <div className="dpc-badge">{project.status}</div>
+                          <div className="dpc-overlay"><span>View Details</span></div>
+                        </div>
+                        <div className="dpc-body">
+                          <h4 className="dpc-name">{project.name}</h4>
+                          <p className="dpc-location">{project.location}</p>
+                          <div className="dpc-footer">
+                            <span className="dpc-price">{project.price_range}</span>
+                            <span className="dpc-config">{project.configurations}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ) : (
+              <>
+                {/* Projects Grid for Developers */}
+                <div className="dev-projects-header">
+                  <h3>Active Portfolio</h3>
+                  <span className="dev-projects-count">{profile.projects.length} projects</span>
+                </div>
+                <div className="dev-projects-grid">
+                  {profile.projects.map((project) => (
+                    <div
+                      key={project.id}
+                      className="dev-project-card"
+                      onClick={() => fetchProjectDetail(project.slug)}
+                    >
+                      <div className="dpc-image">
+                        {project.primary_image ? (
+                          <img src={project.primary_image} alt={project.name} />
+                        ) : (
+                          <div className="dpc-image-placeholder">
+                            <span>🏗️</span>
+                          </div>
+                        )}
+                        {project.status && (
+                          <span className={`dpc-badge ${(project.status).toLowerCase().replace(/\s+/g, '-')}`}>
+                            {project.status}
+                          </span>
+                        )}
+                        <div className="dpc-overlay">
+                          <span>View Details →</span>
+                        </div>
+                      </div>
+                      <div className="dpc-body">
+                        <h4 className="dpc-name">{project.name}</h4>
+                        <p className="dpc-location">📍 {project.location}</p>
+                        <div className="dpc-footer">
+                          {project.price_range && <span className="dpc-price">{project.price_range}</span>}
+                          <span className="dpc-config">{project.configurations || project.project_type}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </>
         ) : (
           <div className="dev-modal-empty">

@@ -465,6 +465,14 @@ def get_stats(db: Session = Depends(get_db)):
 def get_area_rates(db: Session = Depends(get_db)):
     return db.query(models.AreaRateModel).all()
 
+@app.get("/api/categories")
+def get_categories(db: Session = Depends(get_db)):
+    return db.query(models.CategoryModel).all()
+
+@app.get("/api/zones")
+def get_zones(db: Session = Depends(get_db)):
+    return db.query(models.ZoneModel).all()
+
 
 @app.get("/api/team")
 def get_team_members(db: Session = Depends(get_db)):
@@ -501,6 +509,8 @@ def search_developer_profile(name: str, db: Session = Depends(get_db)):
                 "price_range": p.price_range,
                 "status": p.status,
                 "configurations": p.configurations,
+                "categories": [c.name for c in p.categories],
+                "zones": [z.name for z in p.zones],
                 "primary_image": next((img.image_url for img in p.images if img.is_primary), None),
             } for p in dev.project_list]
         }
@@ -530,6 +540,8 @@ def search_developer_profile(name: str, db: Session = Depends(get_db)):
                 "price_range": p.price_range,
                 "status": p.status,
                 "configurations": p.configurations,
+                "categories": [c.name for c in p.categories],
+                "zones": [z.name for z in p.zones],
                 "primary_image": next((img.image_url for img in p.images if img.is_primary), None),
             } for p in corridor.project_list]
         }

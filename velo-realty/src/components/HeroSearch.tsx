@@ -5,11 +5,17 @@ type HeroSearchProps = {
   setTab: (value: ListingType) => void
   location: string
   setLocation: (value: string) => void
+  zone: string
+  setZone: (value: string) => void
+  category: string
+  setCategory: (value: string) => void
   propertyType: string
   setPropertyType: (value: string) => void
   bedrooms: string
   setBedrooms: (value: string) => void
   communities: Community[]
+  zones: Category[] // Reusing Category type for Zone simplicity in props
+  categories: Category[]
 }
 
 const listingTypes: ListingType[] = ['Pre-Launch', 'Off-Plan', 'Ready']
@@ -26,11 +32,17 @@ export function HeroSearch({
   setTab,
   location,
   setLocation,
+  zone,
+  setZone,
+  category,
+  setCategory,
   propertyType,
   setPropertyType,
   bedrooms,
   setBedrooms,
   communities,
+  zones,
+  categories,
 }: HeroSearchProps) {
   return (
     <section className="hero">
@@ -62,12 +74,30 @@ export function HeroSearch({
             </button>
           ))}
         </div>
-        <div className="search-grid">
+        <div className="search-grid advanced-search">
           <label>
-            Location
+            Corridor
             <select value={location} onChange={(event) => setLocation(event.target.value)}>
               <option>All Corridors</option>
               {Array.isArray(communities) && communities.map((item) => (
+                <option key={item.name}>{item.name}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Zone
+            <select value={zone} onChange={(event) => setZone(event.target.value)}>
+              <option>All Zones</option>
+              {Array.isArray(zones) && zones.map((item) => (
+                <option key={item.name}>{item.name}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Category
+            <select value={category} onChange={(event) => setCategory(event.target.value)}>
+              <option>All Categories</option>
+              {Array.isArray(categories) && categories.map((item) => (
                 <option key={item.name}>{item.name}</option>
               ))}
             </select>
@@ -91,7 +121,7 @@ export function HeroSearch({
             </select>
           </label>
           <button className="btn btn-primary search-btn" type="button">
-            Search Properties
+            Search
           </button>
         </div>
         <div className="hero-metrics">

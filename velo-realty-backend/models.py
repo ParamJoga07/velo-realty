@@ -1,7 +1,52 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Boolean, Text, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from database import Base
 from datetime import datetime
+
+# Association Tables for Many-to-Many Relationships
+project_categories = Table(
+    "project_categories_map",
+    Base.metadata,
+    Column("project_id", Integer, ForeignKey("project_details.id"), primary_key=True),
+    Column("category_id", Integer, ForeignKey("categories.id"), primary_key=True)
+)
+
+project_zones = Table(
+    "project_zones_map",
+    Base.metadata,
+    Column("project_id", Integer, ForeignKey("project_details.id"), primary_key=True),
+    Column("zone_id", Integer, ForeignKey("zones.id"), primary_key=True)
+)
+
+property_categories = Table(
+    "property_categories_map",
+    Base.metadata,
+    Column("property_id", Integer, ForeignKey("properties.id"), primary_key=True),
+    Column("category_id", Integer, ForeignKey("categories.id"), primary_key=True)
+)
+
+property_zones = Table(
+    "property_zones_map",
+    Base.metadata,
+    Column("property_id", Integer, ForeignKey("properties.id"), primary_key=True),
+    Column("zone_id", Integer, ForeignKey("zones.id"), primary_key=True)
+)
+
+class CategoryModel(Base):
+    __tablename__ = "categories"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True)
+    slug = Column(String, unique=True, index=True)
+    projects = relationship("ProjectModel", secondary=project_categories, back_populates="categories")
+    properties = relationship("PropertyModel", secondary=property_categories, back_populates="categories")
+
+class ZoneModel(Base):
+    __tablename__ = "zones"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True)
+    slug = Column(String, unique=True, index=True)
+    projects = relationship("ProjectModel", secondary=project_zones, back_populates="zones")
+    properties = relationship("PropertyModel", secondary=property_zones, back_populates="zones")
 
 class PropertyModel(Base):
     __tablename__ = "properties"
@@ -21,6 +66,11 @@ class PropertyModel(Base):
     status = Column(String)
     image = Column(String)
     description = Column(String)
+    
+    # Relationships
+    categories = relationship("CategoryModel", secondary=property_categories, back_populates="properties")
+    zones = relationship("ZoneModel", secondary=property_zones, back_populates="properties")
+    
     gallery = relationship("PropertyImageModel", back_populates="property", cascade="all, delete-orphan")
 
 class PropertyImageModel(Base):
@@ -69,8 +119,11 @@ class ProjectModel(Base):
     open_space = Column(String, nullable=True)
     possession = Column(String, nullable=True)
     status = Column(String, nullable=True)
-    zone = Column(String, nullable=True)
-    category = Column(String, nullable=True)
+    
+    # Relationships
+    categories = relationship("CategoryModel", secondary=project_categories, back_populates="projects")
+    zones = relationship("ZoneModel", secondary=project_zones, back_populates="projects")
+    
     clubhouse_size = Column(String, nullable=True)
     description = Column(Text, nullable=True)
     highlights = Column(Text, nullable=True)

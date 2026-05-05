@@ -1,4 +1,4 @@
-export function Footer() {
+export function Footer({ onSignInClick }: { onSignInClick: () => void }) {
   return (
     <footer className="footer">
       <div className="container footer-shell">
@@ -32,11 +32,14 @@ export function Footer() {
         </div>
 
         <div className="footer-bottom">
-          <p>© Velo Realty Pvt Ltd 2026</p>
-          <p>admin@velorealty.com · 7207214848</p>
+          <div className="footer-meta">
+            <p>© Velo Realty Pvt Ltd 2026</p>
+            <p>admin@velorealty.com · 7207214848</p>
+          </div>
           <p className="footer-address">Divya Diamonds Buildings, 1st Floor, Kavuri Hills, Madhapur, Hyderabad, 500081</p>
+          <button className="superadmin-link" onClick={onSignInClick}>Superadmin Access</button>
         </div>
       </div>
     </footer>
-  )
+  );
 }

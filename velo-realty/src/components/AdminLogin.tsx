@@ -46,7 +46,7 @@ export function AdminLogin({ onLogin, onCancel }: AdminLoginProps) {
     <div className="admin-login-overlay animate-in">
       <div className="admin-login-card glass-morphism">
         <div className="login-header">
-          <div className="login-logo">V</div>
+          <div className=""><img src="/Velo Logo Single.png" alt="Logo" height={50}/></div>
           <h2>Superadmin Access</h2>
           <p>Please enter your credentials to manage the ecosystem.</p>
         </div>

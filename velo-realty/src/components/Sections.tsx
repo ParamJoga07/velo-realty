@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Community, Developer, Guide, Property } from '../types'
 import { DeveloperModal } from './DeveloperModal'
+import { Building2 } from 'lucide-react'
+import { CORRIDOR_MAPS } from './maps/CorridorMaps'
 
 type SectionsProps = {
   developers: Developer[]
@@ -9,12 +11,34 @@ type SectionsProps = {
   partners: string[]
   aboutStats: Array<{ value: string; label: string }>
   allProperties: Property[]
+  onDeveloperClick: (name: string) => void
 }
 
-export function Sections({ developers, communities, guides, partners, aboutStats }: SectionsProps) {
-  const [selectedDeveloper, setSelectedDeveloper] = useState<string | null>(null);
-  const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
+const SKYLINE_IMAGES = [
+  "https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=1200&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1449156001931-82d16bca4700?q=80&w=1200&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=1200&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1519501025264-65ba15a82390?q=80&w=1200&auto=format&fit=crop"
+];
+
+export function Sections({ 
+  developers, 
+  communities, 
+  guides, 
+  partners, 
+  aboutStats, 
+  allProperties,
+  onDeveloperClick 
+}: SectionsProps) {
   const [showAllPartners, setShowAllPartners] = useState(false);
+  const [currentSkyline, setCurrentSkyline] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSkyline((prev) => (prev + 1) % SKYLINE_IMAGES.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   if (showAllPartners) {
     return (
@@ -38,7 +62,7 @@ export function Sections({ developers, communities, guides, partners, aboutStats
               <div 
                 key={`${dev.name}-${index}`} 
                 className="partner-universe-card"
-                onClick={() => setSelectedDeveloper(dev.name)}
+                onClick={() => onDeveloperClick(dev.name)}
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
                 <div className="card-image-wrap">
@@ -55,12 +79,6 @@ export function Sections({ developers, communities, guides, partners, aboutStats
           </div>
         </main>
 
-        {selectedDeveloper && (
-          <DeveloperModal 
-            developerName={selectedDeveloper}
-            onClose={() => setSelectedDeveloper(null)}
-          />
-        )}
       </div>
     );
   }
@@ -84,10 +102,10 @@ export function Sections({ developers, communities, guides, partners, aboutStats
               <div 
                 className="ribbon-item" 
                 key={`upper-${item}-${index}`}
-                onClick={() => setSelectedDeveloper(item)}
+                onClick={() => onDeveloperClick(item)}
               >
                 <div className="ribbon-item-inner">
-                  <div className="ribbon-glow"></div>
+                  <Building2 size={18} />
                   <span>{item}</span>
                 </div>
               </div>
@@ -98,10 +116,10 @@ export function Sections({ developers, communities, guides, partners, aboutStats
               <div 
                 className="ribbon-item" 
                 key={`lower-${item}-${index}`}
-                onClick={() => setSelectedDeveloper(item)}
+                onClick={() => onDeveloperClick(item)}
               >
                 <div className="ribbon-item-inner">
-                  <div className="ribbon-glow"></div>
+                  <Building2 size={18} />
                   <span>{item}</span>
                 </div>
               </div>
@@ -170,8 +188,22 @@ export function Sections({ developers, communities, guides, partners, aboutStats
             </div>
           </article>
           <aside className="about-visual" aria-label="City skyline preview">
-            <div className="about-visual-badge">The Skyline Era</div>
-            <p>Empowering the next generation of real estate investors.</p>
+            {SKYLINE_IMAGES.map((img, i) => (
+              <div 
+                key={i}
+                className={`skyline-slide ${i === currentSkyline ? 'active' : ''}`}
+                style={{ backgroundImage: `linear-gradient(to top, rgba(10, 24, 36, 0.95), transparent), url(${img})` }}
+              ></div>
+            ))}
+            <div className="about-visual-content">
+              <div className="about-visual-badge">The Skyline Era</div>
+              <p>Empowering the next generation of real estate investors.</p>
+              <div className="carousel-indicators">
+                {SKYLINE_IMAGES.map((_, i) => (
+                  <div key={i} className={`indicator ${i === currentSkyline ? 'active' : ''}`}></div>
+                ))}
+              </div>
+            </div>
           </aside>
         </div>
       </section>
@@ -189,61 +221,40 @@ export function Sections({ developers, communities, guides, partners, aboutStats
             </div>
           </div>
           <div className="service-grid">
-            <article className="service-card premium-card">
-              <div className="icon-wrapper">
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="2" y1="12" x2="22" y2="12"></line>
-                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                </svg>
+            <article className="service-card premium-card visual-card">
+              <div className="card-media">
+                <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2000&auto=format&fit=crop" alt="Luxury Hyderabad Skyline" />
+                <div className="card-media-overlay"></div>
               </div>
-              <h3>Local Market Mastery</h3>
-              <p>Expert navigation through the luxury landscapes of Hyderabad's growth corridors.</p>
+              <div className="card-body">
+                
+                <h3>Local Market Mastery</h3>
+                <p>Expert navigation through the luxury landscapes of Hyderabad's growth corridors.</p>
+              </div>
             </article>
-            <article className="service-card premium-card">
-              <div className="icon-wrapper">
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                </svg>
+
+            <article className="service-card premium-card visual-card">
+              <div className="card-media">
+                <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2000&auto=format&fit=crop" alt="Data Analytics" />
+                <div className="card-media-overlay"></div>
               </div>
-              <h3>Data-Driven Curation</h3>
-              <p>We analyze long-term appreciation potential to protect your capital, not just list properties.</p>
+              <div className="card-body">
+                
+                <h3>Data-Driven Curation</h3>
+                <p>We analyze long-term appreciation potential to protect your capital, not just list properties.</p>
+              </div>
             </article>
-            <article className="service-card premium-card">
-              <div className="icon-wrapper">
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                </svg>
+
+            <article className="service-card premium-card visual-card">
+              <div className="card-media">
+                <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2000&auto=format&fit=crop" alt="Premium Interior" />
+                <div className="card-media-overlay"></div>
               </div>
-              <h3>Seamless Acquisition</h3>
-              <p>Handling all transaction complexities from discovery to final handover.</p>
+              <div className="card-body">
+                
+                <h3>Seamless Acquisition</h3>
+                <p>Handling all transaction complexities from discovery to final handover.</p>
+              </div>
             </article>
           </div>
         </div>
@@ -263,10 +274,12 @@ export function Sections({ developers, communities, guides, partners, aboutStats
               <div 
                 key={item.name} 
                 className="corridor-impact-card"
-                onClick={() => setSelectedCommunity(item.name)}
+                onClick={() => onDeveloperClick(item.name)}
               >
                 <div className="corridor-visual">
-                  <img src={item.image} alt={item.name} loading="lazy" />
+                  {CORRIDOR_MAPS[item.slug] || CORRIDOR_MAPS[item.name.toLowerCase().replace(/\s+/g, '-')] || (
+                    <img src={item.image} alt={item.name} loading="lazy" />
+                  )}
                   <div className="corridor-blueprint-overlay"></div>
                 </div>
                 <div className="corridor-content">
@@ -302,7 +315,7 @@ export function Sections({ developers, communities, guides, partners, aboutStats
               <article 
                 key={item.name} 
                 className="developer-card-3d"
-                onClick={() => setSelectedDeveloper(item.name)}
+                onClick={() => onDeveloperClick(item.name)}
               >
                 <div className="dev-card-visual">
                   <img src={item.image} alt={item.name} loading="lazy" />
@@ -362,18 +375,6 @@ export function Sections({ developers, communities, guides, partners, aboutStats
           </div>
         </div>
       </section>
-      {selectedDeveloper && (
-        <DeveloperModal 
-          developerName={selectedDeveloper}
-          onClose={() => setSelectedDeveloper(null)}
-        />
-      )}
-      {selectedCommunity && (
-        <DeveloperModal 
-          developerName={selectedCommunity}
-          onClose={() => setSelectedCommunity(null)}
-        />
-      )}
     </>
-  )
+  );
 }

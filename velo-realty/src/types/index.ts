@@ -31,6 +31,7 @@ export type Developer = {
 
 export type Community = {
   name: string
+  slug: string
   image: string
 }
 
@@ -54,6 +55,18 @@ export type ProjectImage = {
   is_primary: boolean
 }
 
+export type Category = {
+  id: number
+  name: string
+  slug: string
+}
+
+export type Zone = {
+  id: number
+  name: string
+  slug: string
+}
+
 export type ProjectSummary = {
   id: number
   name: string
@@ -63,6 +76,8 @@ export type ProjectSummary = {
   price_range: string | null
   status: string | null
   configurations: string | null
+  categories?: string[]
+  zones?: string[]
   primary_image: string | null
 }
 
