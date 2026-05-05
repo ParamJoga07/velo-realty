@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Building2, MapPin, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { CORRIDOR_MAPS } from './maps/CorridorMaps';
 import type { DeveloperProfile, ProjectDetail } from '../types';
 import './DeveloperModal.css';
@@ -181,9 +181,9 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
             {/* Developer Header */}
             <div className={`dev-profile-header ${profile.type?.toLowerCase().includes('corridor') ? 'corridor-mode' : ''}`}>
               <div className="dev-header-main">
-                {profile.image && !profile.type?.toLowerCase().includes('corridor') && (
+                {profile.logo_url && !profile.type?.toLowerCase().includes('corridor') && (
                   <div className="dev-header-image">
-                    <img src={profile.image} alt={profile.name} />
+                    <img src={profile.logo_url} alt={profile.name} />
                   </div>
                 )}
                 <div className="dev-header-text">

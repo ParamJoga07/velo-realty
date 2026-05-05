@@ -4,10 +4,9 @@ type NavbarProps = {
   favoritesCount: number;
   theme: 'light' | 'dark';
   onThemeToggle: () => void;
-  onSignInClick: () => void;
 };
 
-export function Navbar({ favoritesCount, theme, onThemeToggle, onSignInClick }: NavbarProps) {
+export function Navbar({ favoritesCount, theme, onThemeToggle }: NavbarProps) {
   return (
     <header className="navbar">
       <div className="container nav-wrap">

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import type { Community, Developer, Guide, Property } from '../types'
-import { DeveloperModal } from './DeveloperModal'
 import { Building2 } from 'lucide-react'
 import { CORRIDOR_MAPS } from './maps/CorridorMaps'
 
@@ -10,7 +9,6 @@ type SectionsProps = {
   guides: Guide[]
   partners: string[]
   aboutStats: Array<{ value: string; label: string }>
-  allProperties: Property[]
   onDeveloperClick: (name: string) => void
 }
 
@@ -27,7 +25,6 @@ export function Sections({
   guides, 
   partners, 
   aboutStats, 
-  allProperties,
   onDeveloperClick 
 }: SectionsProps) {
   const [showAllPartners, setShowAllPartners] = useState(false);

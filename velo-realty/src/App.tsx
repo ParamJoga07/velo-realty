@@ -194,7 +194,6 @@ function App() {
         favoritesCount={favorites.size}
         theme={theme}
         onThemeToggle={toggleTheme}
-        onSignInClick={() => setShowAdminLogin(true)}
       />
       <HeroSearch
         tab={tab}
@@ -229,7 +228,6 @@ function App() {
           guides={guides}
           partners={partners}
           aboutStats={aboutStats}
-          allProperties={properties}
           onDeveloperClick={setSelectedDeveloperName}
         />
         <TeamSection />

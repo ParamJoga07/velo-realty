@@ -208,10 +208,10 @@ export const developers: Developer[] = [
 ]
 
 export const communities: Community[] = [
-  { name: 'North Corridor', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Tokyo_Sky_Tree_2012.JPG/800px-Tokyo_Sky_Tree_2012.JPG' },
-  { name: 'South Corridor', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Burj_Khalifa.jpg/800px-Burj_Khalifa.jpg' },
-  { name: 'East Corridor', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/One_World_Trade_Center_from_base.jpg/800px-One_World_Trade_Center_from_base.jpg' },
-  { name: 'West Corridor', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/A_View_of_Downtown_Dubai_and_Burj_Khalifa.jpg/800px-A_View_of_Downtown_Dubai_and_Burj_Khalifa.jpg' },
+  { name: 'North Corridor', slug: 'north-corridor', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Tokyo_Sky_Tree_2012.JPG/800px-Tokyo_Sky_Tree_2012.JPG' },
+  { name: 'South Corridor', slug: 'south-corridor', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Burj_Khalifa.jpg/800px-Burj_Khalifa.jpg' },
+  { name: 'East Corridor', slug: 'east-corridor', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/One_World_Trade_Center_from_base.jpg/800px-One_World_Trade_Center_from_base.jpg' },
+  { name: 'West Corridor', slug: 'west-corridor', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/A_View_of_Downtown_Dubai_and_Burj_Khalifa.jpg/800px-A_View_of_Downtown_Dubai_and_Burj_Khalifa.jpg' },
 ]
 
 export const guides: Guide[] = [
