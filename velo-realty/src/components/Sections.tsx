@@ -259,7 +259,7 @@ export function Sections({ developers, communities, guides, partners, aboutStats
             <a href="#properties">Explore Corridor Projects</a>
           </div>
           <div className="corridor-impact-grid">
-            {communities.map((item) => (
+            {Array.isArray(communities) && communities.map((item) => (
               <div 
                 key={item.name} 
                 className="corridor-impact-card"

@@ -1,10 +1,105 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 from sqlalchemy.orm import Session
-from database import get_db
+from database import get_db, engine
 import models
+from datetime import datetime, timedelta
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+
+# Initialize DB Tables
+models.Base.metadata.create_all(bind=engine)
+
+# Auth Settings
+SECRET_KEY = "velo-realty-super-secret-key-change-in-prod"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 24 hours
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/admin/login")
+
+# Pydantic Models for Admin & CRUD
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+class PropertyCreate(BaseModel):
+    title: str
+    location: str
+    community: str
+    developer: str
+    type: str
+    listingType: str
+    price: str
+    priceValue: float
+    beds: int
+    baths: int
+    area: float
+    handover: str
+    status: str
+    image: str
+    description: str
+    gallery: Optional[List[str]] = []
+
+class ProjectCreate(BaseModel):
+    developer_id: int
+    corridor_id: Optional[int] = None
+    name: str
+    slug: str
+    location: str
+    sub_location: Optional[str] = None
+    project_type: str
+    land_area: Optional[str] = None
+    total_units: Optional[str] = None
+    configurations: Optional[str] = None
+    size_range: Optional[str] = None
+    price_range: Optional[str] = None
+    possession: Optional[str] = None
+    status: Optional[str] = None
+    zone: Optional[str] = None
+    category: Optional[str] = None
+    description: Optional[str] = None
+    images: Optional[List[str]] = []
+
+class CorridorCreate(BaseModel):
+    name: str
+    slug: str
+    location: str
+    description: str
+    image: str
+
+class TeamMemberCreate(BaseModel):
+    name: str
+    role: str
+    image: str
+    bio: str
+
+class ContactRequestCreate(BaseModel):
+    name: str
+    email: str
+    phone: str
+    property_id: Optional[int] = None
+    message: str
+
+class DeveloperCreate(BaseModel):
+    name: str
+    slug: str
+    about: str
+    founded_year: Optional[int] = None
+    headquarters: Optional[str] = None
+    logo_url: Optional[str] = None
+    total_projects: int = 0
+
+class AreaRateCreate(BaseModel):
+    area: str
+    price: str
+    cagr: str
 
 app = FastAPI(title="Velo Realty API")
 
@@ -349,9 +444,9 @@ def get_developers(db: Session = Depends(get_db)):
         })
     return result
 
-@app.get("/api/communities")
-def get_communities(db: Session = Depends(get_db)):
-    return db.query(models.CommunityModel).all()
+@app.get("/api/corridors")
+def get_corridors(db: Session = Depends(get_db)):
+    return db.query(models.CorridorModel).all()
 
 @app.get("/api/guides")
 def get_guides(db: Session = Depends(get_db)):
@@ -370,6 +465,7 @@ def get_stats(db: Session = Depends(get_db)):
 def get_area_rates(db: Session = Depends(get_db)):
     return db.query(models.AreaRateModel).all()
 
+
 @app.get("/api/team")
 def get_team_members(db: Session = Depends(get_db)):
     return db.query(models.TeamMemberModel).all()
@@ -378,8 +474,8 @@ def get_team_members(db: Session = Depends(get_db)):
 
 @app.get("/api/developer-profiles/search")
 def search_developer_profile(name: str, db: Session = Depends(get_db)):
-    """Search developer by name (partial match) and return profile with projects"""
-    # Try exact match first, then partial match (ILIKE)
+    """Search developer OR corridor by name and return profile with projects"""
+    # 1. Try Developer Search
     dev = db.query(models.DeveloperProfileModel).filter(
         models.DeveloperProfileModel.name == name
     ).first()
@@ -387,45 +483,58 @@ def search_developer_profile(name: str, db: Session = Depends(get_db)):
         dev = db.query(models.DeveloperProfileModel).filter(
             models.DeveloperProfileModel.name.ilike(f"%{name}%")
         ).first()
-    if not dev:
-        return {"error": "Developer not found", "name": name}
     
-    projects = []
-    for p in dev.project_list:
-        primary_img = None
-        for img in p.images:
-            if img.is_primary:
-                primary_img = img.image_url
-                break
-        projects.append({
-            "id": p.id,
-            "name": p.name,
-            "slug": p.slug,
-            "location": p.location,
-            "sub_location": p.sub_location,
-            "project_type": p.project_type,
-            "land_area": p.land_area,
-            "total_units": p.total_units,
-            "configurations": p.configurations,
-            "size_range": p.size_range,
-            "price_range": p.price_range,
-            "possession": p.possession,
-            "status": p.status,
-            "highlights": p.highlights,
-            "primary_image": primary_img,
-        })
-    
-    return {
-        "id": dev.id,
-        "name": dev.name,
-        "slug": dev.slug,
-        "about": dev.about,
-        "founded_year": dev.founded_year,
-        "headquarters": dev.headquarters,
-        "logo_url": dev.logo_url,
-        "total_projects": dev.total_projects,
-        "projects": projects,
-    }
+    if dev:
+        return {
+            "id": dev.id,
+            "name": dev.name,
+            "about": dev.about,
+            "type": "Developer",
+            "founded_year": dev.founded_year,
+            "headquarters": dev.headquarters,
+            "projects": [{
+                "id": p.id,
+                "name": p.name,
+                "slug": p.slug,
+                "location": p.location,
+                "project_type": p.project_type,
+                "price_range": p.price_range,
+                "status": p.status,
+                "configurations": p.configurations,
+                "primary_image": next((img.image_url for img in p.images if img.is_primary), None),
+            } for p in dev.project_list]
+        }
+
+    # 2. Try Corridor Search
+    corridor = db.query(models.CorridorModel).filter(
+        models.CorridorModel.name == name
+    ).first()
+    if not corridor:
+        corridor = db.query(models.CorridorModel).filter(
+            models.CorridorModel.name.ilike(f"%{name}%")
+        ).first()
+
+    if corridor:
+        return {
+            "id": corridor.id,
+            "name": corridor.name,
+            "about": corridor.description,
+            "type": "Growth Corridor",
+            "headquarters": corridor.location,
+            "projects": [{
+                "id": p.id,
+                "name": p.name,
+                "slug": p.slug,
+                "location": p.location,
+                "project_type": p.project_type,
+                "price_range": p.price_range,
+                "status": p.status,
+                "configurations": p.configurations,
+                "primary_image": next((img.image_url for img in p.images if img.is_primary), None),
+            } for p in corridor.project_list]
+        }
+
+    return {"error": "Portfolio not found", "name": name}
 
 @app.get("/api/developer-profiles")
 def get_developer_profiles(db: Session = Depends(get_db)):
@@ -592,3 +701,250 @@ def get_project_detail(slug: str, db: Session = Depends(get_db)):
             "is_primary": img.is_primary,
         } for img in project.images],
     }
+
+# --- Auth Utilities ---
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+async def get_current_admin(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    user = db.query(models.AdminUser).filter(models.AdminUser.username == token_data.username).first()
+    if user is None:
+        raise credentials_exception
+    return user
+
+@app.post("/api/contact-requests")
+def submit_contact(req: ContactRequestCreate, db: Session = Depends(get_db)):
+    db_req = models.ContactRequestModel(**req.dict())
+    db.add(db_req)
+    db.commit()
+    db.refresh(db_req)
+    return {"message": "Inquiry submitted successfully"}
+
+@app.get("/api/admin/contact-requests")
+def get_contact_requests(db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    return db.query(models.ContactRequestModel).all()
+
+@app.delete("/api/admin/contact-requests/{req_id}")
+def delete_contact_request(req_id: int, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    db_req = db.query(models.ContactRequestModel).filter(models.ContactRequestModel.id == req_id).first()
+    if not db_req:
+        raise HTTPException(status_code=404, detail="Request not found")
+    db.delete(db_req)
+    db.commit()
+    return {"message": "Inquiry deleted"}
+
+@app.get("/api/admin/dashboard-stats")
+def get_dashboard_stats(db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    # Basic counts
+    props_count = db.query(models.PropertyModel).count()
+    devs_count = db.query(models.DeveloperProfileModel).count()
+    projs_count = db.query(models.ProjectModel).count()
+    leads_count = db.query(models.ContactRequestModel).count()
+    
+    # Chart Data: Properties by Type
+    prop_types = db.query(models.PropertyModel.type).all()
+    type_dist = {}
+    for (t,) in prop_types:
+        type_dist[t] = type_dist.get(t, 0) + 1
+    type_chart = [{"name": k or "Unspecified", "value": v} for k, v in type_dist.items()]
+    
+    # Chart Data: Projects by Type
+    proj_types = db.query(models.ProjectModel.project_type).all()
+    proj_dist = {}
+    for (t,) in proj_types:
+        proj_dist[t] = proj_dist.get(t, 0) + 1
+    proj_chart = [{"name": k or "Unspecified", "value": v} for k, v in proj_dist.items()]
+
+    return {
+        "properties": props_count,
+        "developers": devs_count,
+        "projects": projs_count,
+        "corridors": db.query(models.CorridorModel).count(),
+        "team": db.query(models.TeamMemberModel).count(),
+        "leads": leads_count,
+        "type_chart": type_chart,
+        "proj_chart": proj_chart
+    }
+
+@app.get("/api/projects")
+def get_projects(db: Session = Depends(get_db)):
+    return db.query(models.ProjectModel).all()
+
+@app.get("/api/team")
+def get_team(db: Session = Depends(get_db)):
+    return db.query(models.TeamMemberModel).all()
+
+# --- Admin Auth Endpoints ---
+@app.post("/api/admin/login", response_model=Token)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = db.query(models.AdminUser).filter(models.AdminUser.username == form_data.username).first()
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token = create_access_token(data={"sub": user.username})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.get("/api/admin/me")
+async def read_admin_me(current_admin: models.AdminUser = Depends(get_current_admin)):
+    return {"username": current_admin.username}
+
+# --- Admin CRUD Endpoints ---
+
+# Properties
+@app.post("/api/admin/properties", status_code=status.HTTP_201_CREATED)
+def create_property(prop: PropertyCreate, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    prop_data = prop.dict()
+    gallery_data = prop_data.pop("gallery", [])
+    db_prop = models.PropertyModel(**prop_data)
+    db.add(db_prop)
+    db.commit()
+    db.refresh(db_prop)
+    
+    # Add gallery images
+    for img_url in gallery_data:
+        db_img = models.PropertyImageModel(property_id=db_prop.id, image_url=img_url)
+        db.add(db_img)
+    db.commit()
+    return db_prop
+
+# Projects (Detailed Developer Projects)
+@app.post("/api/admin/projects", status_code=status.HTTP_201_CREATED)
+def create_project(proj: ProjectCreate, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    proj_data = proj.dict()
+    images_data = proj_data.pop("images", [])
+    db_proj = models.ProjectModel(**proj_data)
+    db.add(db_proj)
+    db.commit()
+    db.refresh(db_proj)
+    
+    for img_url in images_data:
+        db_img = models.ProjectImageModel(project_id=db_proj.id, image_url=img_url, is_primary=False)
+        db.add(db_img)
+    db.commit()
+    return db_proj
+
+@app.delete("/api/admin/projects/{proj_id}")
+def delete_project(proj_id: int, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    db_proj = db.query(models.ProjectModel).filter(models.ProjectModel.id == proj_id).first()
+    if not db_proj:
+        raise HTTPException(status_code=404, detail="Project not found")
+    db.delete(db_proj)
+    db.commit()
+    return {"message": "Project deleted"}
+
+# Team
+@app.post("/api/admin/team", status_code=status.HTTP_201_CREATED)
+def create_team_member(member: TeamMemberCreate, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    db_member = models.TeamMemberModel(**member.dict())
+    db.add(db_member)
+    db.commit()
+    db.refresh(db_member)
+    return db_member
+
+@app.delete("/api/admin/team/{member_id}")
+def delete_team_member(member_id: int, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    db_member = db.query(models.TeamMemberModel).filter(models.TeamMemberModel.id == member_id).first()
+    if not db_member:
+        raise HTTPException(status_code=404, detail="Team member not found")
+    db.delete(db_member)
+    db.commit()
+    return {"message": "Team member deleted"}
+
+@app.put("/api/admin/properties/{prop_id}")
+def update_property(prop_id: int, prop: PropertyCreate, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    db_prop = db.query(models.PropertyModel).filter(models.PropertyModel.id == prop_id).first()
+    if not db_prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+    for key, value in prop.dict().items():
+        setattr(db_prop, key, value)
+    db.commit()
+    db.refresh(db_prop)
+    return db_prop
+
+@app.delete("/api/admin/properties/{prop_id}")
+def delete_property(prop_id: int, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    db_prop = db.query(models.PropertyModel).filter(models.PropertyModel.id == prop_id).first()
+    if not db_prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+    db.delete(db_prop)
+    db.commit()
+    return {"message": "Property deleted"}
+
+# Developers
+@app.post("/api/admin/developers", status_code=status.HTTP_201_CREATED)
+def create_developer(dev: DeveloperCreate, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    db_dev = models.DeveloperProfileModel(**dev.dict())
+    db.add(db_dev)
+    db.commit()
+    db.refresh(db_dev)
+    return db_dev
+
+@app.delete("/api/admin/developers/{dev_id}")
+def delete_developer(dev_id: int, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    db_dev = db.query(models.DeveloperProfileModel).filter(models.DeveloperProfileModel.id == dev_id).first()
+    if not db_dev:
+        raise HTTPException(status_code=404, detail="Developer not found")
+    db.delete(db_dev)
+    db.commit()
+    return {"message": "Developer deleted"}
+
+# Area Rates
+@app.post("/api/admin/area-rates", status_code=status.HTTP_201_CREATED)
+def create_area_rate(rate: AreaRateCreate, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    db_rate = models.AreaRateModel(**rate.dict())
+    db.add(db_rate)
+    db.commit()
+    db.refresh(db_rate)
+    return db_rate
+
+@app.delete("/api/admin/area-rates/{rate_id}")
+def delete_area_rate(rate_id: int, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    db_rate = db.query(models.AreaRateModel).filter(models.AreaRateModel.id == rate_id).first()
+    if not db_rate:
+        raise HTTPException(status_code=404, detail="Area rate not found")
+    db.delete(db_rate)
+    db.commit()
+    return {"message": "Area rate deleted"}
+
+# Corridors
+@app.post("/api/admin/corridors", status_code=status.HTTP_201_CREATED)
+def create_corridor(corridor: CorridorCreate, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    db_corridor = models.CorridorModel(**corridor.dict())
+    db.add(db_corridor)
+    db.commit()
+    db.refresh(db_corridor)
+    return db_corridor
+
+@app.delete("/api/admin/corridors/{corridor_id}")
+def delete_corridor(corridor_id: int, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    db_corridor = db.query(models.CorridorModel).filter(models.CorridorModel.id == corridor_id).first()
+    if not db_corridor:
+        raise HTTPException(status_code=404, detail="Corridor not found")
+    db.delete(db_corridor)
+    db.commit()
+    return {"message": "Corridor deleted"}

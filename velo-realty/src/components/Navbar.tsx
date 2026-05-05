@@ -2,9 +2,10 @@ type NavbarProps = {
   favoritesCount: number;
   theme: 'light' | 'dark';
   onThemeToggle: () => void;
+  onSignInClick: () => void;
 };
 
-export function Navbar({ favoritesCount, theme, onThemeToggle }: NavbarProps) {
+export function Navbar({ favoritesCount, theme, onThemeToggle, onSignInClick }: NavbarProps) {
   return (
     <header className="navbar">
       <div className="container nav-wrap">
@@ -23,9 +24,9 @@ export function Navbar({ favoritesCount, theme, onThemeToggle }: NavbarProps) {
             <button className="btn theme-toggle-btn" onClick={onThemeToggle} type="button" aria-label="Toggle theme">
               {theme === 'dark' ? 'Light' : 'Dark'}
             </button>
-            <a className="btn btn-ghost" href="#contact">
+            <button className="btn btn-ghost" onClick={onSignInClick}>
               Sign in
-            </a>
+            </button>
             <a className="btn btn-primary nav-demo" href="#contact">
               Contact Us
               <svg

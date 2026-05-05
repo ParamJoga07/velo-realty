@@ -71,6 +71,7 @@ export type DeveloperProfile = {
   name: string
   slug: string
   about: string
+  type: string | null
   founded_year: number | null
   headquarters: string | null
   logo_url: string | null

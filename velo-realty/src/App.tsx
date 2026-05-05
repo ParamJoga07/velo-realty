@@ -11,6 +11,9 @@ import { PropertyShowcase } from './components/PropertyShowcase'
 import { Sections } from './components/Sections'
 import { TeamSection } from './components/TeamSection'
 import type { ListingType, Property, Developer, Community, Guide } from './types'
+import { AdminDashboard } from './components/AdminDashboard'
+import { AdminLogin } from './components/AdminLogin'
+import API_BASE_URL from './config'
 
 function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -35,21 +38,26 @@ function App() {
   const [aboutStats, setAboutStats] = useState<any[]>([])
   const [areaRates, setAreaRates] = useState<any[]>([])
 
+  // Admin States
+  const [adminToken, setAdminToken] = useState<string | null>(() => window.localStorage.getItem('velo-admin-token'))
+  const [showAdminLogin, setShowAdminLogin] = useState(false)
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [propRes, devRes, commRes, guideRes, partRes, statRes, areaRes] = await Promise.all([
-          fetch('http://127.0.0.1:8000/api/properties'),
-          fetch('http://127.0.0.1:8000/api/developers'),
-          fetch('http://127.0.0.1:8000/api/communities'),
-          fetch('http://127.0.0.1:8000/api/guides'),
-          fetch('http://127.0.0.1:8000/api/partners'),
-          fetch('http://127.0.0.1:8000/api/stats'),
-          fetch('http://127.0.0.1:8000/api/area-rates')
+        const [propRes, devRes, corrRes, guideRes, partRes, statRes, areaRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/properties`),
+          fetch(`${API_BASE_URL}/api/developers`),
+          fetch(`${API_BASE_URL}/api/corridors`),
+          fetch(`${API_BASE_URL}/api/guides`),
+          fetch(`${API_BASE_URL}/api/partners`),
+          fetch(`${API_BASE_URL}/api/stats`),
+          fetch(`${API_BASE_URL}/api/area-rates`)
         ]);
         setProperties(await propRes.json());
         setDevelopers(await devRes.json());
-        setCommunities(await commRes.json());
+        const corridorsData = await corrRes.json();
+        setCommunities(Array.isArray(corridorsData) ? corridorsData : []);
         setGuides(await guideRes.json());
         setPartners(await partRes.json());
         setAboutStats(await statRes.json());
@@ -75,6 +83,17 @@ function App() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  const handleLogin = (token: string) => {
+    setAdminToken(token)
+    window.localStorage.setItem('velo-admin-token', token)
+    setShowAdminLogin(false)
+  }
+
+  const handleLogout = () => {
+    setAdminToken(null)
+    window.localStorage.removeItem('velo-admin-token')
+  }
 
   useEffect(() => {
     window.localStorage.setItem('velo-theme', theme)
@@ -145,15 +164,23 @@ function App() {
     })
   }, [tab, location, propertyType, bedrooms, sortBy, properties])
 
+  if (adminToken) {
+    return <AdminDashboard token={adminToken} onLogout={handleLogout} />
+  }
+
   return (
     <div className="page" data-theme={theme}>
       <div className="theme-sweep" />
       {isLoading && <LoadingScreen />}
+      {showAdminLogin && (
+        <AdminLogin onLogin={handleLogin} onCancel={() => setShowAdminLogin(false)} />
+      )}
       <PriceTicker areaRates={areaRates} />
       <Navbar
         favoritesCount={favorites.size}
         theme={theme}
         onThemeToggle={toggleTheme}
+        onSignInClick={() => setShowAdminLogin(true)}
       />
       <HeroSearch
         tab={tab}

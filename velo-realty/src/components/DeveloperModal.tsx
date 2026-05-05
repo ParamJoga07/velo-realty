@@ -7,6 +7,8 @@ type DeveloperModalProps = {
   onClose: () => void;
 };
 
+import API_BASE_URL from '../config';
+
 export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) {
   const [profile, setProfile] = useState<DeveloperProfile | null>(null);
   const [selectedProject, setSelectedProject] = useState<ProjectDetail | null>(null);
@@ -18,7 +20,7 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
     const fetchProfile = async () => {
       try {
         const res = await fetch(
-          `http://127.0.0.1:8000/api/developer-profiles/search?name=${encodeURIComponent(developerName)}`
+          `${API_BASE_URL}/api/developer-profiles/search?name=${encodeURIComponent(developerName)}`
         );
         const data = await res.json();
         if (!data.error) {
@@ -176,7 +178,7 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
           <>
             {/* Developer Header */}
             <div className="dev-profile-header">
-              <div className="dev-profile-badge">A-List Developer</div>
+              <div className="dev-profile-badge">{profile.type || 'A-List Developer'}</div>
               <h2 className="dev-profile-name">{profile.name}</h2>
               <p className="dev-profile-about">{profile.about}</p>
               <div className="dev-profile-chips">

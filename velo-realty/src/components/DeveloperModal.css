@@ -25,7 +25,7 @@
 /* ── Modal Shell ── */
 .dev-modal-content {
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 1.5rem;
   max-width: 960px;
   width: 100%;
@@ -34,8 +34,9 @@
   padding: 2.5rem;
   position: relative;
   animation: devModalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+  scrollbar-width: none; /* Hide for Firefox */
+  -ms-overflow-style: none; /* Hide for IE/Edge */
+  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 .dev-modal-content.dev-modal-project {
@@ -43,11 +44,7 @@
 }
 
 .dev-modal-content::-webkit-scrollbar {
-  width: 6px;
-}
-.dev-modal-content::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 3px;
+  display: none; /* Hide for Chrome/Safari */
 }
 
 @keyframes devModalSlideUp {

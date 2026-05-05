@@ -67,7 +67,7 @@ export function HeroSearch({
             Location
             <select value={location} onChange={(event) => setLocation(event.target.value)}>
               <option>All Corridors</option>
-              {communities.map((item) => (
+              {Array.isArray(communities) && communities.map((item) => (
                 <option key={item.name}>{item.name}</option>
               ))}
             </select>
