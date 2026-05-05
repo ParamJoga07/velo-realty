@@ -255,12 +255,6 @@
   color: rgba(255, 255, 255, 0.5); /* Dimmed white */
   text-transform: lowercase;
 }
-  color: var(--text-secondary);
-  background: var(--surface-alt);
-  padding: 0.3rem 0.8rem;
-  border-radius: 2rem;
-  border: 1px solid var(--border);
-}
 
 .dev-projects-grid {
   display: grid;
