@@ -2,8 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   LayoutDashboard, Building2, HardHat, Globe, TrendingUp, Users, 
   ChevronLeft, Search, Plus, Trash2, Edit3, 
-  MapPin, Mail, Download, PieChart as PieChartIcon,
-  Layers, CheckCircle, Power, Zap, BarChart3, X
+  Mail, Download, Power, Zap, X
 } from 'lucide-react';
 import { 
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, 
@@ -33,7 +32,7 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const [locationFilter, setLocationFilter] = useState('All');
-  const [statusFilter, setStatusFilter] = useState('All');
+  const [statusFilter] = useState('All');
 
   const [formData, setFormData] = useState<any>({});
   const [imageLinks, setImageLinks] = useState<string[]>(['']);

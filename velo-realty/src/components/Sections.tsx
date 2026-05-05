@@ -11,7 +11,7 @@ type SectionsProps = {
   allProperties: Property[]
 }
 
-export function Sections({ developers, communities, guides, partners, aboutStats, allProperties }: SectionsProps) {
+export function Sections({ developers, communities, guides, partners, aboutStats }: SectionsProps) {
   const [selectedDeveloper, setSelectedDeveloper] = useState<string | null>(null);
   const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
   const [showAllPartners, setShowAllPartners] = useState(false);
