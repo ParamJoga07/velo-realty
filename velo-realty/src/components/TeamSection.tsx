@@ -8,12 +8,14 @@ interface TeamMember {
   bio: string;
 }
 
+import API_BASE_URL from '../config';
+
 export function TeamSection() {
   const [teamMembers, setTeamMembers] = React.useState<TeamMember[]>([]);
   const [activeMember, setActiveMember] = React.useState(0);
 
   React.useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/team')
+    fetch(`${API_BASE_URL}/api/team`)
       .then(res => res.json())
       .then(data => setTeamMembers(data))
       .catch(err => console.error("Error fetching team members:", err));

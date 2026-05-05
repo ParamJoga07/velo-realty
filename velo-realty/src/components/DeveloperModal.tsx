@@ -37,7 +37,7 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
 
   const fetchProjectDetail = async (slug: string) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/projects/${slug}`);
+      const res = await fetch(`${API_BASE_URL}/api/projects/${slug}`);
       const data: ProjectDetail = await res.json();
       setSelectedProject(data);
       setActiveImageIdx(0);
