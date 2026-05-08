@@ -23,6 +23,7 @@
   --card-border: rgba(255, 255, 255, 0.08);
   --heading-color: #ffffff;
   --body-color: rgba(255, 255, 255, 0.8);
+  --surface-main: #1A2B3C;
 }
 
 * {

@@ -101,6 +101,13 @@ class AreaRateCreate(BaseModel):
     price: str
     cagr: str
 
+class ReferralCreate(BaseModel):
+    referrer_name: str
+    referrer_email: str
+    friend_name: str
+    friend_contact: str
+    investment_intent: Optional[str] = None
+
 app = FastAPI(title="Velo Realty API")
 
 # Configure CORS
@@ -960,3 +967,15 @@ def delete_corridor(corridor_id: int, db: Session = Depends(get_db), admin: mode
     db.delete(db_corridor)
     db.commit()
     return {"message": "Corridor deleted"}
+
+@app.post("/api/referrals")
+def submit_referral(req: ReferralCreate, db: Session = Depends(get_db)):
+    db_ref = models.ReferralModel(**req.dict())
+    db.add(db_ref)
+    db.commit()
+    db.refresh(db_ref)
+    return {"message": "Referral submitted. Our concierge will reach out to your peer soon."}
+
+@app.get("/api/admin/referrals")
+def get_referrals(db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    return db.query(models.ReferralModel).all()

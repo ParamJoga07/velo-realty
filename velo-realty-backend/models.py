@@ -202,3 +202,14 @@ class AdminUser(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
     hashed_password = Column(String)
+
+class ReferralModel(Base):
+    __tablename__ = "referrals"
+    id = Column(Integer, primary_key=True, index=True)
+    referrer_name = Column(String, nullable=False)
+    referrer_email = Column(String, nullable=False)
+    friend_name = Column(String, nullable=False)
+    friend_contact = Column(String, nullable=False)
+    investment_intent = Column(String, nullable=True)
+    status = Column(String, default="Active") # Active, Converted, Rewarded
+    created_at = Column(String, default=lambda: datetime.now().isoformat())

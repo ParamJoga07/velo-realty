@@ -10,6 +10,7 @@ import { PriceTicker } from './components/PriceTicker'
 import { PropertyShowcase } from './components/PropertyShowcase'
 import { Sections } from './components/Sections'
 import { TeamSection } from './components/TeamSection'
+import { ServicesHub } from './components/ServicesHub'
 import { DeveloperModal } from './components/DeveloperModal'
 import type { ListingType, Property, Developer, Community, Guide, Category, Zone } from './types'
 import { AdminDashboard } from './components/AdminDashboard'
@@ -230,6 +231,7 @@ function App() {
           aboutStats={aboutStats}
           onDeveloperClick={setSelectedDeveloperName}
         />
+        <ServicesHub />
         <TeamSection />
         <ContactSection />
       </main>
