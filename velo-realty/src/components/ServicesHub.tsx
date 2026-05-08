@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './ServicesHub.css';
-import { Calculator, Home, BarChart3, Compass, Briefcase, Key, ArrowRight, X, Send, User, Phone, Mail, Sparkles, Gift, Crown, MapPin, Activity, Clock } from 'lucide-react';
+import { Calculator, Home, BarChart3, Compass, Briefcase, Key, ArrowRight, X, User, Phone, Mail, Sparkles, Gift, Crown, MapPin, Activity, Clock } from 'lucide-react';
 import API_BASE_URL from '../config';
 
 interface Service {
@@ -26,7 +26,7 @@ export function ServicesHub() {
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
+        (_pos) => {
           // In a real app, you'd reverse geocode this. 
           // For now, we'll keep the strategic corridor name but mark it as "Live".
           setLocation('Live: Hitech City Corridor');
