@@ -26,9 +26,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/admin/login")
 # ImageKit Configuration (Replace with your actual keys)
 # The user can update these in their .env or directly here
 imagekit = ImageKit(
-    public_key='public_V3U7S+n1oW2w8P9X+j0Y8r5oU+U=',
-    private_key='private_Uv8P8m7v1S+n9X+j0Y8r5oU+U=',
-    url_endpoint='https://ik.imagekit.io/velo_realty'
+    public_key='public_p+Zs79z/CFpE8ecWc4QWKDNcWqE=',
+    private_key='private_HJwTJ2e+s9gJiMUk8uIhjgsdvfjnm',
+    url_endpoint='https://ik.imagekit.io/zpj7zrcs73'
 )
 
 # Pydantic Models for Admin & CRUD
