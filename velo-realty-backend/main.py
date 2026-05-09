@@ -948,8 +948,19 @@ def update_property(prop_id: int, prop: PropertyCreate, db: Session = Depends(ge
     db_prop = db.query(models.PropertyModel).filter(models.PropertyModel.id == prop_id).first()
     if not db_prop:
         raise HTTPException(status_code=404, detail="Property not found")
-    for key, value in prop.dict().items():
+    
+    prop_data = prop.dict()
+    gallery_data = prop_data.pop("gallery", [])
+    
+    for key, value in prop_data.items():
         setattr(db_prop, key, value)
+    
+    # Update gallery
+    db.query(models.PropertyImageModel).filter(models.PropertyImageModel.property_id == prop_id).delete()
+    for img_url in gallery_data:
+        db_img = models.PropertyImageModel(property_id=db_prop.id, image_url=img_url)
+        db.add(db_img)
+        
     db.commit()
     db.refresh(db_prop)
     return db_prop

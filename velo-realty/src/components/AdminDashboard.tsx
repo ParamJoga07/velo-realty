@@ -32,6 +32,7 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
   const [editingItem, setEditingItem] = useState<any | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [locationFilter, setLocationFilter] = useState('All');
   const [statusFilter] = useState('All');
@@ -110,6 +111,7 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
     try {
       const method = editingItem ? 'PUT' : 'POST';
       const url = editingItem 
@@ -135,6 +137,8 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
       }
     } catch (err) {
       alert('Error');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -350,7 +354,12 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
                   )}
                </div>
             </div>
-            <div className="modal-footer-v3"><button className="btn-v3 secondary" onClick={() => setShowForm(false)}>Cancel</button><button className="btn-v3 primary" onClick={handleSave}>Save Changes</button></div>
+            <div className="modal-footer-v3">
+              <button className="btn-v3 secondary" onClick={() => setShowForm(false)} disabled={isSaving}>Cancel</button>
+              <button className="btn-v3 primary" onClick={handleSave} disabled={isSaving}>
+                {isSaving ? <><div className="spinner" style={{width: 14, height: 14, borderWidth: 2}}></div> Saving...</> : 'Save Changes'}
+              </button>
+            </div>
           </div>
         </div>
       )}
