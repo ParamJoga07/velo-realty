@@ -438,12 +438,12 @@ def root():
 
 @app.get("/api/properties")
 def get_properties(db: Session = Depends(get_db)):
-    return db.query(models.PropertyModel).all()
+    return db.query(models.PropertyModel).order_by(models.PropertyModel.id.asc()).all()
 
 @app.get("/api/developers")
 def get_developers(db: Session = Depends(get_db)):
     # Return developer profiles mapped to the legacy Developer structure
-    devs = db.query(models.DeveloperProfileModel).all()
+    devs = db.query(models.DeveloperProfileModel).order_by(models.DeveloperProfileModel.id.asc()).all()
     # High-quality real estate placeholders for the main grid
     placeholders = [
         "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=800",
@@ -463,7 +463,7 @@ def get_developers(db: Session = Depends(get_db)):
 
 @app.get("/api/corridors")
 def get_corridors(db: Session = Depends(get_db)):
-    return db.query(models.CorridorModel).all()
+    return db.query(models.CorridorModel).order_by(models.CorridorModel.id.asc()).all()
 
 @app.get("/api/guides")
 def get_guides(db: Session = Depends(get_db)):
@@ -480,7 +480,7 @@ def get_stats(db: Session = Depends(get_db)):
 
 @app.get("/api/area-rates")
 def get_area_rates(db: Session = Depends(get_db)):
-    return db.query(models.AreaRateModel).all()
+    return db.query(models.AreaRateModel).order_by(models.AreaRateModel.id.asc()).all()
 
 @app.get("/api/categories")
 def get_categories(db: Session = Depends(get_db)):
@@ -781,7 +781,7 @@ def submit_contact(req: ContactRequestCreate, db: Session = Depends(get_db)):
 
 @app.get("/api/admin/contact-requests")
 def get_contact_requests(db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
-    return db.query(models.ContactRequestModel).all()
+    return db.query(models.ContactRequestModel).order_by(models.ContactRequestModel.id.asc()).all()
 
 @app.delete("/api/admin/contact-requests/{req_id}")
 def delete_contact_request(req_id: int, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
@@ -827,11 +827,11 @@ def get_dashboard_stats(db: Session = Depends(get_db), admin: models.AdminUser =
 
 @app.get("/api/projects")
 def get_projects(db: Session = Depends(get_db)):
-    return db.query(models.ProjectModel).all()
+    return db.query(models.ProjectModel).order_by(models.ProjectModel.id.asc()).all()
 
 @app.get("/api/team")
 def get_team(db: Session = Depends(get_db)):
-    return db.query(models.TeamMemberModel).all()
+    return db.query(models.TeamMemberModel).order_by(models.TeamMemberModel.id.asc()).all()
 
 # --- Admin Auth Endpoints ---
 @app.post("/api/admin/login", response_model=Token)

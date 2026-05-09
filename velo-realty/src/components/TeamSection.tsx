@@ -2,6 +2,7 @@ import React from 'react';
 import './TeamSection.css';
 
 interface TeamMember {
+  id: number;
   name: string;
   role: string;
   image: string;
@@ -17,7 +18,10 @@ export function TeamSection() {
   React.useEffect(() => {
     fetch(`${API_BASE_URL}/api/team`)
       .then(res => res.json())
-      .then(data => setTeamMembers(data))
+      .then(data => {
+        const sortedData = Array.isArray(data) ? [...data].sort((a, b) => a.id - b.id) : [];
+        setTeamMembers(sortedData);
+      })
       .catch(err => console.error("Error fetching team members:", err));
   }, []);
 
