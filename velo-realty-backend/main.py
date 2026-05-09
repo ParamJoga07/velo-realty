@@ -27,7 +27,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/admin/login")
 # The user can update these in their .env or directly here
 imagekit = ImageKit(
     public_key='public_p+Zs79z/CFpE8ecWc4QWKDNcWqE=',
-    private_key='private_HJwTJ2e+s9gJiMUk8uI59XqieYI=',
+    private_key='private_HJwTJ2e+s9gJiMUk8uIhjgsdvfjnm',
     url_endpoint='https://ik.imagekit.io/zpj7zrcs73'
 )
 

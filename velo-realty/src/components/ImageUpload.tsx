@@ -75,7 +75,7 @@ export function ImageUpload({ onSuccess, onLoading, folder = '/general', current
               </div>
             </div>
           ) : (
-            <div className="upload-placeholder" onClick={() => ikUploadRef.current?.click()}>
+            <label htmlFor="ik-upload-input" className="upload-placeholder">
               {isUploading ? (
                 <div className="upload-spinner"></div>
               ) : (
@@ -85,10 +85,11 @@ export function ImageUpload({ onSuccess, onLoading, folder = '/general', current
                   <small>ImageKit.io Optimized</small>
                 </>
               )}
-            </div>
+            </label>
           )}
           
           <IKUpload
+            id="ik-upload-input"
             fileName="velo_asset"
             folder={folder}
             useUniqueFileName={true}
@@ -96,7 +97,6 @@ export function ImageUpload({ onSuccess, onLoading, folder = '/general', current
             onSuccess={handleSuccess}
             onUploadStart={onUploadStart}
             style={{ display: 'none' }}
-            inputRef={ikUploadRef}
           />
         </div>
       </div>
