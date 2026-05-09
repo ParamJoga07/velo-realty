@@ -12,6 +12,7 @@ import * as XLSX from 'xlsx';
 import API_BASE_URL from '../config';
 import './AdminDashboard.css';
 import { ImageUpload } from './ImageUpload';
+import { MultiImageUpload } from './MultiImageUpload';
 
 type AdminDashboardProps = {
   token: string;
@@ -338,29 +339,13 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
 
                   {(activeTab === 'properties' || activeTab === 'projects') && (
                     <div style={{gridColumn: 'span 2', marginTop: '1.5rem'}}>
-                      <label className="upload-label">Tactical Gallery (Multiple 4K Assets)</label>
-                      <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem'}}>
-                        {imageLinks.map((link, idx) => (
-                          <ImageUpload 
-                            key={idx}
-                            token={token}
-                            currentImage={link}
-                            folder={`/${activeTab}/gallery`}
-                            onSuccess={(url) => {
-                              const newLinks = [...imageLinks];
-                              if (url === '') {
-                                newLinks.splice(idx, 1);
-                              } else {
-                                newLinks[idx] = url;
-                              }
-                              setImageLinks(newLinks);
-                            }}
-                          />
-                        ))}
-                        <button className="btn-v3 secondary" style={{height: 120, borderStyle: 'dashed'}} onClick={() => setImageLinks([...imageLinks, ''])}>
-                          <Plus size={20} /> Add Another
-                        </button>
-                      </div>
+                      <label className="upload-label">Tactical Gallery (Multi-Asset Bulk Upload)</label>
+                      <MultiImageUpload 
+                        token={token}
+                        currentImages={imageLinks}
+                        folder={`/${activeTab}/gallery`}
+                        onSuccess={(urls) => setImageLinks(urls)}
+                      />
                     </div>
                   )}
                </div>

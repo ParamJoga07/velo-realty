@@ -27,7 +27,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/admin/login")
 # The user can update these in their .env or directly here
 imagekit = ImageKit(
     public_key='public_p+Zs79z/CFpE8ecWc4QWKDNcWqE=',
-    private_key='private_HJwTJ2e+s9gJiMUk8uIhjgsdvfjnm',
+    private_key='private_HJwTJ2e+s9gJiMUk8uI59XqieYI=',
     url_endpoint='https://ik.imagekit.io/zpj7zrcs73'
 )
 
@@ -769,7 +769,7 @@ def get_imagekit_auth(admin: models.AdminUser = Depends(get_current_admin)):
     Returns authentication parameters for ImageKit client-side upload.
     This endpoint is protected and only accessible by logged-in admins.
     """
-    return imagekit.get_auth_params()
+    return imagekit.get_authentication_parameters()
 
 @app.post("/api/contact-requests")
 def submit_contact(req: ContactRequestCreate, db: Session = Depends(get_db)):
@@ -885,6 +885,26 @@ def create_project(proj: ProjectCreate, db: Session = Depends(get_db), admin: mo
     db.commit()
     return db_proj
 
+@app.put("/api/admin/projects/{proj_id}")
+def update_project(proj_id: int, proj: ProjectCreate, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    db_proj = db.query(models.ProjectModel).filter(models.ProjectModel.id == proj_id).first()
+    if not db_proj:
+        raise HTTPException(status_code=404, detail="Project not found")
+    proj_data = proj.dict()
+    images_data = proj_data.pop("images", [])
+    for key, value in proj_data.items():
+        setattr(db_proj, key, value)
+    
+    # Update images: simple approach - clear and re-add
+    db.query(models.ProjectImageModel).filter(models.ProjectImageModel.project_id == proj_id).delete()
+    for img_url in images_data:
+        db_img = models.ProjectImageModel(project_id=db_proj.id, image_url=img_url, is_primary=False)
+        db.add(db_img)
+        
+    db.commit()
+    db.refresh(db_proj)
+    return db_proj
+
 @app.delete("/api/admin/projects/{proj_id}")
 def delete_project(proj_id: int, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
     db_proj = db.query(models.ProjectModel).filter(models.ProjectModel.id == proj_id).first()
@@ -899,6 +919,17 @@ def delete_project(proj_id: int, db: Session = Depends(get_db), admin: models.Ad
 def create_team_member(member: TeamMemberCreate, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
     db_member = models.TeamMemberModel(**member.dict())
     db.add(db_member)
+    db.commit()
+    db.refresh(db_member)
+    return db_member
+
+@app.put("/api/admin/team/{member_id}")
+def update_team_member(member_id: int, member: TeamMemberCreate, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    db_member = db.query(models.TeamMemberModel).filter(models.TeamMemberModel.id == member_id).first()
+    if not db_member:
+        raise HTTPException(status_code=404, detail="Team member not found")
+    for key, value in member.dict().items():
+        setattr(db_member, key, value)
     db.commit()
     db.refresh(db_member)
     return db_member
@@ -941,6 +972,17 @@ def create_developer(dev: DeveloperCreate, db: Session = Depends(get_db), admin:
     db.refresh(db_dev)
     return db_dev
 
+@app.put("/api/admin/developers/{dev_id}")
+def update_developer(dev_id: int, dev: DeveloperCreate, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    db_dev = db.query(models.DeveloperProfileModel).filter(models.DeveloperProfileModel.id == dev_id).first()
+    if not db_dev:
+        raise HTTPException(status_code=404, detail="Developer not found")
+    for key, value in dev.dict().items():
+        setattr(db_dev, key, value)
+    db.commit()
+    db.refresh(db_dev)
+    return db_dev
+
 @app.delete("/api/admin/developers/{dev_id}")
 def delete_developer(dev_id: int, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
     db_dev = db.query(models.DeveloperProfileModel).filter(models.DeveloperProfileModel.id == dev_id).first()
@@ -959,6 +1001,17 @@ def create_area_rate(rate: AreaRateCreate, db: Session = Depends(get_db), admin:
     db.refresh(db_rate)
     return db_rate
 
+@app.put("/api/admin/area-rates/{rate_id}")
+def update_area_rate(rate_id: int, rate: AreaRateCreate, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    db_rate = db.query(models.AreaRateModel).filter(models.AreaRateModel.id == rate_id).first()
+    if not db_rate:
+        raise HTTPException(status_code=404, detail="Area rate not found")
+    for key, value in rate.dict().items():
+        setattr(db_rate, key, value)
+    db.commit()
+    db.refresh(db_rate)
+    return db_rate
+
 @app.delete("/api/admin/area-rates/{rate_id}")
 def delete_area_rate(rate_id: int, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
     db_rate = db.query(models.AreaRateModel).filter(models.AreaRateModel.id == rate_id).first()
@@ -973,6 +1026,17 @@ def delete_area_rate(rate_id: int, db: Session = Depends(get_db), admin: models.
 def create_corridor(corridor: CorridorCreate, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
     db_corridor = models.CorridorModel(**corridor.dict())
     db.add(db_corridor)
+    db.commit()
+    db.refresh(db_corridor)
+    return db_corridor
+
+@app.put("/api/admin/corridors/{corridor_id}")
+def update_corridor(corridor_id: int, corridor: CorridorCreate, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    db_corridor = db.query(models.CorridorModel).filter(models.CorridorModel.id == corridor_id).first()
+    if not db_corridor:
+        raise HTTPException(status_code=404, detail="Corridor not found")
+    for key, value in corridor.dict().items():
+        setattr(db_corridor, key, value)
     db.commit()
     db.refresh(db_corridor)
     return db_corridor

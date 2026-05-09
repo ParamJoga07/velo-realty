@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { IKContext, IKUpload } from 'imagekitio-react';
 import { Upload, X, CheckCircle2 } from 'lucide-react';
 import API_BASE_URL, { IMAGEKIT_PUBLIC_KEY, IMAGEKIT_URL_ENDPOINT } from '../config';
@@ -13,7 +13,6 @@ interface ImageUploadProps {
 }
 
 export function ImageUpload({ onSuccess, onLoading, folder = '/general', currentImage, label, token }: ImageUploadProps) {
-  const ikUploadRef = useRef<any>(null);
   const [isUploading, setIsUploading] = React.useState(false);
   const [preview, setPreview] = React.useState(currentImage || '');
 
@@ -67,9 +66,14 @@ export function ImageUpload({ onSuccess, onLoading, folder = '/general', current
           {preview ? (
             <div className="preview-box">
               <img src={preview} alt="Preview" />
-              <button className="remove-preview" onClick={() => { setPreview(''); onSuccess(''); }}>
-                <X size={14} />
-              </button>
+              <div className="preview-overlay-actions">
+                <button className="remove-preview" onClick={() => { setPreview(''); onSuccess(''); }}>
+                  <X size={14} />
+                </button>
+                <label htmlFor="ik-upload-input" className="change-btn">
+                  Change Image
+                </label>
+              </div>
               <div className="upload-status-badge success">
                 <CheckCircle2 size={12} /> Live on CDN
               </div>
@@ -154,6 +158,35 @@ export function ImageUpload({ onSuccess, onLoading, folder = '/general', current
           width: 100%;
           height: 100%;
           object-fit: cover;
+        }
+        .preview-box:hover .preview-overlay-actions {
+          opacity: 1;
+        }
+        .preview-overlay-actions {
+          position: absolute;
+          inset: 0;
+          background: rgba(0,0,0,0.6);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 1rem;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          backdrop-filter: blur(4px);
+        }
+        .change-btn {
+          padding: 0.6rem 1.2rem;
+          background: var(--teal-500);
+          color: white;
+          border-radius: 8px;
+          font-size: 0.8rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: transform 0.2s;
+        }
+        .change-btn:hover {
+          transform: scale(1.05);
         }
         .remove-preview {
           position: absolute;
