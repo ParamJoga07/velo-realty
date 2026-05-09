@@ -11,6 +11,7 @@ import {
 import * as XLSX from 'xlsx';
 import API_BASE_URL from '../config';
 import './AdminDashboard.css';
+import { ImageUpload } from './ImageUpload';
 
 type AdminDashboardProps = {
   token: string;
@@ -312,12 +313,56 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
             <div className="modal-header-v3"><h2>{editingItem ? 'Edit' : 'New'} {activeTab.slice(0, -1)}</h2><button onClick={() => setShowForm(false)} style={{background: 'none', border: 'none', color: '#fff'}}><X size={18}/></button></div>
             <div className="modal-body-v3">
                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
-                  {Object.keys(formData).filter(k => !['id', 'gallery', 'images', 'project_list', 'projects'].includes(k)).map(key => (
-                    <div className="form-group-v3" key={key} style={{gridColumn: ['description', 'bio', 'about'].includes(key) ? 'span 2' : 'span 1'}}>
-                      <label>{key.replace('_', ' ')}</label>
-                      {['description', 'bio', 'about'].includes(key) ? <textarea rows={4} value={formData[key]} onChange={e => setFormData({...formData, [key]: e.target.value})} /> : <input value={formData[key]} onChange={e => setFormData({...formData, [key]: e.target.value})} />}
+                  {Object.keys(formData).filter(k => !['id', 'gallery', 'images', 'project_list', 'projects', 'corridor'].includes(k)).map(key => {
+                    const isImage = ['image', 'logo_url'].includes(key);
+                    const isFullWidth = ['description', 'bio', 'about'].includes(key);
+                    
+                    return (
+                      <div className="form-group-v3" key={key} style={{gridColumn: (isFullWidth || isImage) ? 'span 2' : 'span 1'}}>
+                        <label>{key.replace('_', ' ')}</label>
+                        {isImage ? (
+                          <ImageUpload 
+                            token={token} 
+                            currentImage={formData[key]} 
+                            folder={`/${activeTab}`}
+                            onSuccess={(url) => setFormData({...formData, [key]: url})}
+                          />
+                        ) : isFullWidth ? (
+                          <textarea rows={4} value={formData[key] || ''} onChange={e => setFormData({...formData, [key]: e.target.value})} />
+                        ) : (
+                          <input value={formData[key] || ''} onChange={e => setFormData({...formData, [key]: e.target.value})} />
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {(activeTab === 'properties' || activeTab === 'projects') && (
+                    <div style={{gridColumn: 'span 2', marginTop: '1.5rem'}}>
+                      <label className="upload-label">Tactical Gallery (Multiple 4K Assets)</label>
+                      <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem'}}>
+                        {imageLinks.map((link, idx) => (
+                          <ImageUpload 
+                            key={idx}
+                            token={token}
+                            currentImage={link}
+                            folder={`/${activeTab}/gallery`}
+                            onSuccess={(url) => {
+                              const newLinks = [...imageLinks];
+                              if (url === '') {
+                                newLinks.splice(idx, 1);
+                              } else {
+                                newLinks[idx] = url;
+                              }
+                              setImageLinks(newLinks);
+                            }}
+                          />
+                        ))}
+                        <button className="btn-v3 secondary" style={{height: 120, borderStyle: 'dashed'}} onClick={() => setImageLinks([...imageLinks, ''])}>
+                          <Plus size={20} /> Add Another
+                        </button>
+                      </div>
                     </div>
-                  ))}
+                  )}
                </div>
             </div>
             <div className="modal-footer-v3"><button className="btn-v3 secondary" onClick={() => setShowForm(false)}>Cancel</button><button className="btn-v3 primary" onClick={handleSave}>Save Changes</button></div>

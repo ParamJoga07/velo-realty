@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import type { Community, Developer, Guide } from '../types'
 import { Building2 } from 'lucide-react'
 import { CORRIDOR_MAPS } from './maps/CorridorMaps'
+import { getOptimizedImage } from '../config'
 
 type SectionsProps = {
   developers: Developer[]
@@ -63,7 +64,7 @@ export function Sections({
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
                 <div className="card-image-wrap">
-                  <img src={dev.image} alt={dev.name} />
+                  <img src={getOptimizedImage(dev.image)} alt={dev.name} />
                   <div className="card-overlay"></div>
                 </div>
                 <div className="card-content">

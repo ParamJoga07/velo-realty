@@ -7,8 +7,10 @@ from sqlalchemy.orm import Session
 from database import get_db, engine
 import models
 from datetime import datetime, timedelta
-from jose import JWTError, jwt
 from passlib.context import CryptContext
+from jose import JWTError, jwt
+from imagekitio import ImageKit
+import uuid
 
 # Initialize DB Tables
 models.Base.metadata.create_all(bind=engine)
@@ -20,6 +22,14 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 24 hours
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/admin/login")
+
+# ImageKit Configuration (Replace with your actual keys)
+# The user can update these in their .env or directly here
+imagekit = ImageKit(
+    public_key='public_V3U7S+n1oW2w8P9X+j0Y8r5oU+U=',
+    private_key='private_Uv8P8m7v1S+n9X+j0Y8r5oU+U=',
+    url_endpoint='https://ik.imagekit.io/velo_realty'
+)
 
 # Pydantic Models for Admin & CRUD
 class Token(BaseModel):
@@ -752,6 +762,14 @@ async def get_current_admin(token: str = Depends(oauth2_scheme), db: Session = D
     if user is None:
         raise credentials_exception
     return user
+
+@app.get("/api/imagekit/auth")
+def get_imagekit_auth(admin: models.AdminUser = Depends(get_current_admin)):
+    """
+    Returns authentication parameters for ImageKit client-side upload.
+    This endpoint is protected and only accessible by logged-in admins.
+    """
+    return imagekit.get_auth_params()
 
 @app.post("/api/contact-requests")
 def submit_contact(req: ContactRequestCreate, db: Session = Depends(get_db)):
