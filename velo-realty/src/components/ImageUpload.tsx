@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { IKContext, IKUpload } from 'imagekitio-react';
 import { Upload, X, CheckCircle2 } from 'lucide-react';
 import API_BASE_URL, { IMAGEKIT_PUBLIC_KEY, IMAGEKIT_URL_ENDPOINT } from '../config';
@@ -13,6 +13,7 @@ interface ImageUploadProps {
 }
 
 export function ImageUpload({ onSuccess, onLoading, folder = '/general', currentImage, label, token }: ImageUploadProps) {
+  const uploadId = useId();
   const [isUploading, setIsUploading] = React.useState(false);
   const [preview, setPreview] = React.useState(currentImage || '');
 
@@ -70,7 +71,7 @@ export function ImageUpload({ onSuccess, onLoading, folder = '/general', current
                 <button className="remove-preview" onClick={() => { setPreview(''); onSuccess(''); }}>
                   <X size={14} />
                 </button>
-                <label htmlFor="ik-upload-input" className="change-btn">
+                <label htmlFor={uploadId} className="change-btn">
                   Change Image
                 </label>
               </div>
@@ -79,7 +80,7 @@ export function ImageUpload({ onSuccess, onLoading, folder = '/general', current
               </div>
             </div>
           ) : (
-            <label htmlFor="ik-upload-input" className="upload-placeholder">
+            <label htmlFor={uploadId} className="upload-placeholder">
               {isUploading ? (
                 <div className="upload-spinner"></div>
               ) : (
@@ -93,7 +94,7 @@ export function ImageUpload({ onSuccess, onLoading, folder = '/general', current
           )}
           
           <IKUpload
-            id="ik-upload-input"
+            id={uploadId}
             fileName="velo_asset"
             folder={folder}
             useUniqueFileName={true}

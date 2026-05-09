@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { IKContext } from 'imagekitio-react';
 import { Upload, X, CheckCircle2, Plus } from 'lucide-react';
 import API_BASE_URL, { IMAGEKIT_PUBLIC_KEY, IMAGEKIT_URL_ENDPOINT } from '../config';
@@ -11,6 +11,7 @@ interface MultiImageUploadProps {
 }
 
 export function MultiImageUpload({ onSuccess, folder = '/gallery', currentImages = [], token }: MultiImageUploadProps) {
+  const uploadId = useId();
   const [images, setImages] = React.useState<string[]>(currentImages);
   const [uploadingCount, setUploadingCount] = React.useState(0);
 
@@ -91,8 +92,9 @@ export function MultiImageUpload({ onSuccess, folder = '/gallery', currentImages
           </div>
         ))}
         
-        <label className="add-more-card">
+        <label htmlFor={uploadId} className="add-more-card">
           <input 
+            id={uploadId}
             type="file" 
             multiple 
             onChange={handleFileChange} 
