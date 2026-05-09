@@ -1,7 +1,6 @@
 import React, { useId } from 'react';
-import { IKContext } from 'imagekitio-react';
-import { Upload, X, CheckCircle2, Plus } from 'lucide-react';
-import API_BASE_URL, { IMAGEKIT_PUBLIC_KEY, IMAGEKIT_URL_ENDPOINT } from '../config';
+import { X, CheckCircle2, Plus } from 'lucide-react';
+import API_BASE_URL, { IMAGEKIT_PUBLIC_KEY } from '../config';
 
 interface MultiImageUploadProps {
   onSuccess: (urls: string[]) => void;
