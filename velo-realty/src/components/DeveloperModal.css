@@ -2,12 +2,32 @@
    Developer Modal — Premium Design System
    ═══════════════════════════════════════════════ */
 
+:root {
+  --dev-modal-bg: #0a1118;
+  --dev-modal-border: rgba(255, 255, 255, 0.12);
+  --dev-modal-text: #ffffff;
+  --dev-modal-text-dim: rgba(255, 255, 255, 0.6);
+  --dev-modal-surface: rgba(255, 255, 255, 0.05);
+  --dev-modal-overlay: rgba(0, 0, 0, 0.85);
+  --dev-modal-shadow: 0 40px 100px rgba(0, 0, 0, 0.9);
+}
+
+.page[data-theme='light'] {
+  --dev-modal-bg: #ffffff;
+  --dev-modal-border: rgba(0, 0, 0, 0.08);
+  --dev-modal-text: #1a2b3c;
+  --dev-modal-text-dim: #8e8e93;
+  --dev-modal-surface: #f5f5f7;
+  --dev-modal-overlay: rgba(0, 0, 0, 0.4);
+  --dev-modal-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+}
+
 /* ── Overlay ── */
 .dev-modal-overlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: rgba(0, 0, 0, 0.85); /* Darker, more solid overlay */
+  background: var(--dev-modal-overlay);
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
@@ -23,8 +43,8 @@
 
 /* ── Modal Shell ── */
 .dev-modal-content {
-  background: #0a1118; /* Solid, premium dark background */
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--dev-modal-bg);
+  border: 1px solid var(--dev-modal-border);
   border-radius: 2rem;
   max-width: 1000px;
   width: 100%;
@@ -33,10 +53,11 @@
   padding: 3rem;
   position: relative;
   box-shadow: 
-    0 40px 100px rgba(0, 0, 0, 0.9),
+    var(--dev-modal-shadow),
     0 0 0 1px rgba(255, 255, 255, 0.05);
   animation: devModalZoomIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   scrollbar-width: none;
+  color: var(--dev-modal-text);
 }
 
 @keyframes devModalZoomIn {
@@ -62,9 +83,9 @@
   position: sticky;
   top: 0;
   float: right;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  background: var(--dev-modal-surface);
+  border: 1px solid var(--dev-modal-border);
+  color: var(--dev-modal-text);
   font-size: 1.4rem;
   width: 2.2rem;
   height: 2.2rem;
@@ -79,17 +100,17 @@
 }
 
 .dev-modal-close:hover {
-  background: var(--accent);
+  background: var(--teal-500);
   color: #fff;
   transform: rotate(90deg);
-  border-color: var(--accent);
+  border-color: var(--teal-500);
 }
 
 /* ── Back Button ── */
 .dev-modal-back {
   background: none;
   border: none;
-  color: var(--accent);
+  color: var(--teal-500);
   font-size: 0.88rem;
   cursor: pointer;
   padding: 0.3rem 0;
@@ -114,14 +135,14 @@
 .dev-loading-spinner {
   width: 36px;
   height: 36px;
-  border: 3px solid var(--border);
-  border-top-color: var(--accent);
+  border: 3px solid var(--dev-modal-border);
+  border-top-color: var(--teal-500);
   border-radius: 50%;
   animation: devSpin 0.7s linear infinite;
 }
 @keyframes devSpin { to { transform: rotate(360deg); } }
 .dev-modal-loading p {
-  color: var(--text-secondary);
+  color: var(--dev-modal-text-dim);
   font-size: 0.9rem;
 }
 
@@ -139,7 +160,7 @@
   margin-bottom: 0.5rem;
 }
 .dev-modal-empty p {
-  color: var(--text-secondary);
+  color: var(--dev-modal-text-dim);
 }
 
 /* ═══════════════════════════════════════════════
@@ -149,7 +170,7 @@
 .dev-profile-header {
   margin-bottom: 2rem;
   padding-bottom: 1.75rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--dev-modal-border);
 }
 
 .dev-header-main {
@@ -164,8 +185,8 @@
   height: 80px;
   border-radius: 1rem;
   overflow: hidden;
-  background: var(--surface-alt);
-  border: 1px solid var(--border);
+  background: var(--dev-modal-surface);
+  border: 1px solid var(--dev-modal-border);
   flex-shrink: 0;
 }
 
@@ -196,16 +217,15 @@
   font-size: 2rem;
   font-weight: 800;
   margin: 0 0 0.75rem;
-  background: linear-gradient(135deg, var(--text-primary), var(--accent));
+  background: linear-gradient(135deg, var(--dev-modal-text), var(--teal-500));
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .dev-profile-about {
   font-size: 0.95rem;
   line-height: 1.7;
-  color: rgba(255, 255, 255, 0.85); /* Highly visible */
+  color: var(--dev-modal-text-dim);
   margin: 0 0 1.25rem;
 }
 
@@ -216,12 +236,12 @@
 }
 
 .dev-chip {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--dev-modal-surface);
+  border: 1px solid var(--dev-modal-border);
   padding: 0.45rem 1rem;
   border-radius: 2rem;
   font-size: 0.82rem;
-  color: #ffffff; /* Explicit white */
+  color: var(--dev-modal-text);
   font-weight: 500;
   transition: all 0.25s;
   display: flex;
@@ -230,7 +250,7 @@
 }
 
 .dev-chip:hover {
-  border-color: var(--accent);
+  border-color: var(--teal-500);
   background: rgba(255, 255, 255, 0.08);
 }
 
@@ -247,12 +267,12 @@
   font-size: 1.25rem;
   font-weight: 800;
   margin: 0;
-  color: #ffffff; /* Explicit white */
+  color: var(--dev-modal-text);
 }
 
 .dev-projects-count {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.5); /* Dimmed white */
+  color: var(--dev-modal-text-dim);
   text-transform: lowercase;
 }
 
@@ -263,8 +283,8 @@
 }
 
 .dev-project-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--dev-modal-surface);
+  border: 1px solid var(--dev-modal-border);
   border-radius: 1.5rem;
   overflow: hidden;
   cursor: pointer;
@@ -307,7 +327,7 @@
   align-items: center;
   justify-content: center;
   font-size: 3rem;
-  background: linear-gradient(135deg, var(--surface-alt), var(--surface));
+  background: linear-gradient(135deg, var(--dev-modal-surface), var(--surface));
 }
 
 /* Status Badge */
@@ -322,7 +342,7 @@
   text-transform: uppercase;
   letter-spacing: 0.6px;
   z-index: 2;
-  background: var(--accent);
+  background: var(--teal-500);
   color: #fff;
 }
 .dpc-badge.under-construction { background: #e67e22; }
@@ -366,7 +386,7 @@
   font-size: 1.1rem;
   font-weight: 800;
   margin: 0 0 0.4rem;
-  color: #ffffff; /* Explicit high contrast */
+  color: var(--dev-modal-text);
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
@@ -375,7 +395,7 @@
 
 .dpc-location {
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--dev-modal-text-dim);
   margin: 0 0 1rem;
   display: flex;
   align-items: center;
@@ -397,11 +417,11 @@
 
 .dpc-config {
   font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.7);
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--dev-modal-text-dim);
+  background: var(--dev-modal-surface);
   padding: 0.25rem 0.65rem;
   border-radius: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--dev-modal-border);
 }
 
 /* ═══════════════════════════════════════════════
@@ -427,7 +447,7 @@
   border-radius: 1rem;
   overflow: hidden;
   aspect-ratio: 4 / 3;
-  background: var(--surface-alt);
+  background: var(--dev-modal-surface);
 }
 
 .pd-gallery-main img {
@@ -505,7 +525,7 @@
 .pd-thumb.active,
 .pd-thumb:hover {
   opacity: 1;
-  border-color: var(--accent);
+  border-color: var(--teal-500);
 }
 
 /* Info Panel */
@@ -529,7 +549,7 @@
   text-transform: uppercase;
   letter-spacing: 0.8px;
   color: #fff;
-  background: var(--accent);
+  background: var(--teal-500);
   margin-bottom: 0.5rem;
 }
 .pd-status-pill.under-construction { background: #e67e22; }
@@ -540,11 +560,11 @@
   font-size: 1.5rem;
   font-weight: 800;
   margin: 0 0 0.35rem;
-  color: var(--text-primary);
+  color: var(--dev-modal-text);
 }
 
 .pd-location {
-  color: var(--text-secondary);
+  color: var(--dev-modal-text-dim);
   font-size: 0.88rem;
   margin: 0;
   line-height: 1.5;
@@ -562,34 +582,34 @@
   flex-direction: column;
   gap: 0.15rem;
   padding: 0.65rem 0.85rem;
-  background: var(--surface-alt);
-  border: 1px solid var(--border);
+  background: var(--dev-modal-surface);
+  border: 1px solid var(--dev-modal-border);
   border-radius: 0.65rem;
   transition: border-color 0.2s;
 }
-.pd-spec:hover { border-color: color-mix(in srgb, var(--accent), transparent 50%); }
+.pd-spec:hover { border-color: color-mix(in srgb, var(--teal-500), transparent 50%); }
 
 .pd-spec.accent {
-  border-color: color-mix(in srgb, var(--accent), transparent 60%);
-  background: color-mix(in srgb, var(--accent), transparent 92%);
+  border-color: color-mix(in srgb, var(--teal-500), transparent 60%);
+  background: color-mix(in srgb, var(--teal-500), transparent 92%);
 }
 
 .pd-spec-label {
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: var(--text-secondary);
+  color: var(--dev-modal-text-dim);
   font-weight: 600;
 }
 
 .pd-spec-val {
   font-size: 0.85rem;
-  color: var(--text-primary);
+  color: var(--dev-modal-text);
   font-weight: 600;
 }
 
 .pd-spec.accent .pd-spec-val {
-  color: var(--accent);
+  color: var(--teal-500);
   font-weight: 800;
 }
 
@@ -598,7 +618,7 @@
   font-size: 0.9rem;
   font-weight: 700;
   margin: 0 0 0.5rem;
-  color: var(--text-primary);
+  color: var(--dev-modal-text);
 }
 
 .pd-chips {
@@ -608,23 +628,23 @@
 }
 
 .pd-chip {
-  background: var(--surface-alt);
-  border: 1px solid var(--border);
+  background: var(--dev-modal-surface);
+  border: 1px solid var(--dev-modal-border);
   padding: 0.3rem 0.75rem;
   border-radius: 2rem;
   font-size: 0.76rem;
-  color: var(--text-secondary);
+  color: var(--dev-modal-text-dim);
   transition: all 0.2s;
 }
 .pd-chip:hover {
-  border-color: var(--accent);
-  color: var(--text-primary);
+  border-color: var(--teal-500);
+  color: var(--dev-modal-text);
 }
 
 .pd-desc {
   font-size: 0.88rem;
   line-height: 1.7;
-  color: var(--text-secondary);
+  color: var(--dev-modal-text-dim);
   margin: 0;
 }
 
@@ -642,10 +662,10 @@
 
 .corridor-map-side {
   flex: 1.2;
-  background: var(--surface-alt);
+  background: var(--dev-modal-surface);
   border-radius: 1.5rem;
   overflow: hidden;
-  border: 1px solid var(--border);
+  border: 1px solid var(--dev-modal-border);
   position: sticky;
   top: 0;
   height: 600px;
@@ -675,7 +695,7 @@
   justify-content: center;
   height: 100%;
   gap: 1rem;
-  color: var(--text-secondary);
+  color: var(--dev-modal-text-dim);
   background: var(--surface);
 }
 

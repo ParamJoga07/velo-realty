@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import './App.css'
 import { BackToTop } from './components/BackToTop'
 import { ContactSection } from './components/ContactSection'
@@ -15,6 +16,7 @@ import { DeveloperModal } from './components/DeveloperModal'
 import type { ListingType, Property, Developer, Community, Guide, Category, Zone } from './types'
 import { AdminDashboard } from './components/AdminDashboard'
 import { AdminLogin } from './components/AdminLogin'
+import { IdentityModal } from './components/IdentityModal'
 import API_BASE_URL from './config'
 
 function App() {
@@ -32,17 +34,61 @@ function App() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
   const [showBackToTop, setShowBackToTop] = useState(false)
+  // --- Data Queries ---
+  const { data: properties = [], isLoading: isLoadingProps } = useQuery<Property[]>({
+    queryKey: ['properties'],
+    queryFn: () => fetch(`${API_BASE_URL}/api/properties`).then(res => res.json())
+  })
+
+  const { data: developers = [], isLoading: isLoadingDevs } = useQuery<Developer[]>({
+    queryKey: ['developers'],
+    queryFn: () => fetch(`${API_BASE_URL}/api/developers`).then(res => res.json())
+  })
+
+  const { data: corridorsRaw = [], isLoading: isLoadingCorr } = useQuery({
+    queryKey: ['corridors'],
+    queryFn: () => fetch(`${API_BASE_URL}/api/corridors`).then(res => res.json())
+  })
+  const communities = useMemo(() => Array.isArray(corridorsRaw) ? corridorsRaw : [], [corridorsRaw]);
+
+  const { data: guides = [] } = useQuery<Guide[]>({
+    queryKey: ['guides'],
+    queryFn: () => fetch(`${API_BASE_URL}/api/guides`).then(res => res.json())
+  })
+
+  const { data: partners = [] } = useQuery<string[]>({
+    queryKey: ['partners'],
+    queryFn: () => fetch(`${API_BASE_URL}/api/partners`).then(res => res.json())
+  })
+
+  const { data: aboutStats = [] } = useQuery<any[]>({
+    queryKey: ['stats'],
+    queryFn: () => fetch(`${API_BASE_URL}/api/stats`).then(res => res.json())
+  })
+
+  const { data: areaRates = [] } = useQuery<any[]>({
+    queryKey: ['area-rates'],
+    queryFn: () => fetch(`${API_BASE_URL}/api/area-rates`).then(res => res.json())
+  })
+
+  const { data: dbCategories = [] } = useQuery<Category[]>({
+    queryKey: ['categories'],
+    queryFn: () => fetch(`${API_BASE_URL}/api/categories`).then(res => res.json())
+  })
+
+  const { data: dbZones = [] } = useQuery<Zone[]>({
+    queryKey: ['zones'],
+    queryFn: () => fetch(`${API_BASE_URL}/api/zones`).then(res => res.json())
+  })
+
   const [isLoading, setIsLoading] = useState(true)
 
-  const [properties, setProperties] = useState<Property[]>([])
-  const [developers, setDevelopers] = useState<Developer[]>([])
-  const [communities, setCommunities] = useState<Community[]>([])
-  const [guides, setGuides] = useState<Guide[]>([])
-  const [partners, setPartners] = useState<string[]>([])
-  const [aboutStats, setAboutStats] = useState<any[]>([])
-  const [areaRates, setAreaRates] = useState<any[]>([])
-  const [dbCategories, setDbCategories] = useState<Category[]>([])
-  const [dbZones, setDbZones] = useState<Zone[]>([])
+  useEffect(() => {
+    if (!isLoadingProps && !isLoadingDevs && !isLoadingCorr) {
+      const timer = setTimeout(() => setIsLoading(false), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoadingProps, isLoadingDevs, isLoadingCorr]);
 
   // Admin States
   const [adminToken, setAdminToken] = useState<string | null>(() => window.localStorage.getItem('velo-admin-token'))
@@ -51,40 +97,15 @@ function App() {
   // Developer Modal State
   const [selectedDeveloperName, setSelectedDeveloperName] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [propRes, devRes, corrRes, guideRes, partRes, statRes, areaRes, catRes, zoneRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/properties`),
-          fetch(`${API_BASE_URL}/api/developers`),
-          fetch(`${API_BASE_URL}/api/corridors`),
-          fetch(`${API_BASE_URL}/api/guides`),
-          fetch(`${API_BASE_URL}/api/partners`),
-          fetch(`${API_BASE_URL}/api/stats`),
-          fetch(`${API_BASE_URL}/api/area-rates`),
-          fetch(`${API_BASE_URL}/api/categories`),
-          fetch(`${API_BASE_URL}/api/zones`)
-        ]);
-        setProperties(await propRes.json());
-        setDevelopers(await devRes.json());
-        const corridorsData = await corrRes.json();
-        setCommunities(Array.isArray(corridorsData) ? corridorsData : []);
-        setGuides(await guideRes.json());
-        setPartners(await partRes.json());
-        setAboutStats(await statRes.json());
-        setAreaRates(await areaRes.json());
-        setDbCategories(await catRes.json());
-        setDbZones(await zoneRes.json());
-      } catch (error) {
-        console.error("Failed to fetch data:", error);
-      } finally {
-        setTimeout(() => {
-          setIsLoading(false)
-        }, 1000) // Small delay for animation
-      }
-    };
-    fetchData();
-  }, [])
+  // User Identity State
+  const [user, setUser] = useState<{ name: string; email: string; phone: string } | null>(() => {
+    const savedUser = window.localStorage.getItem('velo-user')
+    return savedUser ? JSON.parse(savedUser) : null
+  })
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
+  const [showIdentityModal, setShowIdentityModal] = useState(false)
+  const [pendingPropertyToSave, setPendingPropertyToSave] = useState<number | null>(null)
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -96,6 +117,15 @@ function App() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  useEffect(() => {
+    if (user?.email) {
+      fetch(`${API_BASE_URL}/api/saved-properties/${user.email}`)
+        .then(res => res.json())
+        .then(data => setFavorites(new Set(data)))
+        .catch(err => console.error("Failed to sync favorites:", err))
+    }
+  }, [user])
 
   const handleLogin = (token: string) => {
     setAdminToken(token)
@@ -135,16 +165,87 @@ function App() {
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [])
 
-  const toggleFavorite = (propertyId: number) => {
-    setFavorites((current) => {
-      const updated = new Set(current)
-      if (updated.has(propertyId)) {
-        updated.delete(propertyId)
-      } else {
-        updated.add(propertyId)
+  // Global Scroll Lock for Modals
+  useEffect(() => {
+    const isModalOpen = !!selectedDeveloperName || !!showAdminLogin || !!showIdentityModal || !!selectedProperty;
+    if (isModalOpen) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+  }, [selectedDeveloperName, showAdminLogin, showIdentityModal, selectedProperty]);
+
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.15
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+        }
+      });
+    }, observerOptions);
+
+    const sections = document.querySelectorAll('.reveal-section');
+    sections.forEach(section => observer.observe(section));
+
+    return () => {
+      sections.forEach(section => observer.unobserve(section));
+    };
+  }, [isLoading]);
+
+  const toggleFavorite = async (propertyId: number) => {
+    if (!user) {
+      setPendingPropertyToSave(propertyId)
+      setShowIdentityModal(true)
+      return
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/save-property`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_email: user.email, property_id: propertyId })
+      })
+      const data = await res.json()
+      
+      setFavorites((current) => {
+        const updated = new Set(current)
+        if (data.status === 'removed') {
+          updated.delete(propertyId)
+        } else {
+          updated.add(propertyId)
+        }
+        return updated
+      })
+    } catch (err) {
+      console.error("Failed to save property:", err)
+    }
+  }
+
+  const handleIdentitySubmit = async (userData: { name: string; email: string; phone: string }) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/identify-user`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+      })
+      const dbUser = await res.json()
+      setUser(dbUser)
+      window.localStorage.setItem('velo-user', JSON.stringify(dbUser))
+      setShowIdentityModal(false)
+      
+      if (pendingPropertyToSave !== null) {
+        toggleFavorite(pendingPropertyToSave)
+        setPendingPropertyToSave(null)
       }
-      return updated
-    })
+    } catch (err) {
+      console.error("Failed to identify user:", err)
+    }
   }
 
   const filteredProperties = useMemo(() => {
@@ -180,7 +281,7 @@ function App() {
   }, [tab, location, propertyType, bedrooms, sortBy, properties])
 
   if (adminToken) {
-    return <AdminDashboard token={adminToken} onLogout={handleLogout} />
+    return <AdminDashboard token={adminToken} onLogout={handleLogout} theme={theme} />
   }
 
   return (
@@ -214,26 +315,38 @@ function App() {
         categories={dbCategories}
       />
       <main>
-        <PropertyShowcase
-          properties={filteredProperties}
-          favorites={favorites}
-          onToggleFavorite={toggleFavorite}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-        />
-        <Sections
-          developers={developers}
-          communities={communities}
-          guides={guides}
-          partners={partners}
-          aboutStats={aboutStats}
-          onDeveloperClick={setSelectedDeveloperName}
-        />
-        <ServicesHub />
-        <TeamSection />
-        <ContactSection />
+        <div className="reveal-section">
+          <PropertyShowcase
+            properties={filteredProperties}
+            favorites={favorites}
+            onToggleFavorite={toggleFavorite}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            selectedProperty={selectedProperty}
+            setSelectedProperty={setSelectedProperty}
+          />
+        </div>
+        <div className="reveal-section">
+          <Sections
+            developers={developers}
+            communities={communities}
+            guides={guides}
+            partners={partners}
+            aboutStats={aboutStats}
+            onDeveloperClick={setSelectedDeveloperName}
+          />
+        </div>
+        <div className="reveal-section">
+          <ServicesHub />
+        </div>
+        <div className="reveal-section">
+          <TeamSection />
+        </div>
+        <div className="reveal-section">
+          <ContactSection />
+        </div>
       </main>
       <Footer onSignInClick={() => setShowAdminLogin(true)} />
       <BackToTop visible={showBackToTop} />
@@ -242,6 +355,17 @@ function App() {
         <DeveloperModal 
           developerName={selectedDeveloperName}
           onClose={() => setSelectedDeveloperName(null)}
+          theme={theme}
+        />
+      )}
+
+      {showIdentityModal && (
+        <IdentityModal 
+          onClose={() => {
+            setShowIdentityModal(false)
+            setPendingPropertyToSave(null)
+          }}
+          onSubmit={handleIdentitySubmit}
         />
       )}
     </div>

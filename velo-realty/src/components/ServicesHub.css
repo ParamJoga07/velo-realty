@@ -562,7 +562,8 @@
 }
 
 [data-theme='light'] .calc-modal-overlay {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(20px);
 }
 
 @keyframes modalFadeIn {
@@ -591,6 +592,8 @@
 
 [data-theme='light'] .calc-modal-window {
   background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.1);
 }
 
 .calc-header {
@@ -818,6 +821,8 @@
 
 [data-theme='light'] .referral-modal-window {
   background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.1);
 }
 
 .referral-modal-window.success {
@@ -892,9 +897,16 @@
   transition: all 0.3s ease;
 }
 
+[data-theme='light'] .intent-chip {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #1e293b;
+}
+
 .intent-chip.active {
   background: var(--teal-500);
   border-color: var(--teal-500);
+  color: white;
 }
 
 .btn-ref-submit {

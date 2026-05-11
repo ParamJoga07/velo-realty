@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import API_BASE_URL from '../config';
 import './TeamSection.css';
 
 interface TeamMember {
@@ -9,23 +11,32 @@ interface TeamMember {
   bio: string;
 }
 
-import API_BASE_URL from '../config';
-
 export function TeamSection() {
-  const [teamMembers, setTeamMembers] = React.useState<TeamMember[]>([]);
-  const [activeMember, setActiveMember] = React.useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  React.useEffect(() => {
-    fetch(`${API_BASE_URL}/api/team`)
-      .then(res => res.json())
-      .then(data => {
-        const sortedData = Array.isArray(data) ? [...data].sort((a, b) => a.id - b.id) : [];
-        setTeamMembers(sortedData);
-      })
-      .catch(err => console.error("Error fetching team members:", err));
-  }, []);
+  const { data: teamMembers = [] } = useQuery<TeamMember[]>({
+    queryKey: ['team'],
+    queryFn: () => fetch(`${API_BASE_URL}/api/team`).then(res => res.json().then(data => 
+      Array.isArray(data) ? [...data].sort((a, b) => a.id - b.id) : []
+    ))
+  });
+
+  useEffect(() => {
+    if (teamMembers.length <= 2) return;
+    const interval = setInterval(() => {
+      setActiveIndex(prev => (prev + 2) % teamMembers.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [teamMembers.length]);
 
   if (teamMembers.length === 0) return null;
+
+  // Calculate the members to show (3 at a time)
+  const displayedMembers = [
+    teamMembers[activeIndex],
+    teamMembers[(activeIndex + 1) % teamMembers.length],
+    teamMembers[(activeIndex + 2) % teamMembers.length]
+  ];
 
   return (
     <section id="team" className="section team-innovative">
@@ -37,51 +48,33 @@ export function TeamSection() {
           </div>
         </div>
 
-        <div className="team-display-container">
-          <div className="team-active-showcase">
-            <div className="active-portrait-wrap">
-              <div className="portrait-glitch-layer"></div>
-              <img 
-                key={teamMembers[activeMember].name}
-                src={teamMembers[activeMember].image} 
-                alt={teamMembers[activeMember].name} 
-                className="active-portrait"
-              />
-              <div className="portrait-hologram-glow"></div>
-            </div>
-            
-            <div className="active-bio-panel">
-              <div className="bio-content-inner">
-                <span className="member-rank">Rank: {teamMembers[activeMember].role}</span>
-                <h3 className="member-name">{teamMembers[activeMember].name}</h3>
-                <p className="member-bio-text">{teamMembers[activeMember].bio}</p>
-                <div className="bio-stats-visual">
-                  <div className="bio-stat">
-                    <span>Precision</span>
-                    <div className="stat-bar"><div className="stat-fill" style={{width: '95%'}}></div></div>
-                  </div>
-                  <div className="bio-stat">
-                    <span>Velocity</span>
-                    <div className="stat-bar"><div className="stat-fill" style={{width: '98%'}}></div></div>
+        <div className="team-slider-wrap">
+          <div className="team-grid-v3">
+            {displayedMembers.map((member, idx) => (
+              <div key={`${member.id}-${idx}`} className="team-card-v3">
+                <div className="card-image-wrap">
+                  <img src={member.image} alt={member.name} className="card-image" />
+                  <div className="card-tag">
+                    <span className="card-role">{member.role}</span>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="team-selection-reel">
-            {teamMembers.map((member, index) => (
-              <div 
-                key={member.name}
-                className={`selection-chip ${activeMember === index ? 'active' : ''}`}
-                onClick={() => setActiveMember(index)}
-                onMouseEnter={() => setActiveMember(index)}
-              >
-                <img src={member.image} alt={member.name} />
-                <div className="chip-indicator"></div>
+                <div className="card-info">
+                  <h3 className="card-name">{member.name}</h3>
+                  <p className="card-bio">{member.bio}</p>
+                </div>
               </div>
             ))}
           </div>
+        </div>
+
+        <div className="team-pagination">
+          {Array.from({ length: Math.ceil(teamMembers.length / 3) }).map((_, i) => (
+            <div 
+              key={i} 
+              className={`pagination-dot ${Math.floor(activeIndex / 3) === i ? 'active' : ''}`}
+              onClick={() => setActiveIndex(i * 3)}
+            />
+          ))}
         </div>
       </div>
     </section>

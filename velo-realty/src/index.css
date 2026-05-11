@@ -37,9 +37,39 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   background: #ffffff;
+  overflow-x: hidden;
+}
+
+.reveal-section {
+  opacity: 0;
+  transform: translateY(100px) scale(0.98);
+  transition: 
+    opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+  overflow: visible;
+}
+
+.reveal-section.revealed {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Staggered entrance for children of revealed sections */
+.reveal-section.revealed > * {
+  animation: fluidRise 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fluidRise {
+  from { transform: translateY(30px); opacity: 0.5; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 #root {

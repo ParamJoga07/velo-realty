@@ -92,6 +92,7 @@ export type DeveloperProfile = {
   logo_url: string | null
   total_projects: number
   projects: ProjectSummary[]
+  properties?: Property[]
 }
 
 export type ProjectDetail = {

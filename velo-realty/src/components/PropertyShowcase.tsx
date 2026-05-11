@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Property } from '../types'
+import { DeveloperModal } from './DeveloperModal'
 
 type ViewMode = 'grid' | 'list'
 type SortBy = 'featured' | 'price-asc' | 'price-desc' | 'handover'
@@ -12,6 +13,8 @@ type PropertyShowcaseProps = {
   setViewMode: (value: ViewMode) => void
   sortBy: SortBy
   setSortBy: (value: SortBy) => void
+  selectedProperty: Property | null
+  setSelectedProperty: (prop: Property | null) => void
 }
 
 export function PropertyShowcase({
@@ -22,8 +25,10 @@ export function PropertyShowcase({
   setViewMode,
   sortBy,
   setSortBy,
+  selectedProperty,
+  setSelectedProperty,
 }: PropertyShowcaseProps) {
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
+  const [selectedDeveloper, setSelectedDeveloper] = useState<string | null>(null)
 
   return (
     <section id="properties" className="section">
@@ -78,7 +83,22 @@ export function PropertyShowcase({
                   <div className="card-luxury-content">
                     <div className="card-luxury-main">
                       <h3>{item.title}</h3>
-                      <p className="card-luxury-loc">{item.location} Corridor</p>
+                      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '4px'}}>
+                        <button 
+                          className="dev-link-btn" 
+                          onClick={(e) => { e.stopPropagation(); setSelectedDeveloper(item.location); }}
+                          style={{background: 'none', border: 'none', color: '#aaa', fontSize: '10px', fontWeight: 600, cursor: 'pointer', textTransform: 'uppercase', padding: 0}}
+                        >
+                          {item.location} Corridor →
+                        </button>
+                        <button 
+                          className="dev-link-btn" 
+                          onClick={(e) => { e.stopPropagation(); setSelectedDeveloper(item.developer); }}
+                          style={{background: 'none', border: 'none', color: 'var(--accent-orange)', fontSize: '10px', fontWeight: 800, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '1px', padding: 0}}
+                        >
+                          By {item.developer} →
+                        </button>
+                      </div>
                     </div>
                     <div className="card-luxury-footer">
                       <div className="luxury-meta-strip">
@@ -109,7 +129,15 @@ export function PropertyShowcase({
             <div className="modal-content">
               <div className="modal-header">
                 <h2>{selectedProperty.title}</h2>
-                <p>{selectedProperty.location} · {selectedProperty.community}</p>
+                <p>
+                  <span 
+                    onClick={() => setSelectedDeveloper(selectedProperty.location)}
+                    style={{color: 'var(--accent-orange)', cursor: 'pointer', fontWeight: 600}}
+                  >
+                    {selectedProperty.location} Corridor
+                  </span>
+                  · {selectedProperty.community}
+                </p>
               </div>
               <div className="modal-meta meta">
                 <span>{selectedProperty.beds} Beds</span>
@@ -117,7 +145,15 @@ export function PropertyShowcase({
                 <span>{selectedProperty.area} sq.ft</span>
               </div>
               <div className="modal-details">
-                <p><strong>Developer:</strong> {selectedProperty.developer}</p>
+                <p>
+                  <strong>Developer:</strong> 
+                  <span 
+                    onClick={() => setSelectedDeveloper(selectedProperty.developer)}
+                    style={{color: 'var(--accent-orange)', cursor: 'pointer', marginLeft: '5px', fontWeight: 700}}
+                  >
+                    {selectedProperty.developer} (View Portfolio)
+                  </span>
+                </p>
                 <p><strong>Type:</strong> {selectedProperty.type}</p>
                 <p><strong>Handover:</strong> {selectedProperty.handover}</p>
                 <p><strong>Listing:</strong> {selectedProperty.listingType}</p>
@@ -138,6 +174,13 @@ export function PropertyShowcase({
             </div>
           </div>
         </div>
+      )}
+
+      {selectedDeveloper && (
+        <DeveloperModal 
+          developerName={selectedDeveloper} 
+          onClose={() => setSelectedDeveloper(null)} 
+        />
       )}
     </section>
   )

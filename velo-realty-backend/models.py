@@ -68,6 +68,12 @@ class PropertyModel(Base):
     description = Column(String)
     
     # Relationships
+    developer_id = Column(Integer, ForeignKey("developer_profiles.id"), nullable=True)
+    corridor_id = Column(Integer, ForeignKey("corridors.id"), nullable=True)
+    
+    # Relationships
+    developer_rel = relationship("DeveloperProfileModel", back_populates="property_list")
+    corridor_rel = relationship("CorridorModel", back_populates="property_list")
     categories = relationship("CategoryModel", secondary=property_categories, back_populates="properties")
     zones = relationship("ZoneModel", secondary=property_zones, back_populates="properties")
     
@@ -98,6 +104,7 @@ class DeveloperProfileModel(Base):
     logo_url = Column(String, nullable=True)
     total_projects = Column(Integer, default=0)
     project_list = relationship("ProjectModel", back_populates="developer", cascade="all, delete-orphan")
+    property_list = relationship("PropertyModel", back_populates="developer_rel", cascade="all, delete-orphan")
 
 class ProjectModel(Base):
     __tablename__ = "project_details"
@@ -153,6 +160,7 @@ class CorridorModel(Base):
     image = Column(String)
     
     project_list = relationship("ProjectModel", back_populates="corridor")
+    property_list = relationship("PropertyModel", back_populates="corridor_rel")
 
 class ContactRequestModel(Base):
     __tablename__ = "contact_requests"
@@ -213,3 +221,20 @@ class ReferralModel(Base):
     investment_intent = Column(String, nullable=True)
     status = Column(String, default="Active") # Active, Converted, Rewarded
     created_at = Column(String, default=lambda: datetime.now().isoformat())
+class UserIdentityModel(Base):
+    __tablename__ = "user_identities"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
+    phone = Column(String, index=True, nullable=False)
+    created_at = Column(String, default=lambda: datetime.now().isoformat())
+    saved_properties = relationship("SavedPropertyModel", back_populates="user", cascade="all, delete-orphan")
+
+class SavedPropertyModel(Base):
+    __tablename__ = "saved_properties"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("user_identities.id"), nullable=False)
+    property_id = Column(Integer, ForeignKey("properties.id"), nullable=False)
+    created_at = Column(String, default=lambda: datetime.now().isoformat())
+    user = relationship("UserIdentityModel", back_populates="saved_properties")
+    property = relationship("PropertyModel")

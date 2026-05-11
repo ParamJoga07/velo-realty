@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { MapPin } from 'lucide-react';
 import { CORRIDOR_MAPS } from './maps/CorridorMaps';
 import type { DeveloperProfile, ProjectDetail } from '../types';
@@ -7,45 +8,43 @@ import './DeveloperModal.css';
 type DeveloperModalProps = {
   developerName: string;
   onClose: () => void;
+  theme?: 'light' | 'dark';
 };
 
 import API_BASE_URL from '../config';
 
-export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) {
-  const [profile, setProfile] = useState<DeveloperProfile | null>(null);
-  const [selectedProject, setSelectedProject] = useState<ProjectDetail | null>(null);
-  const [activeImageIdx, setActiveImageIdx] = useState(0);
-  const [loading, setLoading] = useState(true);
-
+export function DeveloperModal({ developerName, onClose, theme }: DeveloperModalProps) {
   // Fetch developer by name (partial match via search API)
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await fetch(
-          `${API_BASE_URL}/api/developer-profiles/search?name=${encodeURIComponent(developerName)}`
-        );
-        const data = await res.json();
-        if (!data.error) {
-          setProfile(data as DeveloperProfile);
-        }
-      } catch (err) {
-        console.error('Failed to fetch developer:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProfile();
-  }, [developerName]);
+  const { data: profile, isLoading: isLoadingProfile } = useQuery<DeveloperProfile>({
+    queryKey: ['developer', developerName],
+    queryFn: async () => {
+      const res = await fetch(
+        `${API_BASE_URL}/api/developer-profiles/search?name=${encodeURIComponent(developerName)}`
+      );
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      return data as DeveloperProfile;
+    },
+    enabled: !!developerName
+  });
 
-  const fetchProjectDetail = async (slug: string) => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/projects/${slug}`);
-      const data: ProjectDetail = await res.json();
-      setSelectedProject(data);
-      setActiveImageIdx(0);
-    } catch (err) {
-      console.error('Failed to fetch project:', err);
-    }
+  const [selectedProjectSlug, setSelectedProjectSlug] = useState<string | null>(null);
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
+
+  const { data: selectedProject, isLoading: isLoadingProject } = useQuery<ProjectDetail>({
+    queryKey: ['project', selectedProjectSlug],
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE_URL}/api/projects/${selectedProjectSlug}`);
+      return res.json();
+    },
+    enabled: !!selectedProjectSlug
+  });
+
+  const loading = isLoadingProfile || (selectedProjectSlug ? isLoadingProject : false);
+
+  const fetchProjectDetail = (slug: string) => {
+    setSelectedProjectSlug(slug);
+    setActiveImageIdx(0);
   };
 
   // --- PROJECT DETAIL VIEW ---
@@ -57,7 +56,7 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
       <div className="dev-modal-overlay" onClick={onClose}>
         <div className="dev-modal-content dev-modal-project" onClick={(e) => e.stopPropagation()}>
           <button className="dev-modal-close" onClick={onClose}>×</button>
-          <button className="dev-modal-back" onClick={() => setSelectedProject(null)}>
+          <button className="dev-modal-back" onClick={() => setSelectedProjectSlug(null)}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
             Back to {profile?.name || 'Developer'}
           </button>
@@ -212,12 +211,31 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
                 <div className="corridor-list-side">
                   <div className="dev-projects-header">
                     <h3>Active Properties</h3>
-                    <span className="dev-projects-count">{profile.projects.length} projects</span>
+                    <span className="dev-projects-count">{(profile.projects?.length || 0) + (profile.properties?.length || 0)} assets</span>
                   </div>
                   <div className="dev-projects-grid corridor-grid">
-                    {profile.projects.map((project) => (
+                    {/* Render Properties first as they are usually the main focus */}
+                    {(profile.properties || []).map((prop: any) => (
+                      <div key={`prop-${prop.id}`} className="dev-project-card property-variant">
+                         <div className="dpc-image">
+                            <img src={prop.image} alt={prop.title} />
+                            <div className="dpc-badge">{prop.status}</div>
+                         </div>
+                         <div className="dpc-body">
+                            <h4 className="dpc-name">{prop.title}</h4>
+                            <p className="dpc-location">{prop.location}</p>
+                            <div className="dpc-footer">
+                               <span className="dpc-price">{prop.price}</span>
+                               <span className="dpc-config">{prop.beds}B • {prop.area} FT²</span>
+                            </div>
+                         </div>
+                      </div>
+                    ))}
+
+                    {/* Render Projects */}
+                    {(profile.projects || []).map((project) => (
                       <div
-                        key={project.id}
+                        key={`proj-${project.id}`}
                         className="dev-project-card"
                         onClick={() => fetchProjectDetail(project.slug)}
                       >

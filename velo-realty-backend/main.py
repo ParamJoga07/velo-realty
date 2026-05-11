@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from typing import List, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from database import get_db, engine
 import models
 from datetime import datetime, timedelta
@@ -43,7 +43,7 @@ class PropertyCreate(BaseModel):
     title: str
     location: str
     community: str
-    developer: str
+    developer: Optional[str] = None
     type: str
     listingType: str
     price: str
@@ -55,6 +55,8 @@ class PropertyCreate(BaseModel):
     status: str
     image: str
     description: str
+    developer_id: Optional[int] = None
+    corridor_id: Optional[int] = None
     gallery: Optional[List[str]] = []
 
 class ProjectCreate(BaseModel):
@@ -117,6 +119,15 @@ class ReferralCreate(BaseModel):
     friend_name: str
     friend_contact: str
     investment_intent: Optional[str] = None
+
+class UserIdentityCreate(BaseModel):
+    name: str
+    email: str
+    phone: str
+
+class PropertySaveRequest(BaseModel):
+    user_email: str
+    property_id: int
 
 app = FastAPI(title="Velo Realty API")
 
@@ -443,7 +454,9 @@ def get_properties(db: Session = Depends(get_db)):
 @app.get("/api/developers")
 def get_developers(db: Session = Depends(get_db)):
     # Return developer profiles mapped to the legacy Developer structure
-    devs = db.query(models.DeveloperProfileModel).order_by(models.DeveloperProfileModel.id.asc()).all()
+    devs = db.query(models.DeveloperProfileModel)\
+             .options(joinedload(models.DeveloperProfileModel.property_list))\
+             .order_by(models.DeveloperProfileModel.id.asc()).all()
     # High-quality real estate placeholders for the main grid
     placeholders = [
         "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=800",
@@ -455,15 +468,49 @@ def get_developers(db: Session = Depends(get_db)):
     result = []
     for i, d in enumerate(devs):
         result.append({
+            "id": d.id,
             "name": d.name,
-            "projects": d.total_projects,
-            "image": placeholders[i % len(placeholders)]
+            "slug": d.slug,
+            "about": d.about,
+            "founded_year": d.founded_year,
+            "headquarters": d.headquarters,
+            "logo_url": d.logo_url,
+            "total_projects": d.total_projects,
+            "projects": d.total_projects, # Compatibility
+            "image": d.logo_url or placeholders[i % len(placeholders)], # Compatibility
+            "properties": [{
+                "id": p.id,
+                "title": p.title,
+                "location": p.location,
+                "price": p.price,
+                "image": p.image
+            } for p in d.property_list]
         })
     return result
 
 @app.get("/api/corridors")
 def get_corridors(db: Session = Depends(get_db)):
-    return db.query(models.CorridorModel).order_by(models.CorridorModel.id.asc()).all()
+    corridors = db.query(models.CorridorModel)\
+                  .options(joinedload(models.CorridorModel.property_list))\
+                  .order_by(models.CorridorModel.id.asc()).all()
+    result = []
+    for c in corridors:
+        result.append({
+            "id": c.id,
+            "name": c.name,
+            "slug": c.slug,
+            "location": c.location,
+            "description": c.description,
+            "image": c.image,
+            "properties": [{
+                "id": p.id,
+                "title": p.title,
+                "location": p.location,
+                "price": p.price,
+                "image": p.image
+            } for p in c.property_list]
+        })
+    return result
 
 @app.get("/api/guides")
 def get_guides(db: Session = Depends(get_db)):
@@ -548,6 +595,7 @@ def search_developer_profile(name: str, db: Session = Depends(get_db)):
             "about": corridor.description,
             "type": "Growth Corridor",
             "headquarters": corridor.location,
+            "slug": corridor.slug,
             "projects": [{
                 "id": p.id,
                 "name": p.name,
@@ -557,10 +605,19 @@ def search_developer_profile(name: str, db: Session = Depends(get_db)):
                 "price_range": p.price_range,
                 "status": p.status,
                 "configurations": p.configurations,
-                "categories": [c.name for c in p.categories],
-                "zones": [z.name for z in p.zones],
                 "primary_image": next((img.image_url for img in p.images if img.is_primary), None),
-            } for p in corridor.project_list]
+            } for p in corridor.project_list],
+            "properties": [{
+                "id": p.id,
+                "title": p.title,
+                "location": p.location,
+                "price": p.price,
+                "image": p.image,
+                "beds": p.beds,
+                "baths": p.baths,
+                "area": p.area,
+                "status": p.status
+            } for p in corridor.property_list]
         }
 
     return {"error": "Portfolio not found", "name": name}
@@ -596,7 +653,15 @@ def get_developer_profiles(db: Session = Depends(get_db)):
                 "status": p.status,
                 "configurations": p.configurations,
                 "primary_image": primary_images.get(p.id),
-            } for p in d.project_list]
+            } for p in d.project_list],
+            "properties": [{
+                "id": prop.id,
+                "title": prop.title,
+                "location": prop.location,
+                "price": prop.price,
+                "status": prop.status,
+                "image": prop.image
+            } for prop in d.property_list]
         })
     return result
 
@@ -644,6 +709,14 @@ def get_developer_profile_by_id(dev_id: int, db: Session = Depends(get_db)):
         "logo_url": dev.logo_url,
         "total_projects": dev.total_projects,
         "projects": projects,
+        "properties": [{
+            "id": prop.id,
+            "title": prop.title,
+            "location": prop.location,
+            "price": prop.price,
+            "status": prop.status,
+            "image": prop.image
+        } for prop in dev.property_list]
     }
 
 @app.get("/api/developer-profiles/slug/{slug}")
@@ -690,6 +763,14 @@ def get_developer_profile(slug: str, db: Session = Depends(get_db)):
         "logo_url": dev.logo_url,
         "total_projects": dev.total_projects,
         "projects": projects,
+        "properties": [{
+            "id": prop.id,
+            "title": prop.title,
+            "location": prop.location,
+            "price": prop.price,
+            "status": prop.status,
+            "image": prop.image
+        } for prop in dev.property_list]
     }
 
 @app.get("/api/projects/{slug}")
@@ -798,7 +879,6 @@ def get_dashboard_stats(db: Session = Depends(get_db), admin: models.AdminUser =
     props_count = db.query(models.PropertyModel).count()
     devs_count = db.query(models.DeveloperProfileModel).count()
     projs_count = db.query(models.ProjectModel).count()
-    leads_count = db.query(models.ContactRequestModel).count()
     
     # Chart Data: Properties by Type
     prop_types = db.query(models.PropertyModel.type).all()
@@ -814,16 +894,55 @@ def get_dashboard_stats(db: Session = Depends(get_db), admin: models.AdminUser =
         proj_dist[t] = proj_dist.get(t, 0) + 1
     proj_chart = [{"name": k or "Unspecified", "value": v} for k, v in proj_dist.items()]
 
+    # Captured Leads (Contact Requests + User Identities)
+    contact_requests = db.query(models.ContactRequestModel).count()
+    user_identities = db.query(models.UserIdentityModel).count()
+    total_leads = contact_requests + user_identities
+
+    # Time-series Chart: Leads Generated (Daily for last 7 days)
+    leads_chart = []
+    for i in range(6, -1, -1):
+        d = (datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d")
+        # Search for leads created on this day
+        daily_leads = db.query(models.UserIdentityModel).filter(models.UserIdentityModel.created_at.like(f"{d}%")).count()
+        # Add some variation with contact requests
+        daily_contacts = db.query(models.ContactRequestModel).filter(models.ContactRequestModel.created_at.like(f"{d}%")).count()
+        leads_chart.append({"date": d, "value": daily_leads + daily_contacts})
+
+    # Traffic Chart (Mocked based on leads)
+    traffic_chart = []
+    import random
+    for i in range(13, -1, -1):
+        d = (datetime.now() - timedelta(days=i)).strftime("%d %b")
+        # Mock traffic: 50-200 users, slightly growing
+        traffic_chart.append({"date": d, "value": random.randint(150, 300) + (14-i)*5})
+
     return {
         "properties": props_count,
         "developers": devs_count,
         "projects": projs_count,
         "corridors": db.query(models.CorridorModel).count(),
         "team": db.query(models.TeamMemberModel).count(),
-        "leads": leads_count,
+        "leads": total_leads,
         "type_chart": type_chart,
-        "proj_chart": proj_chart
+        "proj_chart": proj_chart,
+        "leads_chart": leads_chart,
+        "traffic_chart": traffic_chart
     }
+
+
+@app.get("/api/admin/user-leads")
+def get_user_leads(db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    users = db.query(models.UserIdentityModel).all()
+    return [{
+        "id": u.id,
+        "name": u.name,
+        "email": u.email,
+        "phone": u.phone,
+        "created_at": u.created_at,
+        "saved_count": len(u.saved_properties)
+    } for u in users]
+
 
 @app.get("/api/projects")
 def get_projects(db: Session = Depends(get_db)):
@@ -856,6 +975,8 @@ async def read_admin_me(current_admin: models.AdminUser = Depends(get_current_ad
 @app.post("/api/admin/properties", status_code=status.HTTP_201_CREATED)
 def create_property(prop: PropertyCreate, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
     prop_data = prop.dict()
+    if prop_data.get("developer_id") == 0: prop_data["developer_id"] = None
+    if prop_data.get("corridor_id") == 0: prop_data["corridor_id"] = None
     gallery_data = prop_data.pop("gallery", [])
     db_prop = models.PropertyModel(**prop_data)
     db.add(db_prop)
@@ -873,6 +994,8 @@ def create_property(prop: PropertyCreate, db: Session = Depends(get_db), admin: 
 @app.post("/api/admin/projects", status_code=status.HTTP_201_CREATED)
 def create_project(proj: ProjectCreate, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
     proj_data = proj.dict()
+    if proj_data.get("developer_id") == 0: proj_data["developer_id"] = None
+    if proj_data.get("corridor_id") == 0: proj_data["corridor_id"] = None
     images_data = proj_data.pop("images", [])
     db_proj = models.ProjectModel(**proj_data)
     db.add(db_proj)
@@ -950,6 +1073,8 @@ def update_property(prop_id: int, prop: PropertyCreate, db: Session = Depends(ge
         raise HTTPException(status_code=404, detail="Property not found")
     
     prop_data = prop.dict()
+    if prop_data.get("developer_id") == 0: prop_data["developer_id"] = None
+    if prop_data.get("corridor_id") == 0: prop_data["corridor_id"] = None
     gallery_data = prop_data.pop("gallery", [])
     
     for key, value in prop_data.items():
@@ -1072,3 +1197,51 @@ def submit_referral(req: ReferralCreate, db: Session = Depends(get_db)):
 @app.get("/api/admin/referrals")
 def get_referrals(db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
     return db.query(models.ReferralModel).all()
+
+# --- USER IDENTITY & SAVED PROPERTIES ---
+
+@app.post("/api/identify-user")
+def identify_user(user: UserIdentityCreate, db: Session = Depends(get_db)):
+    db_user = db.query(models.UserIdentityModel).filter(models.UserIdentityModel.email == user.email).first()
+    if not db_user:
+        db_user = models.UserIdentityModel(name=user.name, email=user.email, phone=user.phone)
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+    else:
+        # Update name/phone if they changed
+        db_user.name = user.name
+        db_user.phone = user.phone
+        db.commit()
+        db.refresh(db_user)
+    return db_user
+
+@app.post("/api/save-property")
+def save_property(req: PropertySaveRequest, db: Session = Depends(get_db)):
+    user = db.query(models.UserIdentityModel).filter(models.UserIdentityModel.email == req.user_email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not identified")
+    
+    # Check if already saved
+    existing = db.query(models.SavedPropertyModel).filter(
+        models.SavedPropertyModel.user_id == user.id,
+        models.SavedPropertyModel.property_id == req.property_id
+    ).first()
+    
+    if existing:
+        db.delete(existing)
+        db.commit()
+        return {"status": "removed"}
+    
+    saved = models.SavedPropertyModel(user_id=user.id, property_id=req.property_id)
+    db.add(saved)
+    db.commit()
+    return {"status": "saved"}
+
+@app.get("/api/saved-properties/{email}")
+def get_saved_properties(email: str, db: Session = Depends(get_db)):
+    user = db.query(models.UserIdentityModel).filter(models.UserIdentityModel.email == email).first()
+    if not user:
+        return []
+    return [sp.property_id for sp in user.saved_properties]
+
