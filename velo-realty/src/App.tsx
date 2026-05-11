@@ -326,6 +326,7 @@ function App() {
             setSortBy={setSortBy}
             selectedProperty={selectedProperty}
             setSelectedProperty={setSelectedProperty}
+            onDeveloperClick={setSelectedDeveloperName}
           />
         </div>
         <div className="reveal-section">
@@ -350,6 +351,65 @@ function App() {
       </main>
       <Footer onSignInClick={() => setShowAdminLogin(true)} />
       <BackToTop visible={showBackToTop} />
+
+      {selectedProperty && (
+        <div className="property-modal-overlay" onClick={() => setSelectedProperty(null)}>
+          <div className="property-modal-card" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setSelectedProperty(null)} aria-label="Close modal">✕</button>
+            <div className="modal-image-container">
+              <img src={selectedProperty.image} alt={selectedProperty.title} />
+              <span className="badge">{selectedProperty.status}</span>
+              <span className="price-chip">{selectedProperty.price}</span>
+            </div>
+            <div className="modal-content">
+              <div className="modal-header">
+                <h2>{selectedProperty.title}</h2>
+                <p>
+                  <span 
+                    onClick={() => setSelectedDeveloperName(selectedProperty.location)}
+                    style={{color: 'var(--accent-orange)', cursor: 'pointer', fontWeight: 600}}
+                  >
+                    {selectedProperty.location} Corridor
+                  </span>
+                  · {selectedProperty.community}
+                </p>
+              </div>
+              <div className="modal-meta meta">
+                <span>{selectedProperty.beds} Beds</span>
+                <span>{selectedProperty.baths} Baths</span>
+                <span>{selectedProperty.area} sq.ft</span>
+              </div>
+              <div className="modal-details">
+                <p>
+                  <strong>Developer:</strong> 
+                  <span 
+                    onClick={() => setSelectedDeveloperName(selectedProperty.developer)}
+                    style={{color: 'var(--accent-orange)', cursor: 'pointer', marginLeft: '5px', fontWeight: 700}}
+                  >
+                    {selectedProperty.developer} (View Portfolio)
+                  </span>
+                </p>
+                <p><strong>Type:</strong> {selectedProperty.type}</p>
+                <p><strong>Handover:</strong> {selectedProperty.handover}</p>
+                <p><strong>Listing:</strong> {selectedProperty.listingType}</p>
+              </div>
+              <div className="modal-description">
+                <p>{selectedProperty.description}</p>
+              </div>
+              <div className="modal-actions">
+                <button className="btn btn-primary" type="button">Contact Agent</button>
+                <button 
+                  className="btn btn-ghost" 
+                  type="button" 
+                  onClick={() => toggleFavorite(selectedProperty.id)}
+                >
+                  {favorites.has(selectedProperty.id) ? '♥ Saved' : '♡ Save Property'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {selectedDeveloperName && (
         <DeveloperModal 

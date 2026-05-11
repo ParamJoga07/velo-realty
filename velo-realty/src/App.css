@@ -2276,39 +2276,42 @@ body.modal-open {
 
 .property-modal-card {
   background: #ffffff;
-  width: 90%;
+  width: 95%;
   max-width: 1000px;
+  max-height: 90vh;
   border-radius: 24px;
   overflow: hidden;
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
-  transform-style: preserve-3d;
-  animation: flipInModal 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  opacity: 0;
+  grid-template-columns: 1.1fr 1fr;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+  animation: modalSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.page[data-theme='dark'] .property-modal-card {
-  background: rgba(18, 36, 52, 0.95);
-  border: 1px solid rgba(233, 247, 246, 0.1);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes flipInModal {
+@keyframes modalSlideUp {
   0% {
     opacity: 0;
-    transform: rotateY(-60deg) scale(0.8) translateY(50px);
+    transform: translateY(40px) scale(0.98);
   }
   100% {
     opacity: 1;
-    transform: rotateY(0deg) scale(1) translateY(0);
+    transform: translateY(0) scale(1);
   }
+}
+
+.page[data-theme='dark'] .property-modal-card {
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-content {
+  padding: 2.5rem;
+  overflow-y: auto;
+  background: #ffffff;
+}
+
+.page[data-theme='dark'] .modal-content {
+  background: #0f172a;
 }
 
 .modal-close {
