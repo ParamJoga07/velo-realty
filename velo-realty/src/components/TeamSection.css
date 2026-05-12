@@ -1,216 +1,217 @@
 .team-innovative {
-  padding: 6rem 0;
-  background: #0a1f2c; /* Brand Dark Navy */
+  padding: 8rem 0;
+  background: #061118; /* Deeper Navy for more premium feel */
   overflow: hidden;
-  transition: background 0.5s ease;
+  position: relative;
+}
+
+/* Background decorative element */
+.team-innovative::after {
+  content: '';
+  position: absolute;
+  top: -10%;
+  right: -10%;
+  width: 40%;
+  height: 40%;
+  background: radial-gradient(circle, rgba(20, 184, 166, 0.05) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 .team-slider-wrap {
-  max-width: 1100px;
-  margin: 3rem auto 0;
+  max-width: 1200px;
+  margin: 4rem auto 0;
+  padding: 0 1.5rem;
 }
 
 .team-grid-v3 {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  transition: all 0.8s ease;
+  grid-template-columns: 1.1fr 0.95fr 0.95fr; /* CEO card slightly larger */
+  gap: 2.5rem;
+  align-items: center;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .team-card-v3 {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  animation: teamFadeIn 1.2s ease-out;
   height: 100%;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
-@keyframes teamFadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.team-card-v3:hover {
+  transform: translateY(-10px);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 .card-image-wrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 1/1;
+  aspect-ratio: 4/5; /* Taller aspect ratio for more elegance */
   overflow: hidden;
+  clip-path: inset(0 0 0 0 round 20px 20px 0 0);
 }
 
 .card-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 1s ease;
+  transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: grayscale(20%) brightness(0.9);
 }
 
 .team-card-v3:hover .card-image {
-  transform: scale(1.05);
+  transform: scale(1.08);
+  filter: grayscale(0%) brightness(1);
 }
 
+/* Role Label - Improved Visibility */
 .card-tag {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 0.75rem;
-  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+  bottom: 20px;
+  left: 20px;
+  z-index: 5;
+  pointer-events: none;
 }
 
 .card-role {
-  font-size: 7px;
-  font-weight: 800;
-  color: var(--teal-500);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #fff;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
+  background: rgba(20, 184, 166, 0.85); /* Teal accent */
+  padding: 6px 12px;
+  border-radius: 100px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  display: inline-block;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .card-info {
-  padding: 1rem;
+  padding: 1.75rem;
   flex: 1;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.02), transparent);
 }
 
 .card-name {
-  font-size: 1.1rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: #fff;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
 }
 
 .card-bio {
-  font-size: 0.8rem;
-  color: rgba(255,255,255,0.6);
-  line-height: 1.4;
-  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.6;
+  margin-bottom: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* CEO / Founder Special Design */
+.team-card-v3.ceo-card {
+  border: 1px solid rgba(249, 115, 22, 0.3);
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.08) 0%, rgba(6, 17, 24, 1) 100%);
+  box-shadow: 0 0 30px rgba(249, 115, 22, 0.05);
+}
+
+.team-card-v3.ceo-card .card-role {
+  background: var(--accent-orange, #f97316);
+  padding: 8px 16px;
+  font-size: 0.75rem;
+}
+
+.team-card-v3.ceo-card:hover {
+  border-color: rgba(249, 115, 22, 0.6);
+  box-shadow: 0 0 50px rgba(249, 115, 22, 0.1);
+}
+
+/* Removing the old pseudo-element FOUNDER tag as it's now integrated in the badge */
+.ceo-card::before {
+  display: none;
 }
 
 .team-pagination {
   display: flex;
   justify-content: center;
-  gap: 0.5rem;
-  margin-top: 3rem;
+  gap: 1rem;
+  margin-top: 4rem;
 }
 
 .pagination-dot {
-  width: 6px;
-  height: 6px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   cursor: pointer;
-  transition: all 0.4s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .pagination-dot.active {
   background: var(--teal-500);
-  transform: scale(1.3);
-  box-shadow: 0 0 10px var(--teal-500);
+  transform: scale(1.4);
+  box-shadow: 0 0 15px rgba(20, 184, 166, 0.4);
 }
 
-/* Light Theme */
+/* Light Theme Adjustments */
 .page[data-theme='light'] .team-innovative {
-  background: #f8fafc;
+  background: #fdfdfd;
 }
 
 .page[data-theme='light'] .team-card-v3 {
-  background: white;
-  border-color: rgba(0,0,0,0.05);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+}
+
+.page[data-theme='light'] .team-card-v3:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.1);
 }
 
 .page[data-theme='light'] .card-name {
-  color: #0f172a;
+  color: #1a1a1a;
 }
 
 .page[data-theme='light'] .card-bio {
-  color: #64748b;
+  color: #666;
+}
+
+.page[data-theme='light'] .team-card-v3.ceo-card {
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.03) 0%, #fff 100%);
+}
+
+@media (max-width: 1024px) {
+  .team-grid-v3 {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
 }
 
 @media (max-width: 900px) {
   .team-grid-v3 {
     grid-template-columns: 1fr;
-    max-width: 350px;
+    max-width: 400px;
     margin: 0 auto;
   }
-}
-
-.team-pagination {
-  display: flex;
-  justify-content: center;
-  gap: 0.75rem;
-  margin-top: 4rem;
-}
-
-.pagination-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(128,128,128,0.2);
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-}
-
-.pagination-dot::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border: 1px solid transparent;
-  border-radius: 50%;
-  transition: all 0.4s ease;
-}
-
-.pagination-dot.active {
-  background: var(--teal-500);
-  transform: scale(1.2);
-}
-
-.pagination-dot.active::after {
-  border-color: var(--teal-500);
-  transform: scale(1.3);
-}
-
-@media (max-width: 900px) {
-  .team-grid-v2 {
-    grid-template-columns: 1fr;
-    max-width: 450px;
-    padding: 0 1.5rem;
-  }
   
-  .team-slider-wrap {
-    margin-top: 2rem;
+  .team-card-v3.ceo-card {
+    order: -1; /* Always first on mobile */
   }
 }
 
-/* CEO & Rotating Card Styles */
-.team-card-v3.ceo-card {
-  border: 1px solid rgba(249, 115, 22, 0.4);
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.05) 0%, rgba(10, 31, 44, 1) 100%);
-  position: relative;
-}
-
-.ceo-card::before {
-  content: 'FOUNDER';
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: var(--accent-orange);
-  color: white;
-  font-size: 8px;
-  font-weight: 900;
-  padding: 2px 6px;
-  border-radius: 4px;
-  z-index: 2;
-  letter-spacing: 1px;
-}
-
-.rotating-card {
-  animation: cardFadeIn 0.8s ease forwards;
-}
-
-@keyframes cardFadeIn {
-  from { opacity: 0; transform: translateX(20px); }
-  to { opacity: 1; transform: translateX(0); }
-}

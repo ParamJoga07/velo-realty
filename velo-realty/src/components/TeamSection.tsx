@@ -54,7 +54,7 @@ export function TeamSection() {
         <div className="team-slider-wrap">
           <div className="team-grid-v3">
             {displayedMembers.map((member, idx) => (
-              <div key={`${member.id}-${idx}`} className={`team-card-v3 ${idx === 0 ? 'ceo-card' : 'rotating-card'}`}>
+              <div key={`${member.id}-${idx}`} className={`team-card-v3 ${idx === 0 ? 'ceo-card' : 'rotating-card'} vteam-member`}>
                 <div className="card-image-wrap">
                   <img src={member.image} alt={member.name} className="card-image" />
                   <div className="card-tag">
