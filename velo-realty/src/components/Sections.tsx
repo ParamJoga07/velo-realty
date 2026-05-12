@@ -81,7 +81,11 @@ export function Sections({
     );
   }
 
-  const mainPartners = partners.slice(0, 6);
+  // Prepare partner names from both developers and explicit partners
+  const allPartnerNames = Array.from(new Set([
+    ...developers.map(d => d.name),
+    ...partners
+  ]));
 
   return (
     <>
@@ -96,7 +100,7 @@ export function Sections({
         </div>
         <div className="isometric-container ribbon-3d-wrap">
           <div className="ribbon-3d track-upper">
-            {[...mainPartners, ...mainPartners, ...mainPartners, ...mainPartners].map((item, index) => (
+            {[...allPartnerNames, ...allPartnerNames].map((item, index) => (
               <div 
                 className="ribbon-item" 
                 key={`upper-${item}-${index}`}
@@ -110,7 +114,7 @@ export function Sections({
             ))}
           </div>
           <div className="ribbon-3d track-lower">
-            {[...mainPartners, ...mainPartners, ...mainPartners, ...mainPartners].reverse().map((item, index) => (
+            {[...allPartnerNames, ...allPartnerNames].reverse().map((item, index) => (
               <div 
                 className="ribbon-item" 
                 key={`lower-${item}-${index}`}
@@ -126,7 +130,7 @@ export function Sections({
         </div>
         <div className="center-action-wrap">
           <button className="btn-premium-action" onClick={() => setShowAllPartners(true)}>
-            Discover All {partners.length} Strategic Partners
+            Discover All {allPartnerNames.length} Strategic Partners
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
           </button>
         </div>

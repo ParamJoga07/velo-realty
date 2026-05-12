@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { MapPin } from 'lucide-react';
 import { CORRIDOR_MAPS } from './maps/CorridorMaps';
@@ -13,7 +13,7 @@ type DeveloperModalProps = {
 
 import API_BASE_URL from '../config';
 
-export function DeveloperModal({ developerName, onClose, theme }: DeveloperModalProps) {
+export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) {
   // Fetch developer by name (partial match via search API)
   const { data: profile, isLoading: isLoadingProfile } = useQuery<DeveloperProfile>({
     queryKey: ['developer', developerName],

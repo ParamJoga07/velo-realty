@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   LayoutDashboard, Building2, HardHat, Globe, TrendingUp, Users, 
-  ChevronLeft, Search, Plus, Trash2, Edit3, 
+  Search, Plus, Trash2, Edit3, 
   Mail, Download, Power, Zap, X, Bell, Settings, ArrowUpRight
 } from 'lucide-react';
 import { 
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, 
-  BarChart, Bar, XAxis, YAxis, Legend, CartesianGrid,
+  BarChart, Bar, XAxis, CartesianGrid,
   AreaChart, Area, LineChart, Line
 } from 'recharts';
 import * as XLSX from 'xlsx';
@@ -24,7 +24,6 @@ type AdminDashboardProps = {
 
 type TabType = 'dashboard' | 'properties' | 'developers' | 'projects' | 'rates' | 'team' | 'corridors' | 'leads';
 
-const EXECUTIVE_COLORS = ['#f97316', '#22c55e', '#0ea5e9', '#8b5cf6', '#ec4899', '#facc15', '#64748b'];
 
 export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
@@ -33,7 +32,7 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
   const [editingItem, setEditingItem] = useState<any | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSaving] = useState(false);
 
   const [locationFilter, setLocationFilter] = useState('All');
   const [statusFilter] = useState('All');
@@ -395,9 +394,19 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
                         <tr key={item.id}>
                           <td>
                             <div style={{display: 'flex', flexDirection: 'column'}}>
-                              <span style={{fontWeight: 700, color: '#fff'}}>{item.title || item.name || item.area}</span>
+                              <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                                <span style={{fontWeight: 700, color: '#fff'}}>{item.title || item.name || item.area}</span>
+                                {(activeTab === 'developers' || activeTab === 'corridors' || activeTab === 'properties') && (
+                                  <span style={{fontSize: 8, background: 'rgba(255,255,255,0.05)', padding: '1px 4px', borderRadius: 2, color: 'var(--accent-orange)'}}>#{item.id}</span>
+                                )}
+                              </div>
                               <span style={{fontSize: 10, color: 'var(--text-dim)'}}>
-                                {activeTab === 'properties' ? `By ${item.developer || 'Unknown Developer'}` : (item.email || item.location)}
+                                {activeTab === 'properties' ? (
+                                  <span style={{display: 'flex', gap: '8px'}}>
+                                    <span>By {item.developer || 'Unknown'}</span>
+                                    <span style={{color: 'var(--accent-orange)', opacity: 0.8}}>(ID: {item.developer_id})</span>
+                                  </span>
+                                ) : (item.email || item.location)}
                               </span>
                             </div>
                           </td>
@@ -406,7 +415,14 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
                               <span style={{fontWeight: 600, fontSize: 11}}>
                                 {activeTab === 'leads' ? `${item.saved_count || 0} Saved` : (item.role || item.price || item.slug)}
                               </span>
-                              <span style={{fontSize: 10, color: 'var(--text-muted)'}}>{item.phone || item.possession}</span>
+                              <span style={{fontSize: 10, color: 'var(--text-muted)'}}>
+                                {activeTab === 'projects' ? (
+                                  <span style={{display: 'flex', gap: '8px'}}>
+                                    <span>Dev ID: {item.developer_id}</span>
+                                    <span>Corr ID: {item.corridor_id}</span>
+                                  </span>
+                                ) : (item.phone || item.possession)}
+                              </span>
                             </div>
                           </td>
                           <td><span className="tag-v3">{activeTab === 'leads' ? 'User' : (item.status || 'Active')}</span></td>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import './App.css'
 import { BackToTop } from './components/BackToTop'
 import { ContactSection } from './components/ContactSection'
@@ -13,7 +13,7 @@ import { Sections } from './components/Sections'
 import { TeamSection } from './components/TeamSection'
 import { ServicesHub } from './components/ServicesHub'
 import { DeveloperModal } from './components/DeveloperModal'
-import type { ListingType, Property, Developer, Community, Guide, Category, Zone } from './types'
+import type { ListingType, Property, Developer, Guide, Category, Zone } from './types'
 import { AdminDashboard } from './components/AdminDashboard'
 import { AdminLogin } from './components/AdminLogin'
 import { IdentityModal } from './components/IdentityModal'
@@ -324,7 +324,6 @@ function App() {
             setViewMode={setViewMode}
             sortBy={sortBy}
             setSortBy={setSortBy}
-            selectedProperty={selectedProperty}
             setSelectedProperty={setSelectedProperty}
             onDeveloperClick={setSelectedDeveloperName}
           />

@@ -1,6 +1,4 @@
-import { useState } from 'react'
 import type { Property } from '../types'
-import { DeveloperModal } from './DeveloperModal'
 
 type ViewMode = 'grid' | 'list'
 type SortBy = 'featured' | 'price-asc' | 'price-desc' | 'handover'
@@ -13,7 +11,6 @@ type PropertyShowcaseProps = {
   setViewMode: (value: ViewMode) => void
   sortBy: SortBy
   setSortBy: (value: SortBy) => void
-  selectedProperty: Property | null
   setSelectedProperty: (prop: Property | null) => void;
   onDeveloperClick: (name: string) => void;
 }
@@ -26,7 +23,6 @@ export function PropertyShowcase({
   setViewMode,
   sortBy,
   setSortBy,
-  selectedProperty,
   setSelectedProperty,
   onDeveloperClick,
 }: PropertyShowcaseProps) {

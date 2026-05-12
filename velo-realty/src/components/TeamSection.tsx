@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import API_BASE_URL from '../config';
 import './TeamSection.css';
@@ -21,22 +21,25 @@ export function TeamSection() {
     ))
   });
 
+  const ceo = teamMembers[0];
+  const others = teamMembers.slice(1);
+
   useEffect(() => {
-    if (teamMembers.length <= 2) return;
+    if (others.length <= 2) return;
     const interval = setInterval(() => {
-      setActiveIndex(prev => (prev + 2) % teamMembers.length);
+      setActiveIndex(prev => (prev + 1) % others.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [teamMembers.length]);
+  }, [others.length]);
 
   if (teamMembers.length === 0) return null;
 
-  // Calculate the members to show (3 at a time)
+  // Static CEO card + 2 rotating cards
   const displayedMembers = [
-    teamMembers[activeIndex],
-    teamMembers[(activeIndex + 1) % teamMembers.length],
-    teamMembers[(activeIndex + 2) % teamMembers.length]
-  ];
+    ceo,
+    others[activeIndex],
+    others[(activeIndex + 1) % others.length]
+  ].filter(Boolean);
 
   return (
     <section id="team" className="section team-innovative">
@@ -51,7 +54,7 @@ export function TeamSection() {
         <div className="team-slider-wrap">
           <div className="team-grid-v3">
             {displayedMembers.map((member, idx) => (
-              <div key={`${member.id}-${idx}`} className="team-card-v3">
+              <div key={`${member.id}-${idx}`} className={`team-card-v3 ${idx === 0 ? 'ceo-card' : 'rotating-card'}`}>
                 <div className="card-image-wrap">
                   <img src={member.image} alt={member.name} className="card-image" />
                   <div className="card-tag">
@@ -67,15 +70,17 @@ export function TeamSection() {
           </div>
         </div>
 
-        <div className="team-pagination">
-          {Array.from({ length: Math.ceil(teamMembers.length / 3) }).map((_, i) => (
-            <div 
-              key={i} 
-              className={`pagination-dot ${Math.floor(activeIndex / 3) === i ? 'active' : ''}`}
-              onClick={() => setActiveIndex(i * 3)}
-            />
-          ))}
-        </div>
+        {others.length > 2 && (
+          <div className="team-pagination">
+            {others.map((_, i) => (
+              <div 
+                key={i} 
+                className={`pagination-dot ${activeIndex === i ? 'active' : ''}`}
+                onClick={() => setActiveIndex(i)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
