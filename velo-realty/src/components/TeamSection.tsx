@@ -37,18 +37,15 @@ export function TeamSection() {
   }, [others.length]);
 
   const handleDotClick = (i: number) => {
-    if (isAnimating || i === activeIndex) return;
-    setIsAnimating(true);
+    // Keep manual control available if needed, but primary is auto
     setActiveIndex(i);
-    setTimeout(() => setIsAnimating(false), 800);
   };
 
   if (teamMembers.length === 0) return null;
 
-  // We use a 4-face cube (90° per step). Map members to faces 0-3
-  const faceCount = 4;
-  const faceAngle = 360 / faceCount; // 90°
-  const cubeRotation = -activeIndex * faceAngle;
+  // Carousel control
+  const cardsPerPage = 1; // Show one main focused set or a sliding track
+  const maxIndex = Math.max(0, others.length - 1);
 
   return (
     <section id="team" className="section team-innovative">
@@ -79,55 +76,33 @@ export function TeamSection() {
             </div>
           )}
 
-          {/* ── 3D CUBE CAROUSEL ── */}
+          {/* ── CONTINUOUS SCROLL TRACK ── */}
           {others.length > 0 && (
-            <div className="cube-slot">
-              <div className="cube-scene">
-                <div
-                  className="cube-track"
-                  style={{ transform: `translateZ(-180px) rotateY(${cubeRotation}deg)` }}
+            <div className="carousel-slot ticker-mode">
+              <div className="carousel-view">
+                <div 
+                  className="carousel-track continuous-scroll" 
                 >
-                  {/* Render up to 4 faces of the cube */}
-                  {Array.from({ length: faceCount }).map((_, faceIdx) => {
-                    const member = others[faceIdx % others.length];
-                    return (
-                      <div
-                        key={faceIdx}
-                        className="cube-face"
-                        style={{ transform: `rotateY(${faceIdx * faceAngle}deg) translateZ(180px)` }}
-                      >
-                        <div className={`team-card-v3 rotating-card ${faceIdx === 0 ? 'face-front' : ''}`}>
-                          <div className="card-image-wrap">
-                            <img src={member.image} alt={member.name} className="card-image" />
-                            <div className="card-tag">
-                              <span className="card-role">{member.role}</span>
-                            </div>
-                          </div>
-                          <div className="card-info">
-                            <h3 className="card-name">{member.name}</h3>
-                            <p className="card-bio">{member.bio}</p>
+                  {/* Triple the items for a perfectly seamless loop */}
+                  {[...others, ...others, ...others].map((member, idx) => (
+                    <div key={`${member.id}-${idx}`} className="carousel-item">
+                      <div className="team-card-v3 rotating-card">
+                        <div className="card-image-wrap">
+                          <img src={member.image} alt={member.name} className="card-image" />
+                          <div className="card-tag">
+                            <span className="card-role">{member.role}</span>
                           </div>
                         </div>
+                        <div className="card-info">
+                          <h3 className="card-name">{member.name}</h3>
+                          <p className="card-bio">{member.bio}</p>
+                        </div>
                       </div>
-                    );
-                  })}
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Pagination dots */}
-              {others.length > 1 && (
-                <div className="team-pagination">
-                  {others.map((_, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      aria-label={`Team member ${i + 1}`}
-                      className={`pagination-dot ${activeIndex === i ? 'active' : ''}`}
-                      onClick={() => handleDotClick(i)}
-                    />
-                  ))}
-                </div>
-              )}
             </div>
           )}
         </div>

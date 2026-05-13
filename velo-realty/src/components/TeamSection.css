@@ -39,18 +39,24 @@
   margin-top: 5rem;
 }
 
-/* ─── SLOTS (Identical Dimensions) ─── */
-.ceo-slot, .cube-slot {
+/* ─── SLOTS ─── */
+.ceo-slot {
   flex: 0 0 360px;
   height: 540px;
   position: relative;
 }
 
-.cube-slot {
+.carousel-slot {
+  flex: 1;
+  max-width: 1100px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  height: auto; /* Allow height to grow for dots */
+  align-items: flex-start;
+  overflow: hidden;
+  position: relative;
+  /* Fade effect on the left where cards go under CEO */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15%, black 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 15%, black 100%);
 }
 
 /* ═══════════════════════════════════════════════
@@ -185,29 +191,44 @@
 }
 
 /* ═══════════════════════════════════════════════
-   3D CUBE SCENE
+   CAROUSEL SCENE
 ═══════════════════════════════════════════════ */
-.cube-scene {
-  width: 360px;
-  height: 540px;
-  perspective: 2000px; /* High perspective for less distortion */
-  position: relative;
-}
-
-.cube-track {
+.carousel-view {
   width: 100%;
-  height: 100%;
-  position: relative;
-  transform-style: preserve-3d;
-  transition: transform 0.9s cubic-bezier(0.45, 0, 0.15, 1);
+  overflow: hidden;
+  padding: 2rem 0;
+  margin: -2rem 0;
 }
 
-/* Each face of the cube */
-.cube-face {
-  position: absolute;
-  inset: 0;
-  backface-visibility: hidden;
-  transform-style: preserve-3d;
+.carousel-track.continuous-scroll {
+  display: flex;
+  gap: 2.5rem;
+  width: max-content;
+  animation: teamContinuousScroll 40s linear infinite;
+}
+
+.carousel-track.continuous-scroll:hover {
+  animation-play-state: paused;
+}
+
+@keyframes teamContinuousScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-33.333%);
+  }
+}
+
+.carousel-item {
+  flex: 0 0 340px;
+  transform-origin: center center;
+  transition: transform 0.6s ease;
+}
+
+/* Optional: Slight perspective effect for the row */
+.carousel-view {
+  perspective: 2000px;
 }
 
 /* Glow ring behind the cube */
@@ -225,9 +246,11 @@
   pointer-events: none;
 }
 
-/* ─── ROTATING CARD (inside the cube face) ─── */
+/* ─── SLIDING CARD ─── */
 .team-card-v3.rotating-card {
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.3);
+  /* Smoother transition as it moves through the mask */
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
 /* ═══════════════════════════════════════════════
@@ -323,19 +346,16 @@
 /* ═══════════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════════ */
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
   .team-stage {
-    gap: 3rem;
+    gap: 2rem;
+    padding: 0 2rem;
   }
   .ceo-slot {
-    flex: 0 0 280px;
+    flex: 0 0 320px;
   }
-  .cube-slot {
-    flex: 0 0 300px;
-  }
-  .cube-scene {
-    width: 300px;
-    height: 400px;
+  .carousel-item {
+    flex: 0 0 320px;
   }
 }
 
