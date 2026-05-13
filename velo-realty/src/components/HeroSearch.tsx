@@ -1,4 +1,4 @@
-import type { Community, ListingType, PropertyType, Category } from '../types'
+import type { Community, ListingType, Category } from '../types'
 
 type HeroSearchProps = {
   tab: ListingType
@@ -22,13 +22,6 @@ type HeroSearchProps = {
 }
 
 const listingTypes: ListingType[] = ['Pre-Launch', 'Off-Plan', 'Ready']
-const propertyTypes: Array<PropertyType | 'Any Type'> = [
-  'Any Type',
-  'Apartment',
-  'Villa',
-  'Commercial Space',
-  'Plot or Land',
-]
 
 export function HeroSearch({
   tab,
