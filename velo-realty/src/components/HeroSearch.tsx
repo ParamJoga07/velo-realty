@@ -16,6 +16,9 @@ type HeroSearchProps = {
   communities: Community[]
   zones: Category[] // Reusing Category type for Zone simplicity in props
   categories: Category[]
+  heroStats?: Array<{ value: string; label: string }>
+  dbTypes?: string[]
+  dbBedrooms?: string[]
 }
 
 const listingTypes: ListingType[] = ['Pre-Launch', 'Off-Plan', 'Ready']
@@ -43,6 +46,9 @@ export function HeroSearch({
   communities,
   zones,
   categories,
+  heroStats = [],
+  dbTypes = [],
+  dbBedrooms = []
 }: HeroSearchProps) {
   return (
     <section className="hero">
@@ -105,19 +111,32 @@ export function HeroSearch({
           <label>
             Property Type
             <select value={propertyType} onChange={(event) => setPropertyType(event.target.value)}>
-              {propertyTypes.map((item) => (
-                <option key={item}>{item}</option>
-              ))}
+              {dbTypes.length > 0 ? (
+                dbTypes.map((item) => <option key={item}>{item}</option>)
+              ) : (
+                <>
+                  <option>Any Type</option>
+                  <option>Apartment</option>
+                  <option>Villa</option>
+                  <option>Commercial Space</option>
+                </>
+              )}
             </select>
           </label>
           <label>
             Bedrooms
             <select value={bedrooms} onChange={(event) => setBedrooms(event.target.value)}>
-              <option>Any</option>
-              <option>1</option>
-              <option>2</option>
-              <option>3</option>
-              <option>4+</option>
+              {dbBedrooms.length > 0 ? (
+                dbBedrooms.map((item) => <option key={item}>{item}</option>)
+              ) : (
+                <>
+                  <option>Any</option>
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4+</option>
+                </>
+              )}
             </select>
           </label>
           <button className="btn btn-primary search-btn" type="button">
@@ -125,18 +144,28 @@ export function HeroSearch({
           </button>
         </div>
         <div className="hero-metrics">
-          <div>
-            <strong>500+</strong>
-            <span>Curated Units</span>
-          </div>
-          <div>
-            <strong>15+</strong>
-            <span>A-List Developers</span>
-          </div>
-          <div>
-            <strong>&lt; 24h</strong>
-            <span>Transaction Velocity</span>
-          </div>
+          {heroStats.slice(0, 3).map((stat, i) => (
+            <div key={i}>
+              <strong>{stat.value}</strong>
+              <span>{stat.label}</span>
+            </div>
+          ))}
+          {heroStats.length === 0 && (
+            <>
+              <div>
+                <strong>500+</strong>
+                <span>Curated Units</span>
+              </div>
+              <div>
+                <strong>15+</strong>
+                <span>A-List Developers</span>
+              </div>
+              <div>
+                <strong>&lt; 24h</strong>
+                <span>Transaction Velocity</span>
+              </div>
+            </>
+          )}
         </div>
         <p className="search-note">Active in North, South, East, and West Growth Corridors</p>
       </div>

@@ -83,6 +83,23 @@ function App() {
 
   const [isLoading, setIsLoading] = useState(true)
 
+  // Derive dynamic filter options from properties
+  const dbPropertyTypes = useMemo(() => {
+    const types = new Set<string>(['Any Type']);
+    properties.forEach(p => {
+      if (p.type) types.add(p.type);
+    });
+    return Array.from(types);
+  }, [properties]);
+
+  const dbBedrooms = useMemo(() => {
+    const beds = new Set<string>(['Any']);
+    properties.forEach(p => {
+      if (p.beds) beds.add(p.beds.toString());
+    });
+    return Array.from(beds).sort();
+  }, [properties]);
+
   useEffect(() => {
     if (!isLoadingProps && !isLoadingDevs && !isLoadingCorr) {
       const timer = setTimeout(() => setIsLoading(false), 1000);
@@ -305,6 +322,7 @@ function App() {
         theme={theme}
         onThemeToggle={toggleTheme}
         onFilterSelect={handleFilterSelect}
+        dbCorridors={communities}
       />
       <HeroSearch
         tab={tab}
@@ -322,6 +340,9 @@ function App() {
         communities={communities}
         zones={dbZones}
         categories={dbCategories}
+        heroStats={aboutStats}
+        dbTypes={dbPropertyTypes}
+        dbBedrooms={dbBedrooms}
       />
       <main>
         <PropertyShowcase

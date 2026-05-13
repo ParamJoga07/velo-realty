@@ -1,11 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { Sun, Moon, ChevronDown, Menu, X } from 'lucide-react';
 
+type Community = { name: string; };
+
 type NavbarProps = {
   favoritesCount: number;
   theme: 'light' | 'dark';
   onThemeToggle: () => void;
-  onFilterSelect?: (filter: string) => void;
+  onFilterSelect?: (label: string) => void;
+  dbCorridors?: Community[];
 };
 
 type NavItem = {
@@ -16,41 +19,9 @@ type NavItem = {
 
 type NavGroup = {
   label: string;
+  href?: string;
   items: NavItem[];
 };
-
-const NAV_GROUPS: NavGroup[] = [
-  {
-    label: 'Properties',
-    items: [
-      { label: 'Pre-launch',            href: '#properties' },
-      { label: 'Under Construction',    href: '#properties' },
-      { label: 'Ready to Move in',      href: '#properties' },
-      { label: 'Commercial Spaces',     href: '#properties' },
-      { label: 'Plots and Land',        href: '#properties' },
-    ],
-  },
-  {
-    label: 'Services',
-    items: [
-      { label: 'Property & Investment Consultancy', href: '#services' },
-      { label: 'Mortgage Advisory',                 href: '#services' },
-      { label: 'Mortgage Calculator',               href: '#services' },
-      { label: 'Relocation Services',               href: '#services' },
-      { label: 'Book your Valuation',               href: '#contact' },
-      { label: 'Interior Design & Architect Work',  href: '#services' },
-    ],
-  },
-  {
-    label: 'About Us',
-    items: [
-      { label: 'Media',               href: '#blogs' },
-      { label: 'Our Team',            href: '#team' },
-      { label: 'Client Testimonials', href: '#testimonials' },
-      { label: 'Message from CEO',    href: '#team' },
-    ],
-  },
-];
 
 function scrollToSection(href: string) {
   const id = href.replace('#', '');
@@ -111,7 +82,7 @@ function DropdownGroup({ group, onClose, onFilterSelect }: { group: NavGroup; on
   );
 }
 
-export function Navbar({ favoritesCount, theme, onThemeToggle, onFilterSelect }: NavbarProps) {
+export function Navbar({ favoritesCount, theme, onThemeToggle, onFilterSelect, dbCorridors = [] }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleItemClick = (item: NavItem) => {
@@ -121,6 +92,49 @@ export function Navbar({ favoritesCount, theme, onThemeToggle, onFilterSelect }:
     scrollToSection(item.href);
     setMobileOpen(false);
   };
+
+  const NAV_GROUPS: NavGroup[] = [
+    {
+      label: 'Properties',
+      href: '#properties',
+      items: [
+        { label: 'Ready to Move in', href: '#properties' },
+        { label: 'Under Construction', href: '#properties' },
+        { label: 'Plot or Land', href: '#properties' },
+        { label: 'Commercial', href: '#properties' },
+      ],
+    },
+    {
+      label: 'Services',
+      href: '#services',
+      items: [
+        { label: 'EMI Calculator', href: '#services' },
+        { label: 'Property Valuation', href: '#services' },
+        { label: 'Refer & Earn', href: '#services' },
+        { label: 'Home Loans', href: '#services' },
+      ],
+    },
+    {
+      label: 'Corridors',
+      href: '#corridors',
+      items: dbCorridors.length > 0 ? dbCorridors.map(c => ({ label: c.name, href: '#properties' })) : [
+        { label: 'North Corridor', href: '#properties' },
+        { label: 'South Corridor', href: '#properties' },
+        { label: 'East Corridor', href: '#properties' },
+        { label: 'West Corridor', href: '#properties' },
+      ],
+    },
+    {
+      label: 'About Us',
+      href: '#about',
+      items: [
+        { label: 'Our Story', href: '#about' },
+        { label: 'The Team', href: '#team' },
+        { label: 'Strategic Network', href: '#developers' },
+        { label: 'Contact Us', href: '#contact' },
+      ],
+    },
+  ];
 
   // Close mobile menu on resize to desktop
   useEffect(() => {
