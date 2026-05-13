@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import API_BASE_URL from '../config';
 import './TeamSection.css';
@@ -12,9 +11,6 @@ interface TeamMember {
 }
 
 export function TeamSection() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-
   const { data: teamMembers = [] } = useQuery<TeamMember[]>({
     queryKey: ['team'],
     queryFn: () =>
@@ -28,24 +24,7 @@ export function TeamSection() {
   const ceo = teamMembers[0];
   const others = teamMembers.slice(1);
 
-  useEffect(() => {
-    if (others.length < 2) return;
-    const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % others.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [others.length]);
-
-  const handleDotClick = (i: number) => {
-    // Keep manual control available if needed, but primary is auto
-    setActiveIndex(i);
-  };
-
   if (teamMembers.length === 0) return null;
-
-  // Carousel control
-  const cardsPerPage = 1; // Show one main focused set or a sliding track
-  const maxIndex = Math.max(0, others.length - 1);
 
   return (
     <section id="team" className="section team-innovative">
@@ -102,7 +81,6 @@ export function TeamSection() {
                   ))}
                 </div>
               </div>
-
             </div>
           )}
         </div>
