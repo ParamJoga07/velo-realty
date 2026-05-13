@@ -78,6 +78,8 @@ class PropertyModel(Base):
     zones = relationship("ZoneModel", secondary=property_zones, back_populates="properties")
     
     gallery = relationship("PropertyImageModel", back_populates="property", cascade="all, delete-orphan")
+    saved_by_users = relationship("SavedPropertyModel", back_populates="property", cascade="all, delete-orphan")
+    contact_requests = relationship("ContactRequestModel", back_populates="property_rel", cascade="all, delete-orphan")
 
 class PropertyImageModel(Base):
     __tablename__ = "property_images"
@@ -102,7 +104,7 @@ class DeveloperProfileModel(Base):
     founded_year = Column(Integer, nullable=True)
     headquarters = Column(String, nullable=True)
     logo_url = Column(String, nullable=True)
-    total_projects = Column(Integer, default=0)
+    project_count = Column(Integer, default=0)
     project_list = relationship("ProjectModel", back_populates="developer", cascade="all, delete-orphan")
     property_list = relationship("PropertyModel", back_populates="developer_rel", cascade="all, delete-orphan")
 
@@ -132,6 +134,7 @@ class ProjectModel(Base):
     zones = relationship("ZoneModel", secondary=project_zones, back_populates="projects")
     
     clubhouse_size = Column(String, nullable=True)
+    amenities = Column(Text, nullable=True)
     description = Column(Text, nullable=True)
     highlights = Column(Text, nullable=True)
     connectivity = Column(Text, nullable=True)
@@ -159,8 +162,8 @@ class CorridorModel(Base):
     description = Column(Text)
     image = Column(String)
     
-    project_list = relationship("ProjectModel", back_populates="corridor")
-    property_list = relationship("PropertyModel", back_populates="corridor_rel")
+    project_list = relationship("ProjectModel", back_populates="corridor", cascade="all, delete-orphan")
+    property_list = relationship("PropertyModel", back_populates="corridor_rel", cascade="all, delete-orphan")
 
 class ContactRequestModel(Base):
     __tablename__ = "contact_requests"
@@ -168,9 +171,10 @@ class ContactRequestModel(Base):
     name = Column(String)
     email = Column(String)
     phone = Column(String)
-    property_id = Column(Integer, ForeignKey("properties.id"), nullable=True)
+    property_id = Column(Integer, ForeignKey("properties.id", ondelete="CASCADE"), nullable=True)
     message = Column(Text)
     status = Column(String, default="Pending")
+    property_rel = relationship("PropertyModel", back_populates="contact_requests")
     created_at = Column(String, default=lambda: datetime.now().isoformat())
 
 class TeamMemberModel(Base):
@@ -233,8 +237,8 @@ class UserIdentityModel(Base):
 class SavedPropertyModel(Base):
     __tablename__ = "saved_properties"
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("user_identities.id"), nullable=False)
-    property_id = Column(Integer, ForeignKey("properties.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("user_identities.id", ondelete="CASCADE"), nullable=False)
+    property_id = Column(Integer, ForeignKey("properties.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(String, default=lambda: datetime.now().isoformat())
     user = relationship("UserIdentityModel", back_populates="saved_properties")
-    property = relationship("PropertyModel")
+    property = relationship("PropertyModel", back_populates="saved_by_users")

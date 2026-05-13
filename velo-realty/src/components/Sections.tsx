@@ -11,6 +11,7 @@ type SectionsProps = {
   partners: string[]
   aboutStats: Array<{ value: string; label: string }>
   onDeveloperClick: (name: string) => void
+  projectStats: { devCounts: Record<number, number>, corrCounts: Record<number, number> }
 }
 
 const SKYLINE_IMAGES = [
@@ -26,7 +27,8 @@ export function Sections({
   guides, 
   partners, 
   aboutStats, 
-  onDeveloperClick 
+  onDeveloperClick,
+  projectStats
 }: SectionsProps) {
   const [showAllPartners, setShowAllPartners] = useState(false);
   const [currentSkyline, setCurrentSkyline] = useState(0);
@@ -70,7 +72,9 @@ export function Sections({
                 <div className="card-content">
                   <div className="partner-status">Strategic Partner</div>
                   <h3>{dev.name}</h3>
-                  <div className="partner-projects-count">{dev.projects}+ Landmark Projects</div>
+                  <div className="partner-projects-count">
+                    {projectStats.devCounts[dev.id] || 0} Landmark Projects
+                  </div>
                 </div>
               </div>
             ))}
@@ -288,7 +292,7 @@ export function Sections({
                   <span className="corridor-tag">Strategic Corridor</span>
                   <h3>{item.name}</h3>
                   <div className="corridor-stats">
-                    <span>Active Projects: 15+</span>
+                    <span>Active Projects: {projectStats.corrCounts[item.id] || 0}</span>
                     <span className="stat-divider">|</span>
                     <span>Growth: High</span>
                   </div>
@@ -313,7 +317,7 @@ export function Sections({
             <a href="#contact">Partner with Velo</a>
           </div>
           <div className="developer-grid-3d">
-            {developers.slice(0, 6).map((item) => (
+            {developers.map((item) => (
               <article 
                 key={item.name} 
                 className="developer-card-3d"
@@ -323,7 +327,7 @@ export function Sections({
                   <img src={item.image} alt={item.name} loading="lazy" />
                   <div className="dev-card-info">
                     <h3>{item.name}</h3>
-                    <p>{item.projects} Projects</p>
+                    <p>{projectStats.devCounts[item.id] || 0} Projects</p>
                   </div>
                 </div>
                 <div className="dev-card-glare"></div>

@@ -194,7 +194,7 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
               <div className="dev-profile-chips">
                 {profile.founded_year && <span className="dev-chip">🏛️ Est. {profile.founded_year}</span>}
                 {profile.headquarters && <span className="dev-chip">📍 {profile.headquarters}</span>}
-                <span className="dev-chip">🏗️ {profile.projects.length} Projects</span>
+                <span className="dev-chip">🏗️ {profile.project_count || profile.project_items?.length || 0} Projects</span>
               </div>
             </div>
 
@@ -211,7 +211,7 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
                 <div className="corridor-list-side">
                   <div className="dev-projects-header">
                     <h3>Active Properties</h3>
-                    <span className="dev-projects-count">{(profile.projects?.length || 0) + (profile.properties?.length || 0)} assets</span>
+                    <span className="dev-projects-count">{(profile.project_items?.length || 0) + (profile.properties?.length || 0)} assets</span>
                   </div>
                   <div className="dev-projects-grid corridor-grid">
                     {/* Render Properties first as they are usually the main focus */}
@@ -233,7 +233,7 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
                     ))}
 
                     {/* Render Projects */}
-                    {(profile.projects || []).map((project) => (
+                    {(profile.project_items || []).map((project: any) => (
                       <div
                         key={`proj-${project.id}`}
                         className="dev-project-card"
@@ -263,13 +263,35 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
               </div>
             ) : (
               <>
-                {/* Projects Grid for Developers */}
                 <div className="dev-projects-header">
                   <h3>Active Portfolio</h3>
-                  <span className="dev-projects-count">{profile.projects.length} projects</span>
+                  <span className="dev-projects-count">
+                    {(profile.project_items?.length || 0) + (profile.properties?.length || 0)} assets
+                  </span>
                 </div>
                 <div className="dev-projects-grid">
-                  {profile.projects.map((project) => (
+                  {/* Render Properties */}
+                  {(profile.properties || []).map((prop: any) => (
+                    <div key={`prop-${prop.id}`} className="dev-project-card property-variant">
+                       <div className="dpc-image">
+                          <img src={prop.image} alt={prop.title} />
+                          <div className={`dpc-badge ${prop.status?.toLowerCase().replace(/\s+/g, '-')}`}>
+                            {prop.status}
+                          </div>
+                       </div>
+                       <div className="dpc-body">
+                          <h4 className="dpc-name">{prop.title}</h4>
+                          <p className="dpc-location">📍 {prop.location}</p>
+                          <div className="dpc-footer">
+                             <span className="dpc-price">{prop.price}</span>
+                             <span className="dpc-config">{prop.beds}B • {prop.area} FT²</span>
+                          </div>
+                       </div>
+                    </div>
+                  ))}
+
+                  {/* Render Projects */}
+                  {(profile.project_items || []).map((project: any) => (
                     <div
                       key={project.id}
                       className="dev-project-card"

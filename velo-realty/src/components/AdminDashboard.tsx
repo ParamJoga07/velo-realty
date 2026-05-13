@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
-  LayoutDashboard, Building2, HardHat, Globe, TrendingUp, Users, 
+  LayoutDashboard, HardHat, Globe, TrendingUp, Users, 
   Search, Plus, Trash2, Edit3, 
   Mail, Download, Power, Zap, X, Bell, Settings, ArrowUpRight
 } from 'lucide-react';
@@ -22,7 +22,7 @@ type AdminDashboardProps = {
   theme: 'light' | 'dark';
 };
 
-type TabType = 'dashboard' | 'properties' | 'developers' | 'projects' | 'rates' | 'team' | 'corridors' | 'leads';
+type TabType = 'dashboard' | 'developers' | 'projects' | 'rates' | 'team' | 'corridors' | 'leads';
 
 
 export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) {
@@ -33,8 +33,16 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
   const [searchTerm, setSearchTerm] = useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isSaving] = useState(false);
+  const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+
+  const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   const [locationFilter, setLocationFilter] = useState('All');
+  const [developerFilter, setDeveloperFilter] = useState('All');
+  const [corridorFilter, setCorridorFilter] = useState('All');
   const [statusFilter] = useState('All');
 
   const [formData, setFormData] = useState<any>({});
@@ -58,7 +66,6 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
     queryFn: async () => {
       let endpoint = '';
       switch(activeTab) {
-        case 'properties': endpoint = 'api/properties'; break;
         case 'developers': endpoint = 'api/developers'; break;
         case 'projects': endpoint = 'api/projects'; break;
         case 'rates': endpoint = 'api/area-rates'; break;
@@ -77,6 +84,22 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
     enabled: activeTab !== 'dashboard'
   });
 
+  const { data: allDevs = [] } = useQuery({
+    queryKey: ['all-devs-simple'],
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE_URL}/api/developers`);
+      return res.json();
+    }
+  });
+
+  const { data: allCorrs = [] } = useQuery({
+    queryKey: ['all-corrs-simple'],
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE_URL}/api/corridors`);
+      return res.json();
+    }
+  });
+
   const loading = activeTab === 'dashboard' ? isLoadingStats : isLoadingData;
 
   // --- Mutations ---
@@ -89,9 +112,31 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
       });
       if (!res.ok) throw new Error('Delete failed');
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin-data'] });
       queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+      showNotification(`${variables.type.slice(0, -1).toUpperCase()} deleted successfully`);
+    },
+    onError: (error: any) => {
+      showNotification(error.message || 'Deletion failed', 'error');
+    }
+  });
+
+  const deleteAllMutation = useMutation({
+    mutationFn: async (type: TabType) => {
+      const res = await fetch(`${API_BASE_URL}/api/admin/${type}/all/bulk`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Bulk delete failed');
+    },
+    onSuccess: (_, type) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-data'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+      showNotification(`ALL ${type.toUpperCase()} deleted successfully`);
+    },
+    onError: (error: any) => {
+      showNotification(error.message || 'Bulk delete failed', 'error');
     }
   });
 
@@ -115,6 +160,10 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
       queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
       setShowForm(false);
       setEditingItem(null);
+      showNotification(`${activeTab.slice(0, -1).toUpperCase()} saved successfully`);
+    },
+    onError: (error: any) => {
+      showNotification(error.message || 'Save failed', 'error');
     }
   });
 
@@ -122,14 +171,28 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
     return data.filter(item => {
       const matchesSearch = (item.title || item.name || item.area || item.email || '').toLowerCase().includes(searchTerm.toLowerCase());
       const matchesLocation = locationFilter === 'All' || item.location === locationFilter;
+      const matchesDeveloper = developerFilter === 'All' || item.developer === developerFilter || (item.developer_id?.toString() === developerFilter);
+      const matchesCorridor = corridorFilter === 'All' || (item.corridor_id?.toString() === corridorFilter);
       const matchesStatus = statusFilter === 'All' || item.status === statusFilter;
-      return matchesSearch && matchesLocation && matchesStatus;
+      return matchesSearch && matchesLocation && matchesStatus && matchesDeveloper && matchesCorridor;
     });
-  }, [data, searchTerm, locationFilter, statusFilter]);
+  }, [data, searchTerm, locationFilter, developerFilter, corridorFilter, statusFilter]);
 
   const handleDelete = (type: TabType, id: number) => {
     if (!window.confirm(`Delete this ${type.slice(0, -1)}?`)) return;
     deleteMutation.mutate({ type, id });
+  };
+
+  const handleDeleteAll = (type: TabType) => {
+    const confirm1 = window.confirm(`⚠️ CRITICAL WARNING: You are about to delete ALL ${type}. This action cannot be undone. Are you absolutely sure?`);
+    if (!confirm1) return;
+    
+    const confirm2 = window.prompt(`To confirm, please type "DELETE ALL ${type.toUpperCase()}" below:`);
+    if (confirm2 === `DELETE ALL ${type.toUpperCase()}`) {
+      deleteAllMutation.mutate(type);
+    } else {
+      showNotification('Confirmation failed. No data was deleted.', 'error');
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -142,16 +205,6 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
     delete payload.corridor;
     delete payload.developer;
 
-    if (activeTab === 'properties') {
-      payload.priceValue = parseFloat(payload.priceValue) || 0;
-      payload.beds = parseInt(payload.beds) || 0;
-      payload.baths = parseInt(payload.baths) || 0;
-      payload.area = parseFloat(payload.area) || 0;
-      payload.developer_id = parseInt(payload.developer_id) || 0;
-      payload.corridor_id = parseInt(payload.corridor_id) || 0;
-      payload.gallery = imageLinks.filter(l => l.trim() !== '');
-    }
-    
     if (activeTab === 'projects') {
       payload.developer_id = parseInt(payload.developer_id) || 0;
       payload.corridor_id = payload.corridor_id ? parseInt(payload.corridor_id) : null;
@@ -159,7 +212,7 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
     }
 
     if (activeTab === 'developers') {
-      payload.total_projects = parseInt(payload.total_projects) || 0;
+      payload.project_count = parseInt(payload.project_count) || 0;
       payload.founded_year = payload.founded_year ? parseInt(payload.founded_year) : null;
     }
 
@@ -171,8 +224,14 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
     setImageLinks(['']);
     const defaults: any = {
       properties: { title: '', location: '', community: '', developer: '', developer_id: null, corridor_id: null, type: 'Apartment', listingType: 'Pre-Launch', price: '', priceValue: 0, beds: 0, baths: 0, area: 0, handover: '', status: 'New Launch', image: '', description: '' },
-      developers: { name: '', slug: '', about: '', founded_year: 2000, headquarters: '', total_projects: 0, logo_url: '' },
-      projects: { developer_id: null, corridor_id: null, name: '', slug: '', location: '', project_type: 'Luxury', description: '' },
+      developers: { name: '', slug: '', about: '', founded_year: 2000, headquarters: '', project_count: 0, logo_url: '' },
+      projects: { 
+        developer_id: null, corridor_id: null, name: '', slug: '', location: '', sub_location: '',
+        project_type: 'Luxury', land_area: '', structure: '', total_units: '', configurations: '',
+        size_range: '', price_range: '', price_start: 0, open_space: '', possession: '', 
+        status: 'Under Construction', clubhouse_size: '', amenities: '', description: '', 
+        highlights: '', connectivity: '' 
+      },
       rates: { area: '', price: '', cagr: '' },
       team: { name: '', role: '', image: '', bio: '' },
       corridors: { name: '', slug: '', location: '', description: '', image: '' }
@@ -184,8 +243,7 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
   const openEditForm = (item: any) => {
     setEditingItem(item);
     setFormData({ ...item });
-    if (activeTab === 'properties' && item.gallery) setImageLinks(item.gallery.map((g: any) => g.image_url));
-    else if (activeTab === 'projects' && item.images) setImageLinks(item.images.map((i: any) => i.image_url));
+    if (activeTab === 'projects' && item.images) setImageLinks(item.images.map((i: any) => i.image_url));
     else setImageLinks(['']);
     setShowForm(true);
   };
@@ -209,11 +267,11 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
           </button>
           
           <div className="nav-group-label">{!isSidebarCollapsed && 'Portfolio'}</div>
-          <button className={`nav-link ${activeTab === 'properties' ? 'active' : ''}`} onClick={() => setActiveTab('properties')}>
-            <Building2 size={14} /> {!isSidebarCollapsed && 'Properties'}
-          </button>
           <button className={`nav-link ${activeTab === 'developers' ? 'active' : ''}`} onClick={() => setActiveTab('developers')}>
             <HardHat size={14} /> {!isSidebarCollapsed && 'Developers'}
+          </button>
+          <button className={`nav-link ${activeTab === 'projects' ? 'active' : ''}`} onClick={() => setActiveTab('projects')}>
+            <Zap size={14} /> {!isSidebarCollapsed && 'Projects'}
           </button>
           <button className={`nav-link ${activeTab === 'corridors' ? 'active' : ''}`} onClick={() => setActiveTab('corridors')}>
             <Globe size={14} /> {!isSidebarCollapsed && 'Corridors'}
@@ -240,6 +298,16 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
            </button>
         </div>
       </aside>
+
+      {notification && (
+        <div className={`admin-notification ${notification.type}`}>
+          <div className="notif-content">
+            {notification.type === 'success' ? <Zap size={14} /> : <X size={14} />}
+            <span>{notification.message}</span>
+          </div>
+          <div className="notif-progress"></div>
+        </div>
+      )}
 
       <main className="admin-main-v2">
         <header className="dashboard-header-v2">
@@ -366,6 +434,23 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
                       <option value="All">All Locations</option>
                       {[...new Set(data.map((i:any) => i.location))].filter(Boolean).map((l:any) => <option key={l} value={l}>{l}</option>)}
                     </select>
+
+                    {activeTab === 'projects' && (
+                      <>
+                        <select className="filter-select" value={developerFilter} onChange={e => setDeveloperFilter(e.target.value)} 
+                          style={{background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', color: '#fff', padding: '0.4rem 0.8rem', borderRadius: 4, fontSize: 11}}>
+                          <option value="All">All Developers</option>
+                          {allDevs.map((d: any) => <option key={d.id} value={d.id.toString()}>{d.name}</option>)}
+                        </select>
+
+                        <select className="filter-select" value={corridorFilter} onChange={e => setCorridorFilter(e.target.value)} 
+                          style={{background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', color: '#fff', padding: '0.4rem 0.8rem', borderRadius: 4, fontSize: 11}}>
+                          <option value="All">All Corridors</option>
+                          {allCorrs.map((c: any) => <option key={c.id} value={c.id.toString()}>{c.name}</option>)}
+                        </select>
+                      </>
+                    )}
+
                     <button className="btn-v3 secondary" onClick={() => {
                       const ws = XLSX.utils.json_to_sheet(data);
                       const wb = XLSX.utils.book_new();
@@ -375,6 +460,11 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
                   </div>
                   
                   <div style={{display: 'flex', gap: '0.5rem'}}>
+                    {activeTab === 'projects' && (
+                      <button className="btn-v3 secondary" onClick={() => handleDeleteAll(activeTab)} style={{color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.2)'}}>
+                        <Trash2 size={14} /> Delete All
+                      </button>
+                    )}
                     {activeTab !== 'leads' && <button className="btn-v3 primary" onClick={openAddForm}><Plus size={14} /> Create New</button>}
                   </div>
                 </div>
@@ -396,15 +486,15 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
                             <div style={{display: 'flex', flexDirection: 'column'}}>
                               <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
                                 <span style={{fontWeight: 700, color: '#fff'}}>{item.title || item.name || item.area}</span>
-                                {(activeTab === 'developers' || activeTab === 'corridors' || activeTab === 'properties') && (
+                                {(activeTab === 'developers' || activeTab === 'corridors') && (
                                   <span style={{fontSize: 8, background: 'rgba(255,255,255,0.05)', padding: '1px 4px', borderRadius: 2, color: 'var(--accent-orange)'}}>#{item.id}</span>
                                 )}
                               </div>
                               <span style={{fontSize: 10, color: 'var(--text-dim)'}}>
-                                {activeTab === 'properties' ? (
+                                {activeTab === 'projects' ? (
                                   <span style={{display: 'flex', gap: '8px'}}>
-                                    <span>By {item.developer || 'Unknown'}</span>
-                                    <span style={{color: 'var(--accent-orange)', opacity: 0.8}}>(ID: {item.developer_id})</span>
+                                    <span>Dev ID: {item.developer_id}</span>
+                                    <span>Corr ID: {item.corridor_id}</span>
                                   </span>
                                 ) : (item.email || item.location)}
                               </span>
@@ -452,15 +542,26 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
             </div>
             <div className="modal-body-v3">
                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
-                  {Object.keys(formData).filter(k => !['id', 'gallery', 'images', 'project_list', 'projects', 'corridor', 'properties'].includes(k)).map(key => {
+                  {Object.keys(formData).filter(k => !['id', 'gallery', 'images', 'project_list', 'projects', 'corridor'].includes(k)).map(key => {
                     const isImage = ['image', 'logo_url'].includes(key);
                     const isFullWidth = ['description', 'bio', 'about'].includes(key);
                     
                     return (
                       <div className="form-group-v3" key={key} style={{gridColumn: (isFullWidth || isImage) ? 'span 2' : 'span 1', marginBottom: '1rem'}}>
                         <label style={{fontSize: 10, color: 'var(--text-dim)', display: 'block', marginBottom: 4}}>{key.replace('_', ' ')}</label>
+                        
                         {isImage ? (
                           <ImageUpload token={token} currentImage={formData[key]} folder={`/${activeTab}`} onSuccess={(url) => setFormData({...formData, [key]: url})} />
+                        ) : (activeTab === 'projects') && key === 'developer_id' ? (
+                          <select style={{background: 'var(--bg-main)', border: '1px solid var(--border-subtle)', color: '#fff', width: '100%', padding: '0.4rem'}} value={formData[key] || ''} onChange={e => setFormData({...formData, [key]: e.target.value})}>
+                            <option value="">Select Developer</option>
+                            {allDevs.map((d: any) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                          </select>
+                        ) : (activeTab === 'projects') && key === 'corridor_id' ? (
+                          <select style={{background: 'var(--bg-main)', border: '1px solid var(--border-subtle)', color: '#fff', width: '100%', padding: '0.4rem'}} value={formData[key] || ''} onChange={e => setFormData({...formData, [key]: e.target.value})}>
+                            <option value="">Select Corridor</option>
+                            {allCorrs.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                          </select>
                         ) : isFullWidth ? (
                           <textarea rows={3} style={{background: 'var(--bg-main)', border: '1px solid var(--border-subtle)', color: '#fff', width: '100%', padding: '0.5rem'}} value={formData[key] || ''} onChange={e => setFormData({...formData, [key]: e.target.value})} />
                         ) : (
@@ -470,27 +571,33 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
                     );
                   })}
                   
-                  {(activeTab === 'properties' || activeTab === 'projects') && (
+                  {(activeTab === 'projects') && (
                     <div style={{gridColumn: 'span 2'}}>
                       <label style={{fontSize: 10, color: 'var(--text-dim)'}}>Gallery Assets</label>
                       <MultiImageUpload token={token} currentImages={imageLinks} folder={`/${activeTab}/gallery`} onSuccess={(urls) => setImageLinks(urls)} />
                     </div>
                   )}
 
-                  {(activeTab === 'developers' || activeTab === 'corridors') && editingItem && editingItem.properties && editingItem.properties.length > 0 && (
-                    <div style={{gridColumn: 'span 2', marginTop: '1.5rem'}}>
-                      <label style={{fontSize: 10, color: 'var(--accent-orange)', textTransform: 'uppercase', fontWeight: 800}}>Linked Assets Portfolio</label>
-                      <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem'}}>
-                        {editingItem.properties.map((p: any) => (
-                          <div key={p.id} style={{display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#111', border: '1px solid #222', padding: '0.5rem', borderRadius: 4}}>
-                            <img src={p.image} alt="" style={{width: 32, height: 32, borderRadius: 2, objectFit: 'cover'}} />
+                  {(activeTab === 'developers' || activeTab === 'corridors') && editingItem && (
+                    <div style={{gridColumn: 'span 2', marginTop: '1rem', borderTop: '1px solid #222', paddingTop: '1rem'}}>
+                      <h4 style={{fontSize: 11, marginBottom: '1rem', color: 'var(--text-dim)'}}>Portfolio Projects ({editingItem.project_count || 0})</h4>
+                      <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
+                        {Array.isArray(editingItem.project_items) && editingItem.project_items.map((p: any) => (
+                          <div key={`proj-${p.id}`} style={{display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(249, 115, 22, 0.05)', border: '1px solid rgba(249, 115, 22, 0.1)', padding: '0.5rem', borderRadius: 4}}>
+                            <img src={p.primary_image || null} alt="" style={{width: 32, height: 32, borderRadius: 2, objectFit: 'cover'}} />
                             <div style={{flex: 1}}>
-                              <div style={{fontSize: 11, fontWeight: 700}}>{p.title}</div>
-                              <div style={{fontSize: 9, color: 'var(--text-muted)'}}>{p.location} • {p.price}</div>
+                              <div style={{fontSize: 11, fontWeight: 700, color: 'var(--accent-orange)'}}>{p.name} <span style={{fontSize: 8, color: 'var(--text-muted)'}}>(Portfolio Project)</span></div>
+                              <div style={{fontSize: 9, color: 'var(--text-muted)'}}>{p.location} • {p.status}</div>
                             </div>
-                            <button className="btn-action-v3" onClick={() => { setActiveTab('properties'); openEditForm(p); }}><Edit3 size={10}/></button>
+                            <button className="btn-action-v3" onClick={() => { setActiveTab('projects'); openEditForm(p); }}><Edit3 size={10}/></button>
                           </div>
                         ))}
+
+                        {!editingItem.project_items?.length && (
+                          <div style={{fontSize: 10, color: 'var(--text-dim)', textAlign: 'center', padding: '1rem', border: '1px dashed #222'}}>
+                            No linked projects found. Add projects and link them via Developer ID.
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}

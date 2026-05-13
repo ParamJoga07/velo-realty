@@ -34,54 +34,99 @@ function App() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
   const [showBackToTop, setShowBackToTop] = useState(false)
-  // --- Data Queries ---
-  const { data: properties = [], isLoading: isLoadingProps } = useQuery<Property[]>({
+  const queryOptions = {
+    retry: 1, // Only retry once for initial load to avoid long hangs
+    staleTime: 60000,
+  };
+
+  const { data: properties = [], isLoading: isLoadingProps, isError: isErrorProps } = useQuery<Property[]>({
     queryKey: ['properties'],
-    queryFn: () => fetch(`${API_BASE_URL}/api/properties`).then(res => res.json())
+    queryFn: () => fetch(`${API_BASE_URL}/api/properties`).then(res => {
+      if (!res.ok) throw new Error('Failed to fetch properties');
+      return res.json();
+    }),
+    ...queryOptions
   })
 
-  const { data: developers = [], isLoading: isLoadingDevs } = useQuery<Developer[]>({
+  const { data: developers = [], isLoading: isLoadingDevs, isError: isErrorDevs } = useQuery<Developer[]>({
     queryKey: ['developers'],
-    queryFn: () => fetch(`${API_BASE_URL}/api/developers`).then(res => res.json())
+    queryFn: () => fetch(`${API_BASE_URL}/api/developers`).then(res => {
+      if (!res.ok) throw new Error('Failed to fetch developers');
+      return res.json();
+    }),
+    ...queryOptions
   })
 
-  const { data: corridorsRaw = [], isLoading: isLoadingCorr } = useQuery({
+  const { data: corridorsRaw = [], isLoading: isLoadingCorr, isError: isErrorCorr } = useQuery({
     queryKey: ['corridors'],
-    queryFn: () => fetch(`${API_BASE_URL}/api/corridors`).then(res => res.json())
+    queryFn: () => fetch(`${API_BASE_URL}/api/corridors`).then(res => {
+      if (!res.ok) throw new Error('Failed to fetch corridors');
+      return res.json();
+    }),
+    ...queryOptions
   })
   const communities = useMemo(() => Array.isArray(corridorsRaw) ? corridorsRaw : [], [corridorsRaw]);
 
   const { data: guides = [] } = useQuery<Guide[]>({
     queryKey: ['guides'],
-    queryFn: () => fetch(`${API_BASE_URL}/api/guides`).then(res => res.json())
+    queryFn: () => fetch(`${API_BASE_URL}/api/guides`).then(res => res.json()),
+    ...queryOptions
   })
 
   const { data: partners = [] } = useQuery<string[]>({
     queryKey: ['partners'],
-    queryFn: () => fetch(`${API_BASE_URL}/api/partners`).then(res => res.json())
+    queryFn: () => fetch(`${API_BASE_URL}/api/partners`).then(res => res.json()),
+    ...queryOptions
+  })
+
+  const { data: allProjects = [], isLoading: isLoadingProjects } = useQuery<any[]>({
+    queryKey: ['all-projects'],
+    queryFn: () => fetch(`${API_BASE_URL}/api/projects`).then(res => res.json()),
+    ...queryOptions
   })
 
   const { data: aboutStats = [] } = useQuery<any[]>({
     queryKey: ['stats'],
-    queryFn: () => fetch(`${API_BASE_URL}/api/stats`).then(res => res.json())
+    queryFn: () => fetch(`${API_BASE_URL}/api/stats`).then(res => res.json()),
+    ...queryOptions
   })
 
   const { data: areaRates = [] } = useQuery<any[]>({
     queryKey: ['area-rates'],
-    queryFn: () => fetch(`${API_BASE_URL}/api/area-rates`).then(res => res.json())
+    queryFn: () => fetch(`${API_BASE_URL}/api/area-rates`).then(res => res.json()),
+    ...queryOptions
   })
 
   const { data: dbCategories = [] } = useQuery<Category[]>({
     queryKey: ['categories'],
-    queryFn: () => fetch(`${API_BASE_URL}/api/categories`).then(res => res.json())
+    queryFn: () => fetch(`${API_BASE_URL}/api/categories`).then(res => res.json()),
+    ...queryOptions
   })
 
   const { data: dbZones = [] } = useQuery<Zone[]>({
     queryKey: ['zones'],
-    queryFn: () => fetch(`${API_BASE_URL}/api/zones`).then(res => res.json())
+    queryFn: () => fetch(`${API_BASE_URL}/api/zones`).then(res => res.json()),
+    ...queryOptions
   })
 
   const [isLoading, setIsLoading] = useState(true)
+
+  // Derive dynamic counts and filters
+  const projectStats = useMemo(() => {
+    const devCounts: Record<number, number> = {};
+    const corrCounts: Record<number, number> = {};
+    
+    allProjects.forEach(p => {
+      if (p.developer_id) {
+        devCounts[p.developer_id] = (devCounts[p.developer_id] || 0) + 1;
+      }
+      if (p.corridor_id) {
+        corrCounts[p.corridor_id] = (corrCounts[p.corridor_id] || 0) + 1;
+      }
+    });
+
+    return { devCounts, corrCounts };
+  }, [allProjects]);
 
   // Derive dynamic filter options from properties
   const dbPropertyTypes = useMemo(() => {
@@ -101,11 +146,21 @@ function App() {
   }, [properties]);
 
   useEffect(() => {
-    if (!isLoadingProps && !isLoadingDevs && !isLoadingCorr) {
+    // Safety timeout: Hide loader after 10s regardless of state
+    const safetyTimer = setTimeout(() => setIsLoading(false), 10000);
+
+    const stillLoading = isLoadingProps || isLoadingDevs || isLoadingCorr || isLoadingProjects;
+    const hasError = isErrorProps || isErrorDevs || isErrorCorr;
+
+    if (!stillLoading || hasError) {
       const timer = setTimeout(() => setIsLoading(false), 1000);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(safetyTimer);
+      };
     }
-  }, [isLoadingProps, isLoadingDevs, isLoadingCorr]);
+    return () => clearTimeout(safetyTimer);
+  }, [isLoadingProps, isLoadingDevs, isLoadingCorr, isLoadingProjects, isErrorProps, isErrorDevs, isErrorCorr]);
 
   // Admin States
   const [adminToken, setAdminToken] = useState<string | null>(() => window.localStorage.getItem('velo-admin-token'))
@@ -363,6 +418,7 @@ function App() {
           partners={partners}
           aboutStats={aboutStats}
           onDeveloperClick={setSelectedDeveloperName}
+          projectStats={projectStats}
         />
         <ServicesHub />
         <TeamSection />

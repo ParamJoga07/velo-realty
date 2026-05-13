@@ -24,12 +24,14 @@ export type Property = {
 }
 
 export type Developer = {
+  id: number
   name: string
   projects: number
   image: string
 }
 
 export type Community = {
+  id: number
   name: string
   slug: string
   image: string
@@ -90,8 +92,8 @@ export type DeveloperProfile = {
   founded_year: number | null
   headquarters: string | null
   logo_url: string | null
-  total_projects: number
-  projects: ProjectSummary[]
+  project_count: number
+  project_items: ProjectSummary[]
   properties?: Property[]
 }
 

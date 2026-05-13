@@ -1,4 +1,4 @@
-import type { Community, ListingType, Category } from '../types'
+import type { Community, ListingType, Category } from '../types/index'
 
 type HeroSearchProps = {
   tab: ListingType
