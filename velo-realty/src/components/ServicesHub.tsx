@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import './ServicesHub.css';
 import { Calculator, Home, BarChart3, Compass, Briefcase, Key, ArrowRight, X, User, Phone, Mail, Sparkles, Gift, Crown, MapPin, Activity, Clock } from 'lucide-react';
 import API_BASE_URL from '../config';
@@ -27,16 +28,24 @@ export function ServicesHub() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (_pos) => {
-          // In a real app, you'd reverse geocode this. 
-          // For now, we'll keep the strategic corridor name but mark it as "Live".
           setLocation('Live: Hitech City Corridor');
         },
         () => setLocation('Hitech City, Hyderabad')
       );
     }
 
-    return () => clearInterval(timer);
-  }, []);
+    // Scroll lock for modal
+    if (showReferralModal || selectedCalc) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      clearInterval(timer);
+      document.body.style.overflow = 'unset';
+    };
+  }, [showReferralModal, selectedCalc]);
 
   const services: Record<string, Service[]> = {
     buyers: [
@@ -132,21 +141,26 @@ export function ServicesHub() {
             </button>
           </div>
           <div className="referral-visual-side">
-            <div className="ref-side-image"></div>
-            <div className="ref-side-overlay"></div>
-            <div className="referral-icon-stack">
-              <Crown className="ref-icon-top" size={60} />
-              <div className="ref-icon-glow"></div>
+            <div className="reward-cards-track">
+              <div className="reward-mini-card"><div className="reward-icon-box"><Gift size={20} /></div><div className="reward-info-text"><span>Luxury Travel</span><p>Global Trips</p></div></div>
+              <div className="reward-mini-card"><div className="reward-icon-box"><Crown size={20} /></div><div className="reward-info-text"><span>Exclusive Gold</span><p>24K Reward</p></div></div>
+              <div className="reward-mini-card"><div className="reward-icon-box"><Sparkles size={20} /></div><div className="reward-info-text"><span>Elite Hampers</span><p>Luxury Curation</p></div></div>
+              <div className="reward-mini-card"><div className="reward-icon-box"><Activity size={20} /></div><div className="reward-info-text"><span>Stock Credits</span><p>Invest Credits</p></div></div>
+              {/* Duplicate for infinite loop */}
+              <div className="reward-mini-card"><div className="reward-icon-box"><Gift size={20} /></div><div className="reward-info-text"><span>Luxury Travel</span><p>Global Trips</p></div></div>
+              <div className="reward-mini-card"><div className="reward-icon-box"><Crown size={20} /></div><div className="reward-info-text"><span>Exclusive Gold</span><p>24K Reward</p></div></div>
+              <div className="reward-mini-card"><div className="reward-icon-box"><Sparkles size={20} /></div><div className="reward-info-text"><span>Elite Hampers</span><p>Luxury Curation</p></div></div>
+              <div className="reward-mini-card"><div className="reward-icon-box"><Activity size={20} /></div><div className="reward-info-text"><span>Stock Credits</span><p>Invest Credits</p></div></div>
             </div>
           </div>
         </div>
       </div>
 
-      {selectedCalc === 'loan' && <EMICalculator onClose={() => setSelectedCalc(null)} />}
-      {selectedCalc === 'valuation' && <ValuationTool onClose={() => setSelectedCalc(null)} />}
-      {selectedCalc === 'rent-eligibility' && <RentCalculator onClose={() => setSelectedCalc(null)} />}
-      {selectedCalc === 'comm-calc' && <IncentiveCalculator onClose={() => setSelectedCalc(null)} />}
-      {showReferralModal && <ReferralModal onClose={() => setShowReferralModal(false)} />}
+      {selectedCalc === 'loan' && createPortal(<EMICalculator onClose={() => setSelectedCalc(null)} />, document.body)}
+      {selectedCalc === 'valuation' && createPortal(<ValuationTool onClose={() => setSelectedCalc(null)} />, document.body)}
+      {selectedCalc === 'rent-eligibility' && createPortal(<RentCalculator onClose={() => setSelectedCalc(null)} />, document.body)}
+      {selectedCalc === 'comm-calc' && createPortal(<IncentiveCalculator onClose={() => setSelectedCalc(null)} />, document.body)}
+      {showReferralModal && createPortal(<ReferralModal onClose={() => setShowReferralModal(false)} />, document.body)}
     </section>
   );
 }

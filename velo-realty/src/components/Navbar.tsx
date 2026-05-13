@@ -1,55 +1,217 @@
-import { Sun, Moon } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Sun, Moon, ChevronDown, Menu, X } from 'lucide-react';
 
 type NavbarProps = {
   favoritesCount: number;
   theme: 'light' | 'dark';
   onThemeToggle: () => void;
+  onFilterSelect?: (filter: string) => void;
 };
 
-export function Navbar({ favoritesCount, theme, onThemeToggle }: NavbarProps) {
+type NavItem = {
+  label: string;
+  href: string;
+  isExternal?: boolean;
+};
+
+type NavGroup = {
+  label: string;
+  items: NavItem[];
+};
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    label: 'Properties',
+    items: [
+      { label: 'Pre-launch',            href: '#properties' },
+      { label: 'Under Construction',    href: '#properties' },
+      { label: 'Ready to Move in',      href: '#properties' },
+      { label: 'Commercial Spaces',     href: '#properties' },
+      { label: 'Plots and Land',        href: '#properties' },
+    ],
+  },
+  {
+    label: 'Services',
+    items: [
+      { label: 'Property & Investment Consultancy', href: '#services' },
+      { label: 'Mortgage Advisory',                 href: '#services' },
+      { label: 'Mortgage Calculator',               href: '#services' },
+      { label: 'Relocation Services',               href: '#services' },
+      { label: 'Book your Valuation',               href: '#contact' },
+      { label: 'Interior Design & Architect Work',  href: '#services' },
+    ],
+  },
+  {
+    label: 'About Us',
+    items: [
+      { label: 'Media',               href: '#blogs' },
+      { label: 'Our Team',            href: '#team' },
+      { label: 'Client Testimonials', href: '#testimonials' },
+      { label: 'Message from CEO',    href: '#team' },
+    ],
+  },
+];
+
+function scrollToSection(href: string) {
+  const id = href.replace('#', '');
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function DropdownGroup({ group, onClose, onFilterSelect }: { group: NavGroup; onClose: () => void; onFilterSelect?: (filter: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div className="nav-dropdown-group" ref={ref}>
+      <button
+        type="button"
+        className="nav-dropdown-trigger"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+      >
+        {group.label}
+        <ChevronDown size={14} className={`nav-chevron ${open ? 'open' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="nav-dropdown-panel" role="menu">
+          {group.items.map((item) => (
+            <a
+              key={item.label}
+              className="nav-dropdown-item"
+              href={item.href}
+              role="menuitem"
+              onClick={(e) => {
+                e.preventDefault();
+                setOpen(false);
+                onClose();
+                if (onFilterSelect && item.href === '#properties') {
+                  onFilterSelect(item.label);
+                }
+                scrollToSection(item.href);
+              }}
+            >
+              {item.label}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function Navbar({ favoritesCount, theme, onThemeToggle, onFilterSelect }: NavbarProps) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleItemClick = (item: NavItem) => {
+    if (onFilterSelect && item.href === '#properties') {
+      onFilterSelect(item.label);
+    }
+    scrollToSection(item.href);
+    setMobileOpen(false);
+  };
+
+  // Close mobile menu on resize to desktop
+  useEffect(() => {
+    const handler = () => { if (window.innerWidth > 768) setMobileOpen(false); };
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
+  const closeMobile = () => setMobileOpen(false);
+
   return (
     <header className="navbar">
       <div className="container nav-wrap">
-          
         <div className="nav-pill">
+          {/* LOGO */}
           <a className="logo-link" href="#" aria-label="Velo Realty home">
             <img className="logo-mark" src="/Velo Logo Single.png" alt="Velo Realty" />
           </a>
-          <nav>
-            <a href="#corridors">Corridors</a>
-            <a href="#developers">Developers</a>
-            <a href="#about">About</a>
+
+          {/* DESKTOP NAV */}
+          <nav className="nav-desktop" aria-label="Main navigation">
+            {NAV_GROUPS.map((group) => (
+              <DropdownGroup key={group.label} group={group} onClose={closeMobile} onFilterSelect={onFilterSelect} />
+            ))}
           </nav>
-        
+
+          {/* ACTIONS */}
           <div className="nav-actions">
-            <button className="btn theme-toggle-btn icon-btn" onClick={onThemeToggle} type="button" aria-label="Toggle theme">
+            <button
+              className="btn theme-toggle-btn icon-btn"
+              onClick={onThemeToggle}
+              type="button"
+              aria-label="Toggle theme"
+            >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            <a className="btn btn-primary nav-demo" href="#contact">
+
+            <a className="btn btn-primary nav-demo" href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('#contact'); }}>
               Contact Us
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="nav-demo-arrow"
-              >
-                <path
-                  d="M3.5 8H12.5M12.5 8L8.5 4M12.5 8L8.5 12"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="nav-demo-arrow">
+                <path d="M3.5 8H12.5M12.5 8L8.5 4M12.5 8L8.5 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </a>
+
+            {/* HAMBURGER */}
+            <button
+              type="button"
+              className="btn icon-btn nav-hamburger"
+              onClick={() => setMobileOpen((o) => !o)}
+              aria-label="Toggle menu"
+              aria-expanded={mobileOpen}
+            >
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
         </div>
+
+        {/* ── MOBILE MENU ── */}
+        {mobileOpen && (
+          <div className="nav-mobile-panel">
+            {NAV_GROUPS.map((group) => (
+              <div key={group.label} className="nav-mobile-group">
+                <p className="nav-mobile-heading">{group.label}</p>
+                {group.items.map((item) => (
+                  <a
+                    key={item.label}
+                    className="nav-mobile-item"
+                    href={item.href}
+                    onClick={(e) => { e.preventDefault(); handleItemClick(item); }}
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+            ))}
+            <div className="nav-mobile-footer">
+              <a
+                className="btn btn-primary"
+                href="#contact"
+                onClick={(e) => { e.preventDefault(); closeMobile(); scrollToSection('#contact'); }}
+              >
+                Contact Us →
+              </a>
+            </div>
+          </div>
+        )}
+
         <span className="shortlist-pill floating" aria-live="polite">
           Shortlist {favoritesCount}
         </span>
       </div>
     </header>
-  )
+  );
 }

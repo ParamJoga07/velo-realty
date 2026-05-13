@@ -82,16 +82,14 @@ export function PropertyShowcase({
                       <h3>{item.title}</h3>
                       <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '4px'}}>
                         <button 
-                          className="dev-link-btn" 
+                          className="corridor-link" 
                           onClick={(e) => { e.stopPropagation(); onDeveloperClick(item.location); }}
-                          style={{background: 'none', border: 'none', color: '#aaa', fontSize: '10px', fontWeight: 600, cursor: 'pointer', textTransform: 'uppercase', padding: 0}}
                         >
                           {item.location} Corridor →
                         </button>
                         <button 
-                          className="dev-link-btn" 
+                          className="developer-link" 
                           onClick={(e) => { e.stopPropagation(); onDeveloperClick(item.developer); }}
-                          style={{background: 'none', border: 'none', color: 'var(--accent-orange)', fontSize: '10px', fontWeight: 800, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '1px', padding: 0}}
                         >
                           By {item.developer} →
                         </button>

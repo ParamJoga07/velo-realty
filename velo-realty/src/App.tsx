@@ -175,28 +175,6 @@ function App() {
     }
   }, [selectedDeveloperName, showAdminLogin, showIdentityModal, selectedProperty]);
 
-  useEffect(() => {
-    const observerOptions = {
-      root: null,
-      rootMargin: '0px',
-      threshold: 0.15
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('revealed');
-        }
-      });
-    }, observerOptions);
-
-    const sections = document.querySelectorAll('.reveal-section');
-    sections.forEach(section => observer.observe(section));
-
-    return () => {
-      sections.forEach(section => observer.unobserve(section));
-    };
-  }, [isLoading]);
 
   const toggleFavorite = async (propertyId: number) => {
     if (!user) {
@@ -247,6 +225,36 @@ function App() {
       console.error("Failed to identify user:", err)
     }
   }
+  const handleFilterSelect = (filterLabel: string) => {
+    // Reset basic filters to show matching results
+    setLocation('All Locations');
+    setBedrooms('Any');
+
+    switch (filterLabel) {
+      case 'Pre-launch':
+        setTab('Pre-Launch');
+        setPropertyType('Any Type');
+        break;
+      case 'Under Construction':
+        setTab('Off-Plan');
+        setPropertyType('Any Type');
+        break;
+      case 'Ready to Move in':
+        setTab('Ready');
+        setPropertyType('Any Type');
+        break;
+      case 'Commercial Spaces':
+        setTab('Pre-Launch'); // Show commercial regardless of tab, or keep current tab
+        setPropertyType('Commercial Space');
+        break;
+      case 'Plots and Land':
+        setTab('Pre-Launch'); 
+        setPropertyType('Plot or Land');
+        break;
+      default:
+        break;
+    }
+  };
 
   const filteredProperties = useMemo(() => {
     const filtered = properties.filter((item) => {
@@ -296,6 +304,7 @@ function App() {
         favoritesCount={favorites.size}
         theme={theme}
         onThemeToggle={toggleTheme}
+        onFilterSelect={handleFilterSelect}
       />
       <HeroSearch
         tab={tab}
@@ -315,38 +324,28 @@ function App() {
         categories={dbCategories}
       />
       <main>
-        <div className="reveal-section">
-          <PropertyShowcase
-            properties={filteredProperties}
-            favorites={favorites}
-            onToggleFavorite={toggleFavorite}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            sortBy={sortBy}
-            setSortBy={setSortBy}
-            setSelectedProperty={setSelectedProperty}
-            onDeveloperClick={setSelectedDeveloperName}
-          />
-        </div>
-        <div className="reveal-section">
-          <Sections
-            developers={developers}
-            communities={communities}
-            guides={guides}
-            partners={partners}
-            aboutStats={aboutStats}
-            onDeveloperClick={setSelectedDeveloperName}
-          />
-        </div>
-        <div className="reveal-section">
-          <ServicesHub />
-        </div>
-        <div className="reveal-section">
-          <TeamSection />
-        </div>
-        <div className="reveal-section">
-          <ContactSection />
-        </div>
+        <PropertyShowcase
+          properties={filteredProperties}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          setSelectedProperty={setSelectedProperty}
+          onDeveloperClick={setSelectedDeveloperName}
+        />
+        <Sections
+          developers={developers}
+          communities={communities}
+          guides={guides}
+          partners={partners}
+          aboutStats={aboutStats}
+          onDeveloperClick={setSelectedDeveloperName}
+        />
+        <ServicesHub />
+        <TeamSection />
+        <ContactSection />
       </main>
       <Footer onSignInClick={() => setShowAdminLogin(true)} />
       <BackToTop visible={showBackToTop} />
