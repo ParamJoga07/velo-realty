@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   LayoutDashboard, HardHat, Globe, TrendingUp, Users, 
   Search, Plus, Trash2, Edit3, 
-  Mail, Download, Power, Zap, X, Bell, Settings, ArrowUpRight
+  Mail, Download, Power, Zap, X, Bell, Settings, ArrowUpRight, MessageSquare
 } from 'lucide-react';
 import { 
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, 
@@ -22,7 +22,7 @@ type AdminDashboardProps = {
   theme: 'light' | 'dark';
 };
 
-type TabType = 'dashboard' | 'developers' | 'projects' | 'rates' | 'team' | 'corridors' | 'leads';
+type TabType = 'dashboard' | 'developers' | 'projects' | 'rates' | 'team' | 'corridors' | 'leads' | 'testimonials';
 
 
 export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) {
@@ -71,6 +71,7 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
         case 'rates': endpoint = 'api/area-rates'; break;
         case 'team': endpoint = 'api/team'; break;
         case 'corridors': endpoint = 'api/corridors'; break;
+        case 'testimonials': endpoint = 'api/testimonials'; break;
         case 'leads': endpoint = 'api/admin/user-leads'; break;
       }
       const headers: any = {};
@@ -234,7 +235,8 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
       },
       rates: { area: '', price: '', cagr: '' },
       team: { name: '', role: '', image: '', bio: '' },
-      corridors: { name: '', slug: '', location: '', description: '', image: '' }
+      corridors: { name: '', slug: '', location: '', description: '', image: '' },
+      testimonials: { name: '', role: '', content: '', image_url: '', rating: 5 }
     };
     setFormData(defaults[activeTab]);
     setShowForm(true);
@@ -282,7 +284,10 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
             <Mail size={14} /> {!isSidebarCollapsed && 'Leads'}
           </button>
           <button className={`nav-link ${activeTab === 'rates' ? 'active' : ''}`} onClick={() => setActiveTab('rates')}>
-            <TrendingUp size={14} /> {!isSidebarCollapsed && 'Rates'}
+            <TrendingUp size={14} /> {!isSidebarCollapsed && 'Area Rates'}
+          </button>
+          <button className={`nav-link ${activeTab === 'testimonials' ? 'active' : ''}`} onClick={() => setActiveTab('testimonials')}>
+            <MessageSquare size={14} /> {!isSidebarCollapsed && 'Testimonials'}
           </button>
           <button className={`nav-link ${activeTab === 'team' ? 'active' : ''}`} onClick={() => setActiveTab('team')}>
             <Users size={14} /> {!isSidebarCollapsed && 'Team'}
@@ -576,6 +581,31 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
                       <label style={{fontSize: 10, color: 'var(--text-dim)'}}>Gallery Assets</label>
                       <MultiImageUpload token={token} currentImages={imageLinks} folder={`/${activeTab}/gallery`} onSuccess={(urls) => setImageLinks(urls)} />
                     </div>
+                  )}
+
+                  {(activeTab === 'testimonials') && (
+                    <>
+                      <div className="form-group">
+                        <label>Client Name</label>
+                        <input type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. John Doe" />
+                      </div>
+                      <div className="form-group">
+                        <label>Role / Designation</label>
+                        <input type="text" value={formData.role || ''} onChange={e => setFormData({...formData, role: e.target.value})} placeholder="e.g. Homeowner or CEO" />
+                      </div>
+                      <div className="form-group" style={{gridColumn: 'span 2'}}>
+                        <label>Feedback Content</label>
+                        <textarea value={formData.content || ''} onChange={e => setFormData({...formData, content: e.target.value})} placeholder="What did they say about Velo Realty?" style={{minHeight: 80}} />
+                      </div>
+                      <div className="form-group">
+                        <label>Profile Image URL</label>
+                        <input type="text" value={formData.image_url || ''} onChange={e => setFormData({...formData, image_url: e.target.value})} placeholder="URL to profile picture" />
+                      </div>
+                      <div className="form-group">
+                        <label>Rating (1-5)</label>
+                        <input type="number" min="1" max="5" value={formData.rating || 5} onChange={e => setFormData({...formData, rating: parseInt(e.target.value)})} />
+                      </div>
+                    </>
                   )}
 
                   {(activeTab === 'developers' || activeTab === 'corridors') && editingItem && (

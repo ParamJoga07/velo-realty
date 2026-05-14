@@ -151,6 +151,30 @@ app.add_middleware(
 def root():
     return {"message": "Velo Realty Backend API is running."}
 
+@app.get("/api/testimonials")
+def get_testimonials(db: Session = Depends(get_db)):
+    return db.query(models.TestimonialModel).order_by(models.TestimonialModel.id.desc()).all()
+
+@app.post("/api/admin/testimonials")
+def create_testimonial(data: dict, db: Session = Depends(get_db)):
+    new_t = models.TestimonialModel(**data)
+    db.add(new_t)
+    db.commit()
+    db.refresh(new_t)
+    return new_t
+
+@app.put("/api/admin/testimonials/{tid}")
+def update_testimonial(tid: int, data: dict, db: Session = Depends(get_db)):
+    db.query(models.TestimonialModel).filter(models.TestimonialModel.id == tid).update(data)
+    db.commit()
+    return {"status": "success"}
+
+@app.delete("/api/admin/testimonials/{tid}")
+def delete_testimonial(tid: int, db: Session = Depends(get_db)):
+    db.query(models.TestimonialModel).filter(models.TestimonialModel.id == tid).delete()
+    db.commit()
+    return {"status": "success"}
+
 @app.get("/api/properties")
 def get_properties(db: Session = Depends(get_db)):
     return db.query(models.PropertyModel).order_by(models.PropertyModel.id.asc()).all()

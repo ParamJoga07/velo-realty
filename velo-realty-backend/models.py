@@ -209,6 +209,16 @@ class AreaRateModel(Base):
     price = Column(String)
     cagr = Column(String)
 
+class TestimonialModel(Base):
+    __tablename__ = "testimonials"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    role = Column(String, nullable=True) # e.g. "CEO, Tech Corp" or "Homeowner"
+    content = Column(Text, nullable=False)
+    image_url = Column(String, nullable=True)
+    rating = Column(Integer, default=5)
+    created_at = Column(String, default=lambda: datetime.now().isoformat())
+
 class AdminUser(Base):
     __tablename__ = "admins"
     id = Column(Integer, primary_key=True, index=True)

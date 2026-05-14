@@ -384,3 +384,42 @@ export function Sections({
     </>
   );
 }
+export function TestimonialsSection({ testimonials }: { testimonials: any[] }) {
+  if (!testimonials || testimonials.length === 0) return null;
+
+  return (
+    <section id="testimonials" className="section" style={{background: 'rgba(10, 15, 25, 0.5)'}}>
+      <div className="container">
+        <div className="section-head center">
+          <h2>Client Experiences</h2>
+          <p className="section-subtitle">What modern investors say about Velo Realty.</p>
+        </div>
+        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginTop: '3rem'}}>
+          {testimonials.map((t) => (
+            <div key={t.id} className="premium-card" style={{padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 24}}>
+              <div style={{display: 'flex', gap: '0.2rem'}}>
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={i < t.rating ? "var(--accent-orange)" : "rgba(255,255,255,0.1)"} stroke="none">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                ))}
+              </div>
+              <p style={{fontSize: '1.1rem', fontStyle: 'italic', color: 'var(--text-dim)', lineHeight: 1.6}}>&quot;{t.content}&quot;</p>
+              <div style={{display: 'flex', alignItems: 'center', gap: '1rem', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)'}}>
+                <img 
+                  src={t.image_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100'} 
+                  alt={t.name} 
+                  style={{width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--accent-orange)'}} 
+                />
+                <div>
+                  <div style={{fontWeight: 700, color: '#fff'}}>{t.name}</div>
+                  <div style={{fontSize: '0.85rem', color: 'var(--accent-orange)'}}>{t.role}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

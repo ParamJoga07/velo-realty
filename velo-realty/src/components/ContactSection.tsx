@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import API_BASE_URL from '../config';
 
-export function ContactSection() {
+export function ContactSection({ properties = [] }: { properties?: any[] }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -72,6 +72,19 @@ export function ContactSection() {
               value={formData.email}
               onChange={e => setFormData({...formData, email: e.target.value})}
             />
+          </label>
+          <label>
+            Project of Interest (Optional)
+            <select 
+              value={formData.message.split('Interested in: ')[1] || ''} 
+              onChange={e => setFormData({...formData, message: e.target.value ? `Interested in: ${e.target.value}. ${formData.message.replace(/Interested in:.*?\./, '').trim()}` : formData.message})}
+              style={{background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '0.8rem', borderRadius: '8px', marginTop: '0.4rem'}}
+            >
+              <option value="">General Enquiry</option>
+              {properties.map((p: any) => (
+                <option key={p.id} value={p.name}>{p.name}</option>
+              ))}
+            </select>
           </label>
           <label>
             Message

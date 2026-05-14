@@ -9,7 +9,7 @@ import { LoadingScreen } from './components/LoadingScreen'
 import { Navbar } from './components/Navbar'
 import { PriceTicker } from './components/PriceTicker'
 import { PropertyShowcase } from './components/PropertyShowcase'
-import { Sections } from './components/Sections'
+import { Sections, TestimonialsSection } from './components/Sections'
 import { TeamSection } from './components/TeamSection'
 import { ServicesHub } from './components/ServicesHub'
 import { DeveloperModal } from './components/DeveloperModal'
@@ -106,6 +106,12 @@ function App() {
   const { data: dbZones = [] } = useQuery<Zone[]>({
     queryKey: ['zones'],
     queryFn: () => fetch(`${API_BASE_URL}/api/zones`).then(res => res.json()),
+    ...queryOptions
+  })
+
+  const { data: testimonials = [] } = useQuery<any[]>({
+    queryKey: ['testimonials'],
+    queryFn: () => fetch(`${API_BASE_URL}/api/testimonials`).then(res => res.json()),
     ...queryOptions
   })
 
@@ -422,7 +428,8 @@ function App() {
         />
         <ServicesHub />
         <TeamSection />
-        <ContactSection />
+        <TestimonialsSection testimonials={testimonials} />
+        <ContactSection properties={allProjects} />
       </main>
       <Footer onSignInClick={() => setShowAdminLogin(true)} />
       <BackToTop visible={showBackToTop} />

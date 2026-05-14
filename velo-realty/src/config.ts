@@ -1,5 +1,5 @@
-// const API_BASE_URL = "https://velo-realty-backend.onrender.com";
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = "https://velo-realty-backend.onrender.com";
+// const API_BASE_URL = "http://localhost:8000";
 
 export const IMAGEKIT_PUBLIC_KEY = 'public_p+Zs79z/CFpE8ecWc4QWKDNcWqE=';
 export const IMAGEKIT_URL_ENDPOINT = 'https://ik.imagekit.io/zpj7zrcs73';
