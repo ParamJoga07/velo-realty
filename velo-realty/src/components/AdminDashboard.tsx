@@ -72,7 +72,7 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
         case 'team': endpoint = 'api/team'; break;
         case 'corridors': endpoint = 'api/corridors'; break;
         case 'testimonials': endpoint = 'api/testimonials'; break;
-        case 'leads': endpoint = 'api/admin/user-leads'; break;
+        case 'leads': endpoint = 'api/admin/contact-requests'; break;
       }
       const headers: any = {};
       if (activeTab === 'leads' || activeTab === 'corridors') headers['Authorization'] = `Bearer ${token}`;
@@ -535,7 +535,7 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
                             <div style={{display: 'flex', flexDirection: 'column'}}>
                               <span style={{fontWeight: 600, fontSize: 11}}>
                                 {activeTab === 'leads' ? (
-                                  `${item.saved_count || 0} Saved`
+                                  item.message || 'General Inquiry'
                                 ) : activeTab === 'developers' ? (
                                   `Founded: ${item.founded_year || 'N/A'}`
                                 ) : (item.role || item.price || item.slug)}
@@ -554,7 +554,7 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
                               </span>
                             </div>
                           </td>
-                          <td><span className="tag-v3">{activeTab === 'leads' ? 'User' : (item.status || 'Active')}</span></td>
+                          <td><span className="tag-v3">{activeTab === 'leads' ? (item.status || 'Pending') : (item.status || 'Active')}</span></td>
                           <td>
                             <div style={{display: 'flex', gap: '0.4rem', justifyContent: 'flex-end'}}>
                               {activeTab !== 'leads' && <button className="btn-action-v3" onClick={() => openEditForm(item)}><Edit3 size={12}/></button>}

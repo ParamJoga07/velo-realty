@@ -3176,3 +3176,164 @@ body.modal-open {
   color: var(--teal-500);
 }
 
+/* Contact Agent Modal Styling */
+.contact-agent-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 24, 36, 0.9);
+  backdrop-filter: blur(12px);
+  z-index: 11000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  padding: 1.5rem;
+}
+
+.page[data-theme='light'] .contact-agent-modal-overlay {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.contact-agent-card {
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  max-width: 500px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+  animation: modalSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.page[data-theme='light'] .contact-agent-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+}
+
+.contact-agent-header {
+  padding: 1.8rem 2rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.page[data-theme='light'] .contact-agent-header {
+  border-bottom-color: rgba(0, 0, 0, 0.05);
+}
+
+.contact-agent-header h3 {
+  font-family: 'EB Garamond Custom', serif;
+  font-size: 1.8rem;
+  margin: 0;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.page[data-theme='light'] .contact-agent-header h3 {
+  color: #0f172a;
+}
+
+.contact-agent-project-tag {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--accent-orange);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-top: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.page[data-theme='light'] .contact-agent-project-tag {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.contact-agent-body {
+  padding: 1.5rem 2rem 2rem;
+}
+
+.contact-agent-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.2rem;
+}
+
+.contact-agent-field label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.page[data-theme='light'] .contact-agent-field label {
+  color: rgba(15, 23, 42, 0.7);
+}
+
+.contact-agent-field input {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 0.9rem 1.1rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.page[data-theme='light'] .contact-agent-field input {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #0f172a;
+}
+
+.contact-agent-field input:focus {
+  border-color: var(--accent-orange);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 0 3px rgba(255, 126, 95, 0.15);
+}
+
+.page[data-theme='light'] .contact-agent-field input:focus {
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255, 126, 95, 0.15);
+}
+
+.contact-agent-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.8rem;
+}
+
+.contact-agent-actions .btn {
+  flex: 1;
+  padding: 1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.contact-agent-actions .btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.page[data-theme='light'] .contact-agent-actions .btn-ghost {
+  border-color: rgba(0, 0, 0, 0.1);
+  color: rgba(15, 23, 42, 0.7);
+}
+
+.contact-agent-actions .btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.page[data-theme='light'] .contact-agent-actions .btn-ghost:hover {
+  background: rgba(0, 0, 0, 0.03);
+  color: #0f172a;
+}
+

@@ -184,6 +184,49 @@ function App() {
   const [showIdentityModal, setShowIdentityModal] = useState(false)
   const [pendingPropertyToSave, setPendingPropertyToSave] = useState<number | null>(null)
 
+  // Contact Agent Form State
+  const [contactProperty, setContactProperty] = useState<Property | null>(null)
+  const [contactName, setContactName] = useState('')
+  const [contactEmail, setContactEmail] = useState('')
+  const [contactPhone, setContactPhone] = useState('')
+  const [contactStatus, setContactStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!contactProperty) return
+    setContactStatus('submitting')
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/contact-requests`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: contactName,
+          email: contactEmail,
+          phone: contactPhone,
+          message: `Inquiry for "${contactProperty.title}" developed by "${contactProperty.developer}" in "${contactProperty.location}". User submitted form via Contact Agent modal.`,
+          property_id: null
+        })
+      })
+
+      if (res.ok) {
+        setContactStatus('success')
+        setContactName('')
+        setContactEmail('')
+        setContactPhone('')
+        setTimeout(() => {
+          setContactProperty(null)
+          setSelectedProperty(null)
+          setContactStatus('idle')
+        }, 1500)
+      } else {
+        setContactStatus('error')
+      }
+    } catch (err) {
+      console.error(err)
+      setContactStatus('error')
+    }
+  }
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -580,7 +623,13 @@ function App() {
                 <p>{selectedProperty.description}</p>
               </div>
               <div className="modal-actions">
-                <button className="btn btn-primary" type="button">Contact Agent</button>
+                <button 
+                  className="btn btn-primary" 
+                  type="button"
+                  onClick={() => setContactProperty(selectedProperty)}
+                >
+                  Contact Agent
+                </button>
                 <button 
                   className="btn btn-ghost" 
                   type="button" 
@@ -590,6 +639,93 @@ function App() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {contactProperty && (
+        <div className="contact-agent-modal-overlay" onClick={() => setContactProperty(null)}>
+          <div className="contact-agent-card" onClick={e => e.stopPropagation()}>
+            <div className="contact-agent-header">
+              <h3>Contact Representative</h3>
+              <div className="contact-agent-project-tag">
+                {contactProperty.title}
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                {contactProperty.developer} · {contactProperty.location} Corridor
+              </div>
+            </div>
+            
+            <form onSubmit={handleContactSubmit} className="contact-agent-body">
+              {contactStatus === 'success' ? (
+                <div style={{ textAlign: 'center', padding: '2rem 0' }}>
+                  <div style={{ fontSize: '3rem', color: 'var(--teal-500)', marginBottom: '1rem' }}>✓</div>
+                  <h4 style={{ color: '#fff', fontSize: '1.2rem', marginBottom: '0.5rem', fontFamily: "'EB Garamond Custom', serif" }}>Inquiry Submitted!</h4>
+                  <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>An expert advisor will reach out to you shortly.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="contact-agent-field">
+                    <label htmlFor="modal-lead-name">Full Name</label>
+                    <input
+                      id="modal-lead-name"
+                      type="text"
+                      placeholder="Enter your name"
+                      required
+                      value={contactName}
+                      onChange={e => setContactName(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="contact-agent-field">
+                    <label htmlFor="modal-lead-email">Email Address</label>
+                    <input
+                      id="modal-lead-email"
+                      type="email"
+                      placeholder="you@example.com"
+                      required
+                      value={contactEmail}
+                      onChange={e => setContactEmail(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="contact-agent-field">
+                    <label htmlFor="modal-lead-phone">Contact Number</label>
+                    <input
+                      id="modal-lead-phone"
+                      type="tel"
+                      placeholder="+91 Contact Number"
+                      required
+                      value={contactPhone}
+                      onChange={e => setContactPhone(e.target.value)}
+                    />
+                  </div>
+                  
+                  {contactStatus === 'error' && (
+                    <div style={{ color: '#ef4444', fontSize: '0.8rem', marginBottom: '1rem' }}>
+                      Failed to submit inquiry. Please try again.
+                    </div>
+                  )}
+                  
+                  <div className="contact-agent-actions">
+                    <button 
+                      className="btn btn-ghost" 
+                      type="button" 
+                      onClick={() => setContactProperty(null)}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      className="btn btn-primary" 
+                      type="submit"
+                      disabled={contactStatus === 'submitting'}
+                    >
+                      {contactStatus === 'submitting' ? 'Submitting...' : 'Send Inquiry'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </form>
           </div>
         </div>
       )}
