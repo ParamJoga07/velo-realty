@@ -1,4 +1,4 @@
-export type ListingType = 'Pre-Launch' | 'Off-Plan' | 'Ready'
+export type ListingType = 'Pre-Launch' | 'Off-Plan' | 'Ready' | 'Rentals' | 'Resale'
 
 export type PropertyStatus = 'Featured' | 'New Launch' | 'Ready' | 'Sold Out'
 

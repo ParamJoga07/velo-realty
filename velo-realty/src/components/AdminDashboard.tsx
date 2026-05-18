@@ -8,7 +8,7 @@ import {
 import { 
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, 
   BarChart, Bar, XAxis, CartesianGrid,
-  AreaChart, Area, LineChart, Line
+  AreaChart, Area, LineChart, Line, Legend
 } from 'recharts';
 import * as XLSX from 'xlsx';
 import API_BASE_URL from '../config';
@@ -341,10 +341,10 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
              <button className="btn-action-v3">
                 <Bell size={14} />
              </button>
-             <div className="user-pill">
-                <span style={{fontWeight: 700, fontSize: 11, color: '#fff'}}>Admin</span>
-                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100" alt="Admin" className="user-avatar" />
-             </div>
+              <div className="user-pill">
+                 <span style={{fontWeight: 700, fontSize: 11, color: '#fff'}}>Admin</span>
+                 <img src="/Velo Logo Single.png" alt="Admin" className="user-avatar" style={{ objectFit: 'contain', background: 'rgba(255, 255, 255, 0.05)', padding: '4px' }} />
+              </div>
           </div>
         </header>
         {loading ? (
@@ -384,17 +384,30 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
                 <div className="charts-grid-v3">
                    <div className="chart-card-v3">
                       <h3 style={{fontSize: 12, fontWeight: 800, marginBottom: '1.5rem', color: 'var(--text-dim)'}}>PORTFOLIO COMPOSITION</h3>
-                      <ResponsiveContainer width="100%" height={240}>
+                      <ResponsiveContainer width="100%" height={270}>
                         <PieChart>
-                          <Pie data={stats.type_chart} innerRadius={60} outerRadius={85} paddingAngle={5} dataKey="value">
+                          <Pie data={stats.type_chart} innerRadius={55} outerRadius={75} paddingAngle={5} dataKey="value">
                             {stats.type_chart.map((_:any, i:number) => <Cell key={i} fill={['#f97316', '#3b82f6', '#8b5cf6', '#10b981'][i % 4]} stroke="none" />)}
                           </Pie>
                           <Tooltip contentStyle={{background: '#111', border: '1px solid #222', borderRadius: 4, fontSize: 10}} />
+                          <Legend verticalAlign="bottom" height={36} iconSize={8} iconType="circle" wrapperStyle={{fontSize: 9, marginTop: 10}} />
                         </PieChart>
                       </ResponsiveContainer>
                    </div>
                    <div className="chart-card-v3">
-                      <h3 style={{fontSize: 12, fontWeight: 800, marginBottom: '1.5rem', color: 'var(--text-dim)'}}>GROWTH METRICS</h3>
+                      <h3 style={{fontSize: 12, fontWeight: 800, marginBottom: '1.5rem', color: 'var(--text-dim)'}}>PROJECT PIPELINE (STATUS)</h3>
+                      <ResponsiveContainer width="100%" height={270}>
+                        <PieChart>
+                          <Pie data={stats.status_chart || []} innerRadius={55} outerRadius={75} paddingAngle={5} dataKey="value">
+                            {(stats.status_chart || []).map((_:any, i:number) => <Cell key={i} fill={['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#6366f1'][i % 5]} stroke="none" />)}
+                          </Pie>
+                          <Tooltip contentStyle={{background: '#111', border: '1px solid #222', borderRadius: 4, fontSize: 10}} />
+                          <Legend verticalAlign="bottom" height={36} iconSize={8} iconType="circle" wrapperStyle={{fontSize: 9, marginTop: 10}} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                   </div>
+                   <div className="chart-card-v3">
+                      <h3 style={{fontSize: 12, fontWeight: 800, marginBottom: '1.5rem', color: 'var(--text-dim)'}}>PROJECT TYPES DISTRIBUTION</h3>
                       <ResponsiveContainer width="100%" height={240}>
                         <BarChart data={stats.proj_chart}>
                           <XAxis dataKey="name" tick={{fontSize: 9, fill: '#555'}} axisLine={false} tickLine={false} />
@@ -568,7 +581,7 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
             </div>
             <div className="modal-body-v3">
                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
-                  {Object.keys(formData).filter(k => {
+                  {activeTab !== 'testimonials' && Object.keys(formData).filter(k => {
                     if (['id', 'gallery', 'images', 'project_list', 'projects', 'project_items', 'corridor'].includes(k)) return false;
                     if (activeTab === 'developers' && k === 'image') return false;
                     return true;
@@ -610,25 +623,25 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
 
                   {(activeTab === 'testimonials') && (
                     <>
-                      <div className="form-group">
-                        <label>Client Name</label>
-                        <input type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. John Doe" />
+                      <div className="form-group-v3">
+                        <label style={{fontSize: 10, color: 'var(--text-dim)', display: 'block', marginBottom: 4}}>Client Name</label>
+                        <input style={{background: 'var(--bg-main)', border: '1px solid var(--border-subtle)', color: '#fff', width: '100%', padding: '0.4rem 0.6rem'}} type="text" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. John Doe" />
                       </div>
-                      <div className="form-group">
-                        <label>Role / Designation</label>
-                        <input type="text" value={formData.role || ''} onChange={e => setFormData({...formData, role: e.target.value})} placeholder="e.g. Homeowner or CEO" />
+                      <div className="form-group-v3">
+                        <label style={{fontSize: 10, color: 'var(--text-dim)', display: 'block', marginBottom: 4}}>Role / Designation</label>
+                        <input style={{background: 'var(--bg-main)', border: '1px solid var(--border-subtle)', color: '#fff', width: '100%', padding: '0.4rem 0.6rem'}} type="text" value={formData.role || ''} onChange={e => setFormData({...formData, role: e.target.value})} placeholder="e.g. Homeowner or CEO" />
                       </div>
-                      <div className="form-group" style={{gridColumn: 'span 2'}}>
-                        <label>Feedback Content</label>
-                        <textarea value={formData.content || ''} onChange={e => setFormData({...formData, content: e.target.value})} placeholder="What did they say about Velo Realty?" style={{minHeight: 80}} />
+                      <div className="form-group-v3" style={{gridColumn: 'span 2'}}>
+                        <label style={{fontSize: 10, color: 'var(--text-dim)', display: 'block', marginBottom: 4}}>Feedback Content</label>
+                        <textarea rows={3} style={{background: 'var(--bg-main)', border: '1px solid var(--border-subtle)', color: '#fff', width: '100%', padding: '0.5rem'}} value={formData.content || ''} onChange={e => setFormData({...formData, content: e.target.value})} placeholder="What did they say about Velo Realty?" />
                       </div>
-                      <div className="form-group">
-                        <label>Profile Image URL</label>
-                        <input type="text" value={formData.image_url || ''} onChange={e => setFormData({...formData, image_url: e.target.value})} placeholder="URL to profile picture" />
+                      <div className="form-group-v3" style={{gridColumn: 'span 2', marginBottom: '0.5rem'}}>
+                        <label style={{fontSize: 10, color: 'var(--text-dim)', display: 'block', marginBottom: 4}}>Client Profile Image</label>
+                        <ImageUpload token={token} currentImage={formData.image_url} folder={`/${activeTab}`} onSuccess={(url) => setFormData({...formData, image_url: url})} />
                       </div>
-                      <div className="form-group">
-                        <label>Rating (1-5)</label>
-                        <input type="number" min="1" max="5" value={formData.rating || 5} onChange={e => setFormData({...formData, rating: parseInt(e.target.value)})} />
+                      <div className="form-group-v3">
+                        <label style={{fontSize: 10, color: 'var(--text-dim)', display: 'block', marginBottom: 4}}>Rating (1-5)</label>
+                        <input style={{background: 'var(--bg-main)', border: '1px solid var(--border-subtle)', color: '#fff', width: '100%', padding: '0.4rem 0.6rem'}} type="number" min="1" max="5" value={formData.rating || 5} onChange={e => setFormData({...formData, rating: parseInt(e.target.value) || 5})} />
                       </div>
                     </>
                   )}

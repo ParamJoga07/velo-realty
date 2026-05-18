@@ -583,6 +583,14 @@ def get_dashboard_stats(db: Session = Depends(get_db), admin: models.AdminUser =
         proj_dist[t] = proj_dist.get(t, 0) + 1
     proj_chart = [{"name": k or "Unspecified", "value": v} for k, v in proj_dist.items()]
 
+    # Chart Data: Projects by Status
+    proj_statuses = db.query(models.ProjectModel.status).all()
+    status_dist = {}
+    for (s,) in proj_statuses:
+        status_key = s or "Unspecified"
+        status_dist[status_key] = status_dist.get(status_key, 0) + 1
+    status_chart = [{"name": k, "value": v} for k, v in status_dist.items()]
+
     # Captured Leads (Contact Requests + User Identities)
     contact_requests = db.query(models.ContactRequestModel).count()
     user_identities = db.query(models.UserIdentityModel).count()
@@ -615,6 +623,7 @@ def get_dashboard_stats(db: Session = Depends(get_db), admin: models.AdminUser =
         "leads": total_leads,
         "type_chart": type_chart,
         "proj_chart": proj_chart,
+        "status_chart": status_chart,
         "leads_chart": leads_chart,
         "traffic_chart": traffic_chart
     }
@@ -633,9 +642,40 @@ def get_user_leads(db: Session = Depends(get_db), admin: models.AdminUser = Depe
     } for u in users]
 
 
+from sqlalchemy.orm import joinedload
+
 @app.get("/api/projects")
 def get_projects(db: Session = Depends(get_db)):
-    return db.query(models.ProjectModel).order_by(models.ProjectModel.id.asc()).all()
+    projects = db.query(models.ProjectModel).options(joinedload(models.ProjectModel.images)).order_by(models.ProjectModel.id.asc()).all()
+    result = []
+    for p in projects:
+        result.append({
+            "id": p.id,
+            "developer_id": p.developer_id,
+            "corridor_id": p.corridor_id,
+            "name": p.name,
+            "slug": p.slug,
+            "location": p.location,
+            "sub_location": p.sub_location,
+            "project_type": p.project_type,
+            "land_area": p.land_area,
+            "structure": p.structure,
+            "total_units": p.total_units,
+            "configurations": p.configurations,
+            "size_range": p.size_range,
+            "price_range": p.price_range,
+            "price_start": p.price_start,
+            "open_space": p.open_space,
+            "possession": p.possession,
+            "status": p.status,
+            "clubhouse_size": p.clubhouse_size,
+            "amenities": p.amenities,
+            "description": p.description,
+            "highlights": p.highlights,
+            "connectivity": p.connectivity,
+            "images": [{"image_url": img.image_url} for img in p.images]
+        })
+    return result
 
 @app.get("/api/team")
 def get_team(db: Session = Depends(get_db)):

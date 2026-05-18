@@ -304,12 +304,22 @@ function App() {
     }
   }
   const handleFilterSelect = (filterLabel: string) => {
+    // Check if it is a corridor selection
+    const isCorridor = communities.some(c => c.name.toLowerCase() === filterLabel.toLowerCase()) || 
+                       ['north corridor', 'south corridor', 'east corridor', 'west corridor'].includes(filterLabel.toLowerCase());
+    
+    if (isCorridor) {
+      setSelectedDeveloperName(filterLabel);
+      return;
+    }
+
     // Reset basic filters to show matching results
     setLocation('All Locations');
     setBedrooms('Any');
 
     switch (filterLabel) {
       case 'Pre-launch':
+      case 'Pre-Launch':
         setTab('Pre-Launch');
         setPropertyType('Any Type');
         break;
@@ -321,13 +331,23 @@ function App() {
         setTab('Ready');
         setPropertyType('Any Type');
         break;
+      case 'Commercial':
       case 'Commercial Spaces':
-        setTab('Pre-Launch'); // Show commercial regardless of tab, or keep current tab
+        setTab('Pre-Launch'); // Keep tab but show commercial regardless of tab
         setPropertyType('Commercial Space');
         break;
+      case 'Plot or Land':
       case 'Plots and Land':
         setTab('Pre-Launch'); 
         setPropertyType('Plot or Land');
+        break;
+      case 'Rentals':
+        setTab('Rentals');
+        setPropertyType('Any Type');
+        break;
+      case 'Resale':
+        setTab('Resale');
+        setPropertyType('Any Type');
         break;
       default:
         break;
@@ -335,36 +355,117 @@ function App() {
   };
 
   const filteredProperties = useMemo(() => {
-    const filtered = properties.filter((item) => {
-      const tabMatch = item.listingType === tab
-      const locationMatch = location === 'All Locations' || location === 'All Corridors' || item.location === location
-      const typeMatch = propertyType === 'Any Type' || item.type === propertyType
-      const bedMatch = bedrooms === 'Any' || String(item.beds) === bedrooms
-      // Since PropertyModel doesn't have many-to-many populated in this view yet, we stick to basic filters
-      // but the UI will show these for the discovery module later
-      return tabMatch && locationMatch && typeMatch && bedMatch
-    })
+    // Map all database projects from project_details table to the high-fidelity showcase Property cards
+    const mappedProperties: Property[] = allProjects.map((p) => {
+      // Find developer and corridor names with perfect formatting and fallback mapping
+      const devObj = developers.find(d => d.id === p.developer_id);
+      const devName = devObj ? devObj.name : (p.developer_slug ? p.developer_slug.split('-').map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ') : "Velo Partner");
+      const corrObj = communities.find(c => c.id === p.corridor_id);
+      const corrName = corrObj ? corrObj.name : "Hyderabad Growth";
 
-    const rankByStatus: Record<Property['status'], number> = {
+      // Map project type to PropertyType
+      let pType: Property['type'] = 'Apartment';
+      const typeStr = (p.project_type || '').toLowerCase();
+      if (typeStr.includes('villa')) {
+        pType = 'Villa';
+      } else if (typeStr.includes('commercial') || typeStr.includes('retail') || typeStr.includes('office') || typeStr.includes('township')) {
+        pType = 'Commercial Space';
+      } else if (typeStr.includes('plot') || typeStr.includes('land')) {
+        pType = 'Plot or Land';
+      }
+
+      // Map status to ListingType including support for new Rentals and Resale
+      let pListingType: string = 'Off-Plan'; 
+      const statusStr = (p.status || '').toLowerCase();
+      if (statusStr.includes('pre-launch') || statusStr.includes('launch')) {
+        pListingType = 'Pre-Launch';
+      } else if (statusStr.includes('ready') || statusStr.includes('delivered') || statusStr.includes('completed')) {
+        pListingType = 'Ready';
+      } else if (statusStr.includes('rent')) {
+        pListingType = 'Rentals';
+      } else if (statusStr.includes('resale')) {
+        pListingType = 'Resale';
+      }
+
+      // Map priceValue
+      const priceVal = p.price_start || 0;
+
+      // Extract configurations and beds/baths
+      let beds = 3;
+      const configStr = (p.configurations || '').toLowerCase();
+      if (configStr.includes('2')) beds = 2;
+      if (configStr.includes('4')) beds = 4;
+      if (configStr.includes('5')) beds = 5;
+
+      // Default high-quality placeholder image if no images uploaded
+      let imgUrl = "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=800";
+      if (Array.isArray(p.images) && p.images.length > 0) {
+        const firstImg = p.images[0];
+        if (typeof firstImg === 'string') {
+          imgUrl = firstImg;
+        } else if (firstImg && typeof firstImg === 'object' && firstImg.image_url) {
+          imgUrl = firstImg.image_url;
+        }
+      } else if (p.primary_image) {
+        imgUrl = p.primary_image;
+      }
+
+      return {
+        id: p.id,
+        title: p.name || 'Premium Property',
+        location: corrName.replace(/ corridor/gi, ''),
+        community: p.sub_location || p.location || 'Premium Location',
+        developer: devName,
+        type: pType,
+        listingType: pListingType as any,
+        price: p.price_range || 'Price on Request',
+        priceValue: priceVal,
+        beds: beds,
+        baths: beds, // Match baths to beds
+        area: 1800,
+        handover: p.possession || '2028',
+        status: (p.status === 'Ready to Move' ? 'Ready' : p.status) as Property['status'],
+        image: imgUrl,
+        description: p.description || 'Premium residential gated community with luxury amenities.'
+      };
+    });
+
+    const combined = [...mappedProperties];
+
+    const filtered = combined.filter((item) => {
+      // Allow Rentals and Resale tabs or Commercial/Plots to match directly bypassing strict tab restrictions
+      const isSpecialType = ['Plot or Land', 'Commercial Space'].includes(propertyType) || ['Rentals', 'Resale'].includes(tab);
+      const tabMatch = isSpecialType || item.listingType === tab;
+      
+      const locationMatch = location === 'All Locations' || location === 'All Corridors' || item.location === location;
+      const typeMatch = propertyType === 'Any Type' || item.type === propertyType;
+      const bedMatch = bedrooms === 'Any' || String(item.beds) === bedrooms;
+      
+      return tabMatch && locationMatch && typeMatch && bedMatch;
+    });
+
+    const rankByStatus: Record<string, number> = {
       Featured: 0,
       'New Launch': 1,
       Ready: 2,
       'Sold Out': 3,
-    }
+    };
 
     return [...filtered].sort((a, b) => {
       if (sortBy === 'price-asc') {
-        return a.priceValue - b.priceValue
+        return a.priceValue - b.priceValue;
       }
       if (sortBy === 'price-desc') {
-        return b.priceValue - a.priceValue
+        return b.priceValue - a.priceValue;
       }
       if (sortBy === 'handover') {
-        return a.handover.localeCompare(b.handover)
+        return a.handover.localeCompare(b.handover);
       }
-      return rankByStatus[a.status] - rankByStatus[b.status]
-    })
-  }, [tab, location, propertyType, bedrooms, sortBy, properties])
+      const rankA = rankByStatus[a.status] !== undefined ? rankByStatus[a.status] : 99;
+      const rankB = rankByStatus[b.status] !== undefined ? rankByStatus[b.status] : 99;
+      return rankA - rankB;
+    });
+  }, [tab, location, propertyType, bedrooms, sortBy, allProjects, developers, communities]);
 
   if (adminToken) {
     return <AdminDashboard token={adminToken} onLogout={handleLogout} theme={theme} />

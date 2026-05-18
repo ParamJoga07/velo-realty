@@ -67,7 +67,7 @@ export function ServicesHub() {
   };
 
   return (
-    <section className="section services-hub-section">
+    <section id="services-ecosystem" className="section services-hub-section">
       <div className="container">
         <div className="section-head center">
           <div>
@@ -126,7 +126,7 @@ export function ServicesHub() {
           </div>
         </div>
 
-        <div className="referral-banner-premium">
+        <div id="refer-earn" className="referral-banner-premium">
           <div className="referral-text-content">
             <div className="badge-exclusive"><Sparkles size={12} /> App Exclusive</div>
             <h3>Refer a High-Net-Worth Peer</h3>
