@@ -104,32 +104,76 @@ export function Sections({
         </div>
         <div className="isometric-container ribbon-3d-wrap">
           <div className="ribbon-3d track-upper">
-            {[...allPartnerNames, ...allPartnerNames].map((item, index) => (
-              <div 
-                className="ribbon-item" 
-                key={`upper-${item}-${index}`}
-                onClick={() => onDeveloperClick(item)}
-              >
-                <div className="ribbon-item-inner">
-                  <Building2 size={18} />
-                  <span>{item}</span>
+            {[...allPartnerNames, ...allPartnerNames].map((item, index) => {
+              const dev = developers.find(d => d.name === item);
+              const logoUrl = dev ? dev.image : null;
+              return (
+                <div 
+                  className="ribbon-item" 
+                  key={`upper-${item}-${index}`}
+                  onClick={() => onDeveloperClick(item)}
+                >
+                  <div className="ribbon-item-inner">
+                    {logoUrl ? (
+                      <div className="partner-logo-box" style={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: 4,
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        padding: 2,
+                        flexShrink: 0
+                      }}>
+                        <img src={logoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      </div>
+                    ) : (
+                      <Building2 size={18} />
+                    )}
+                    <span>{item}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="ribbon-3d track-lower">
-            {[...allPartnerNames, ...allPartnerNames].reverse().map((item, index) => (
-              <div 
-                className="ribbon-item" 
-                key={`lower-${item}-${index}`}
-                onClick={() => onDeveloperClick(item)}
-              >
-                <div className="ribbon-item-inner">
-                  <Building2 size={18} />
-                  <span>{item}</span>
+            {[...allPartnerNames, ...allPartnerNames].reverse().map((item, index) => {
+              const dev = developers.find(d => d.name === item);
+              const logoUrl = dev ? dev.image : null;
+              return (
+                <div 
+                  className="ribbon-item" 
+                  key={`lower-${item}-${index}`}
+                  onClick={() => onDeveloperClick(item)}
+                >
+                  <div className="ribbon-item-inner">
+                    {logoUrl ? (
+                      <div className="partner-logo-box" style={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: 4,
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        padding: 2,
+                        flexShrink: 0
+                      }}>
+                        <img src={logoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      </div>
+                    ) : (
+                      <Building2 size={18} />
+                    )}
+                    <span>{item}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
         <div className="center-action-wrap">

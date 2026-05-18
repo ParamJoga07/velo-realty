@@ -171,13 +171,22 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
   const filteredData = useMemo(() => {
     return data.filter(item => {
       const matchesSearch = (item.title || item.name || item.area || item.email || '').toLowerCase().includes(searchTerm.toLowerCase());
+      
+      if (activeTab === 'developers') {
+        return matchesSearch;
+      }
+      if (activeTab === 'corridors') {
+        const matchesLocation = locationFilter === 'All' || item.location === locationFilter;
+        return matchesSearch && matchesLocation;
+      }
+      
       const matchesLocation = locationFilter === 'All' || item.location === locationFilter;
       const matchesDeveloper = developerFilter === 'All' || item.developer === developerFilter || (item.developer_id?.toString() === developerFilter);
       const matchesCorridor = corridorFilter === 'All' || (item.corridor_id?.toString() === corridorFilter);
       const matchesStatus = statusFilter === 'All' || item.status === statusFilter;
       return matchesSearch && matchesLocation && matchesStatus && matchesDeveloper && matchesCorridor;
     });
-  }, [data, searchTerm, locationFilter, developerFilter, corridorFilter, statusFilter]);
+  }, [data, activeTab, searchTerm, locationFilter, developerFilter, corridorFilter, statusFilter]);
 
   const handleDelete = (type: TabType, id: number) => {
     if (!window.confirm(`Delete this ${type.slice(0, -1)}?`)) return;
@@ -501,6 +510,10 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
                                     <span>Dev ID: {item.developer_id}</span>
                                     <span>Corr ID: {item.corridor_id}</span>
                                   </span>
+                                ) : activeTab === 'developers' ? (
+                                  <span>HQ: {item.headquarters || 'N/A'}</span>
+                                ) : activeTab === 'corridors' ? (
+                                  <span>Location: {item.location || 'N/A'}</span>
                                 ) : (item.email || item.location)}
                               </span>
                             </div>
@@ -508,7 +521,11 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
                           <td>
                             <div style={{display: 'flex', flexDirection: 'column'}}>
                               <span style={{fontWeight: 600, fontSize: 11}}>
-                                {activeTab === 'leads' ? `${item.saved_count || 0} Saved` : (item.role || item.price || item.slug)}
+                                {activeTab === 'leads' ? (
+                                  `${item.saved_count || 0} Saved`
+                                ) : activeTab === 'developers' ? (
+                                  `Founded: ${item.founded_year || 'N/A'}`
+                                ) : (item.role || item.price || item.slug)}
                               </span>
                               <span style={{fontSize: 10, color: 'var(--text-muted)'}}>
                                 {activeTab === 'projects' ? (
@@ -516,6 +533,10 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
                                     <span>Dev ID: {item.developer_id}</span>
                                     <span>Corr ID: {item.corridor_id}</span>
                                   </span>
+                                ) : activeTab === 'developers' ? (
+                                  <span>Projects: {item.project_count || 0}</span>
+                                ) : activeTab === 'corridors' ? (
+                                  <span>Slug: {item.slug}</span>
                                 ) : (item.phone || item.possession)}
                               </span>
                             </div>
@@ -547,7 +568,11 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
             </div>
             <div className="modal-body-v3">
                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
-                  {Object.keys(formData).filter(k => !['id', 'gallery', 'images', 'project_list', 'projects', 'corridor'].includes(k)).map(key => {
+                  {Object.keys(formData).filter(k => {
+                    if (['id', 'gallery', 'images', 'project_list', 'projects', 'project_items', 'corridor'].includes(k)) return false;
+                    if (activeTab === 'developers' && k === 'image') return false;
+                    return true;
+                  }).map(key => {
                     const isImage = ['image', 'logo_url'].includes(key);
                     const isFullWidth = ['description', 'bio', 'about'].includes(key);
                     

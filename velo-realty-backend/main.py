@@ -180,7 +180,7 @@ def get_properties(db: Session = Depends(get_db)):
     return db.query(models.PropertyModel).order_by(models.PropertyModel.id.asc()).all()
 
 @app.get("/api/developers")
-def get_developers(page: int = 1, limit: int = 20, db: Session = Depends(get_db)):
+def get_developers(page: int = 1, limit: int = 1000, db: Session = Depends(get_db)):
     # Calculate offset
     offset = (page - 1) * limit
     
@@ -303,7 +303,7 @@ def search_developer_profile(name: str, db: Session = Depends(get_db)):
                 "status": p.status,
                 "configurations": p.configurations,
                 "zones": [z.name for z in p.zones],
-                "primary_image": next((img.image_url for img in p.images if img.is_primary), None),
+                "primary_image": next((img.image_url for img in p.images if img.is_primary), None) or (p.images[0].image_url if p.images else None),
             } for p in dev.project_list]
         }
 
@@ -333,7 +333,7 @@ def search_developer_profile(name: str, db: Session = Depends(get_db)):
                 "price_range": p.price_range,
                 "status": p.status,
                 "configurations": p.configurations,
-                "primary_image": next((img.image_url for img in p.images if img.is_primary), None),
+                "primary_image": next((img.image_url for img in p.images if img.is_primary), None) or (p.images[0].image_url if p.images else None),
             } for p in corridor.project_list]
         }
 
@@ -347,10 +347,10 @@ def get_developer_profiles(db: Session = Depends(get_db)):
     for d in devs:
         primary_images = {}
         for p in d.project_list:
-            for img in p.images:
-                if img.is_primary:
-                    primary_images[p.id] = img.image_url
-                    break
+            primary_img = next((img.image_url for img in p.images if img.is_primary), None)
+            if not primary_img and p.images:
+                primary_img = p.images[0].image_url
+            primary_images[p.id] = primary_img
         result.append({
             "id": d.id,
             "name": d.name,
@@ -385,11 +385,9 @@ def get_developer_profile_by_id(dev_id: int, db: Session = Depends(get_db)):
     
     projects = []
     for p in dev.project_list:
-        primary_img = None
-        for img in p.images:
-            if img.is_primary:
-                primary_img = img.image_url
-                break
+        primary_img = next((img.image_url for img in p.images if img.is_primary), None)
+        if not primary_img and p.images:
+            primary_img = p.images[0].image_url
         projects.append({
             "id": p.id,
             "name": p.name,
@@ -431,11 +429,9 @@ def get_developer_profile(slug: str, db: Session = Depends(get_db)):
     
     projects = []
     for p in dev.project_list:
-        primary_img = None
-        for img in p.images:
-            if img.is_primary:
-                primary_img = img.image_url
-                break
+        primary_img = next((img.image_url for img in p.images if img.is_primary), None)
+        if not primary_img and p.images:
+            primary_img = p.images[0].image_url
         projects.append({
             "id": p.id,
             "name": p.name,
@@ -695,8 +691,8 @@ def create_project(proj: ProjectCreate, db: Session = Depends(get_db), admin: mo
     db.commit()
     db.refresh(db_proj)
     
-    for img_url in images_data:
-        db_img = models.ProjectImageModel(project_id=db_proj.id, image_url=img_url, is_primary=False)
+    for idx, img_url in enumerate(images_data):
+        db_img = models.ProjectImageModel(project_id=db_proj.id, image_url=img_url, is_primary=(idx == 0))
         db.add(db_img)
     db.commit()
     return db_proj
@@ -713,8 +709,8 @@ def update_project(proj_id: int, proj: ProjectCreate, db: Session = Depends(get_
     
     # Update images: simple approach - clear and re-add
     db.query(models.ProjectImageModel).filter(models.ProjectImageModel.project_id == proj_id).delete()
-    for img_url in images_data:
-        db_img = models.ProjectImageModel(project_id=db_proj.id, image_url=img_url, is_primary=False)
+    for idx, img_url in enumerate(images_data):
+        db_img = models.ProjectImageModel(project_id=db_proj.id, image_url=img_url, is_primary=(idx == 0))
         db.add(db_img)
         
     db.commit()
@@ -807,7 +803,20 @@ def delete_all_properties(db: Session = Depends(get_db), admin: models.AdminUser
 # Developers
 @app.post("/api/admin/developers", status_code=status.HTTP_201_CREATED)
 def create_developer(dev: DeveloperCreate, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
-    db_dev = models.DeveloperProfileModel(**dev.dict())
+    dev_data = dev.dict()
+    if not dev_data.get("slug"):
+        import re
+        dev_data["slug"] = re.sub(r'[^a-z0-9]+', '-', dev_data["name"].lower()).strip('-')
+        
+    # Check if developer with same name or slug already exists to prevent integrity errors
+    existing = db.query(models.DeveloperProfileModel).filter(
+        (models.DeveloperProfileModel.name == dev_data["name"]) | 
+        (models.DeveloperProfileModel.slug == dev_data["slug"])
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Developer with this name or slug already exists")
+
+    db_dev = models.DeveloperProfileModel(**dev_data)
     db.add(db_dev)
     db.commit()
     db.refresh(db_dev)
@@ -818,7 +827,22 @@ def update_developer(dev_id: int, dev: DeveloperCreate, db: Session = Depends(ge
     db_dev = db.query(models.DeveloperProfileModel).filter(models.DeveloperProfileModel.id == dev_id).first()
     if not db_dev:
         raise HTTPException(status_code=404, detail="Developer not found")
-    for key, value in dev.dict().items():
+        
+    dev_data = dev.dict()
+    if not dev_data.get("slug"):
+        import re
+        dev_data["slug"] = re.sub(r'[^a-z0-9]+', '-', dev_data["name"].lower()).strip('-')
+        
+    # Check if another developer already has this name or slug
+    existing = db.query(models.DeveloperProfileModel).filter(
+        (models.DeveloperProfileModel.id != dev_id) & 
+        ((models.DeveloperProfileModel.name == dev_data["name"]) | 
+         (models.DeveloperProfileModel.slug == dev_data["slug"]))
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Another developer with this name or slug already exists")
+
+    for key, value in dev_data.items():
         setattr(db_dev, key, value)
     db.commit()
     db.refresh(db_dev)

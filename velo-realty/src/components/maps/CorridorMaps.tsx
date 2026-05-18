@@ -64,13 +64,32 @@ export function HyderabadNorthMap() {
   );
 }
 
+export function HyderabadCentralMap() {
+  return (
+    <div className="corridor-map-container">
+      <iframe
+        title="Hyderabad Central Corridor"
+        width="100%"
+        height="100%"
+        loading="lazy"
+        style={{ border: 0 }}
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.52323456789!2d78.4738!3d17.4323!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb91dabc12345%3A0xabcdef1234567890!2sHyderabad%20Central!5e0!3m2!1sen!2sin!4v1716030000000"
+        referrerPolicy="no-referrer-when-downgrade"
+      />
+    </div>
+  );
+}
+
 export const CORRIDOR_MAPS: Record<string, React.ReactNode> = {
-  'south-corridor': <HyderabadSouthMap />,
-  'west-corridor': <HyderabadWestMap />,
-  'east-corridor': <HyderabadEastMap />,
-  'north-corridor': <HyderabadNorthMap />,
-  'hyderabad-south': <HyderabadSouthMap />,
-  'hyderabad-west': <HyderabadWestMap />,
-  'hyderabad-east': <HyderabadEastMap />,
-  'hyderabad-north': <HyderabadNorthMap />
+  "south-corridor": <HyderabadSouthMap />,
+  "west-corridor": <HyderabadWestMap />,
+  "east-corridor": <HyderabadEastMap />,
+  "north-corridor": <HyderabadNorthMap />,
+  "central-corridor": <HyderabadCentralMap />,
+
+  "hyderabad-south": <HyderabadSouthMap />,
+  "hyderabad-west": <HyderabadWestMap />,
+  "hyderabad-east": <HyderabadEastMap />,
+  "hyderabad-north": <HyderabadNorthMap />,
+  "hyderabad-central": <HyderabadCentralMap />,
 };
