@@ -412,7 +412,7 @@ export function TestimonialsSection({ testimonials }: { testimonials: any[] }) {
                   </svg>
                 ))}
               </div>
-              <p style={{fontSize: '1.1rem', fontStyle: 'italic', color: 'var(--text-700, #475569)', lineHeight: 1.6}}>&quot;{t.content}&quot;</p>
+              <p style={{fontSize: '1.1rem', fontStyle: 'italic', color: 'var(--body-color)', lineHeight: 1.6}}>&quot;{t.content}&quot;</p>
               <div style={{display: 'flex', alignItems: 'center', gap: '1rem', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--card-border)'}}>
                 <img 
                   src={t.image_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100'} 
