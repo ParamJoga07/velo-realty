@@ -13,6 +13,7 @@ type PropertyShowcaseProps = {
   setSortBy: (value: SortBy) => void
   setSelectedProperty: (prop: Property | null) => void;
   onDeveloperClick: (name: string) => void;
+  emptyStateMessage?: string;
 }
 
 export function PropertyShowcase({
@@ -25,6 +26,7 @@ export function PropertyShowcase({
   setSortBy,
   setSelectedProperty,
   onDeveloperClick,
+  emptyStateMessage,
 }: PropertyShowcaseProps) {
 
   return (
@@ -57,7 +59,7 @@ export function PropertyShowcase({
         </div>
         <p className="result-count">{properties.length} curated properties</p>
         <div className={viewMode === 'grid' ? 'property-grid' : 'property-grid list'}>
-          {properties.length === 0 && <p className="empty-state">No properties match this filter yet.</p>}
+          {properties.length === 0 && <p className="empty-state">{emptyStateMessage || 'No properties match this filter yet.'}</p>}
           {properties.map((item) => (
             <article key={item.id} className="property-card interactive-card" onClick={() => setSelectedProperty(item)}>
               <div className="card-image">

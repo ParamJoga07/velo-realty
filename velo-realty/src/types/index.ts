@@ -21,6 +21,8 @@ export type Property = {
   status: PropertyStatus
   image: string
   description: string
+  amenities?: string
+  highlights?: string
 }
 
 export type Developer = {

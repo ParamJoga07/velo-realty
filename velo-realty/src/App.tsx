@@ -19,6 +19,14 @@ import { AdminLogin } from './components/AdminLogin'
 import { IdentityModal } from './components/IdentityModal'
 import API_BASE_URL from './config'
 
+const DEFAULT_PROJECT_IMAGES = [
+  "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=800",
+  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=800",
+  "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=800",
+  "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&q=80&w=800",
+  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800"
+];
+
 function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const savedTheme = window.localStorage.getItem('velo-theme')
@@ -441,7 +449,7 @@ function App() {
       if (configStr.includes('5')) beds = 5;
 
       // Default high-quality placeholder image if no images uploaded
-      let imgUrl = "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=800";
+      let imgUrl = DEFAULT_PROJECT_IMAGES[(p.id || 0) % DEFAULT_PROJECT_IMAGES.length];
       if (Array.isArray(p.images) && p.images.length > 0) {
         const firstImg = p.images[0];
         if (typeof firstImg === 'string') {
@@ -469,15 +477,22 @@ function App() {
         handover: p.possession || '2028',
         status: (p.status === 'Ready to Move' ? 'Ready' : p.status) as Property['status'],
         image: imgUrl,
-        description: p.description || 'Premium residential gated community with luxury amenities.'
+        description: p.description || 'Premium residential gated community with luxury amenities.',
+        amenities: p.amenities,
+        highlights: p.highlights
       };
     });
 
     const combined = [...mappedProperties];
 
     const filtered = combined.filter((item) => {
-      // Allow Rentals and Resale tabs or Commercial/Plots to match directly bypassing strict tab restrictions
-      const isSpecialType = ['Plot or Land', 'Commercial Space'].includes(propertyType) || ['Rentals', 'Resale'].includes(tab);
+      // Force empty state for Coming Soon tabs
+      if (['Ready', 'Resale', 'Rentals'].includes(tab)) {
+        return false;
+      }
+
+      // Allow Commercial/Plots to match directly bypassing strict tab restrictions
+      const isSpecialType = ['Plot or Land', 'Commercial Space'].includes(propertyType);
       const tabMatch = isSpecialType || item.listingType === tab;
       
       const locationMatch = location === 'All Locations' || location === 'All Corridors' || item.location === location;
@@ -560,6 +575,7 @@ function App() {
           setSortBy={setSortBy}
           setSelectedProperty={setSelectedProperty}
           onDeveloperClick={setSelectedDeveloperName}
+          emptyStateMessage={['Ready', 'Resale', 'Rentals'].includes(tab) ? 'We are coming soon or launching soon' : undefined}
         />
         <Sections
           developers={developers}
@@ -620,7 +636,34 @@ function App() {
                 <p><strong>Listing:</strong> {selectedProperty.listingType}</p>
               </div>
               <div className="modal-description">
+                <h4>About this property</h4>
                 <p>{selectedProperty.description}</p>
+                
+                {selectedProperty.highlights && (
+                  <>
+                    <h4 style={{marginTop: '1.5rem'}}>Key Highlights</h4>
+                    <ul style={{ paddingLeft: '1.2rem', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                      {selectedProperty.highlights.split('\n').filter(Boolean).map((h, i) => (
+                        <li key={i} style={{ color: 'var(--text-800)', fontSize: '0.95rem', lineHeight: '1.5' }}>
+                          {h.replace(/^[-\*•]\s*/, '').trim()}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+                
+                {selectedProperty.amenities && (
+                  <>
+                    <h4 style={{marginTop: '1.5rem'}}>Amenities</h4>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
+                      {selectedProperty.amenities.split(',').map((a, i) => (
+                        <span key={i} style={{ background: 'rgba(255,255,255,0.05)', padding: '0.3rem 0.8rem', borderRadius: '4px', fontSize: '0.85rem', color: 'var(--text-900)' }}>
+                          {a.trim()}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
               <div className="modal-actions">
                 <button 

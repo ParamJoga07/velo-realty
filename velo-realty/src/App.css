@@ -677,9 +677,9 @@ textarea {
 
 .section-head h2 {
   margin: 0;
-  font-size: clamp(1.85rem, 2.9vw, 2.55rem);
+  font-size: clamp(1.4rem, 2.2vw, 2.1rem);
   letter-spacing: -0.015em;
-  line-height: 1.1;
+  line-height: 1.15;
   font-family: "EB Garamond Custom", "Times New Roman", serif;
   font-weight: var(--heading-weight-section);
 }
@@ -922,11 +922,11 @@ textarea {
 }
 
 .track-upper {
-  animation: ribbonRun 40s linear infinite; /* Increased speed */
+  animation: ribbonRun 100s linear infinite; /* Increased speed */
 }
 
 .track-lower {
-  animation: ribbonRunReverse 40s linear infinite; /* Increased speed */
+  animation: ribbonRunReverse 100s linear infinite; /* Increased speed */
 }
 
 .ribbon-3d:hover {
@@ -1072,14 +1072,33 @@ textarea {
 /* 3D Developer Grid */
 .developer-grid-3d {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2.5rem;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
   perspective: 2000px;
+}
+
+@media (max-width: 1200px) {
+  .developer-grid-3d {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .developer-grid-3d {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .developer-grid-3d {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
 }
 
 .developer-card-3d {
   position: relative;
-  height: 380px;
+  height: 280px;
   cursor: pointer;
   transform-style: preserve-3d;
   transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
@@ -1092,7 +1111,7 @@ textarea {
 .dev-card-visual {
   position: absolute;
   inset: 0;
-  border-radius: 24px;
+  border-radius: 16px;
   overflow: hidden;
   background: var(--navy-700);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1116,10 +1135,18 @@ textarea {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 2rem;
+  padding: 1.2rem;
   background: linear-gradient(to top, rgba(10, 17, 24, 0.95), transparent);
   color: white;
   transform: translateZ(30px);
+}
+
+.dev-card-info h3 {
+  font-size: 1.2rem;
+  margin: 0 0 0.2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .page[data-theme='light'] .dev-card-visual {
@@ -1500,6 +1527,12 @@ textarea {
     transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1),
     border-color 0.4s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+a.blog-card * {
+  text-decoration: none;
 }
 
 .read-link {
@@ -2682,16 +2715,39 @@ body.modal-open {
 }
 
 @media (max-width: 768px) {
+  .property-modal-overlay {
+    padding: 1rem;
+    align-items: flex-end;
+  }
   .property-modal-card {
     grid-template-columns: 1fr;
-    max-height: 90vh;
+    max-height: 85vh;
     overflow-y: auto;
+    border-radius: 20px;
+    margin-bottom: env(safe-area-inset-bottom, 1rem);
   }
   .modal-image-container {
     min-height: 250px;
+    height: 250px;
   }
   .modal-content {
-    padding: 2rem 1.5rem;
+    padding: 1.5rem 1.2rem;
+    gap: 1rem;
+  }
+  .modal-header h2 {
+    font-size: 1.5rem;
+  }
+  .modal-meta {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .modal-close {
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+    background: rgba(0, 0, 0, 0.4);
   }
 }
 @media (max-width: 768px) {
@@ -3336,4 +3392,66 @@ body.modal-open {
   background: rgba(0, 0, 0, 0.03);
   color: #0f172a;
 }
+
+@media (max-width: 768px) {
+  .contact-agent-modal-overlay {
+    align-items: flex-end;
+    padding: 1rem;
+  }
+  
+  .contact-agent-card {
+    border-radius: 20px;
+    margin-bottom: env(safe-area-inset-bottom, 1rem);
+  }
+  
+  .contact-agent-header {
+    padding: 1.5rem 1.5rem 1rem;
+  }
+  
+  .contact-agent-header h3 {
+    font-size: 1.5rem;
+  }
+  
+  .contact-agent-body {
+    padding: 1rem 1.5rem 1.5rem;
+  }
+  
+  .contact-agent-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+.developer-grid-wrapper {
+  position: relative;
+  overflow: hidden;
+  max-height: calc((280px * 3) + (1.5rem * 2));
+  transition: max-height 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.developer-grid-wrapper.expanded {
+  max-height: 5000px; /* Large enough to fit all content */
+}
+
+@media (max-width: 768px) {
+  .developer-grid-wrapper {
+    max-height: calc((280px * 3) + (1rem * 2));
+  }
+}
+
+.developer-mask {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 250px;
+  background: linear-gradient(to top, #0a1824, transparent);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.page[data-theme='light'] .developer-mask {
+  background: linear-gradient(to top, #ffffff, transparent);
+}
+
 

@@ -103,6 +103,19 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
                 <p className="pd-location">📍 {selectedProject.location}{selectedProject.sub_location ? ` — ${selectedProject.sub_location}` : ''}</p>
               </div>
 
+              {selectedProject.description && (
+                <div className="pd-section" style={{ marginTop: '0.5rem', marginBottom: '1.5rem' }}>
+                  <h4 style={{ marginBottom: '0.8rem' }}>About</h4>
+                  <ul style={{ paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {selectedProject.description.split('\n').filter(Boolean).map((line: string, i: number) => (
+                      <li key={i} style={{ fontSize: '0.95rem', lineHeight: '1.5', opacity: 0.9 }}>
+                        {line.replace(/^[-\*•]\s*/, '').trim()}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {/* Specs */}
               <div className="pd-specs">
                 {selectedProject.price_range && (
@@ -141,13 +154,6 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
                   <div className="pd-chips">
                     {highlights.map((h, i) => <span key={i} className="pd-chip">{h}</span>)}
                   </div>
-                </div>
-              )}
-
-              {selectedProject.description && (
-                <div className="pd-section">
-                  <h4>About</h4>
-                  <p className="pd-desc">{selectedProject.description}</p>
                 </div>
               )}
 

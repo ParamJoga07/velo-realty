@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import type { Community, Developer, Guide } from '../types'
 import { Building2 } from 'lucide-react'
 import { CORRIDOR_MAPS } from './maps/CorridorMaps'
-import { getOptimizedImage } from '../config'
 
 type SectionsProps = {
   developers: Developer[]
@@ -15,10 +14,10 @@ type SectionsProps = {
 }
 
 const SKYLINE_IMAGES = [
-  "https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=1200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1449156001931-82d16bca4700?q=80&w=1200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=1200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1519501025264-65ba15a82390?q=80&w=1200&auto=format&fit=crop"
+  "/images-1.jpeg",
+  "/IMAGE2.jpg",
+  "/IMAGE3.jpg",
+  "/IMAGE4.jpg"
 ];
 
 export function Sections({ 
@@ -40,50 +39,7 @@ export function Sections({
     return () => clearInterval(timer);
   }, []);
 
-  if (showAllPartners) {
-    return (
-      <div className="all-partners-view animate-in">
-        <header className="view-header">
-          <div className="container">
-            <button className="back-nav-btn" onClick={() => setShowAllPartners(false)}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-              Back to Portfolio
-            </button>
-            <div className="view-title">
-              <p className="eyebrow">Strategic Network</p>
-              <h1>Elite Developer Ecosystem</h1>
-            </div>
-          </div>
-        </header>
-
-        <main className="view-content container">
-          <div className="partner-universe-grid">
-            {developers.map((dev, index) => (
-              <div 
-                key={`${dev.name}-${index}`} 
-                className="partner-universe-card"
-                onClick={() => onDeveloperClick(dev.name)}
-                style={{ animationDelay: `${index * 0.05}s` }}
-              >
-                <div className="card-image-wrap">
-                  <img src={getOptimizedImage(dev.image)} alt={dev.name} />
-                  <div className="card-overlay"></div>
-                </div>
-                <div className="card-content">
-                  <div className="partner-status">Strategic Partner</div>
-                  <h3>{dev.name}</h3>
-                  <div className="partner-projects-count">
-                    {projectStats.devCounts[dev.id] || 0} Landmark Projects
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </main>
-
-      </div>
-    );
-  }
+  // Inline expansion logic will be applied at the developer section below.
 
   // Prepare partner names from both developers and explicit partners
   const allPartnerNames = Array.from(new Set([
@@ -176,12 +132,12 @@ export function Sections({
             })}
           </div>
         </div>
-        <div className="center-action-wrap">
+        {/* <div className="center-action-wrap">
           <button className="btn-premium-action" onClick={() => setShowAllPartners(true)}>
             Discover All {allPartnerNames.length} Strategic Partners
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
           </button>
-        </div>
+        </div> */}
       </section>
 
       <section id="about" className="section about-panel">
@@ -360,28 +316,36 @@ export function Sections({
             </div>
             <a href="#contact">Partner with Velo</a>
           </div>
-          <div className="developer-grid-3d">
-            {developers.map((item) => (
-              <article 
-                key={item.name} 
-                className="developer-card-3d"
-                onClick={() => onDeveloperClick(item.name)}
-              >
-                <div className="dev-card-visual">
-                  <img src={item.image} alt={item.name} loading="lazy" />
-                  <div className="dev-card-info">
-                    <h3>{item.name}</h3>
-                    <p>{projectStats.devCounts[item.id] || 0} Projects</p>
+          <div className={`developer-grid-wrapper ${showAllPartners ? 'expanded' : ''}`}>
+            <div className="developer-grid-3d">
+              {developers.map((item) => (
+                <article 
+                  key={item.name} 
+                  className="developer-card-3d"
+                  onClick={() => onDeveloperClick(item.name)}
+                >
+                  <div className="dev-card-visual">
+                    <img src={item.image} alt={item.name} loading="lazy" />
+                    <div className="dev-card-info">
+                      <h3>{item.name}</h3>
+                      <p>{projectStats.devCounts[item.id] || 0} Projects</p>
+                    </div>
                   </div>
-                </div>
-                <div className="dev-card-glare"></div>
-              </article>
-            ))}
+                  <div className="dev-card-glare"></div>
+                </article>
+              ))}
+            </div>
+            {!showAllPartners && <div className="developer-mask"></div>}
           </div>
           <div className="center-action-wrap" style={{ marginTop: '3rem' }}>
-            <button className="btn-premium-action" onClick={() => setShowAllPartners(true)}>
-              Explore All {developers.length} Developers
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            <button className="btn-premium-action" onClick={() => setShowAllPartners(!showAllPartners)}>
+              {showAllPartners ? 'Show Less Developers' : `Explore All ${developers.length} Developers`}
+              <svg 
+                width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                style={{ transform: showAllPartners ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s ease' }}
+              >
+                <line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline>
+              </svg>
             </button>
           </div>
         </div>
@@ -432,7 +396,7 @@ export function TestimonialsSection({ testimonials }: { testimonials: any[] }) {
   if (!testimonials || testimonials.length === 0) return null;
 
   return (
-    <section id="testimonials" className="section" style={{background: 'rgba(10, 15, 25, 0.5)'}}>
+    <section id="testimonials" className="section alt">
       <div className="container">
         <div className="section-head center">
           <h2>Client Experiences</h2>
@@ -440,24 +404,24 @@ export function TestimonialsSection({ testimonials }: { testimonials: any[] }) {
         </div>
         <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginTop: '3rem'}}>
           {testimonials.map((t) => (
-            <div key={t.id} className="premium-card" style={{padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 24}}>
+            <div key={t.id} className="premium-card" style={{padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: 'var(--card-bg)', border: '1px solid var(--card-border)', borderRadius: 24}}>
               <div style={{display: 'flex', gap: '0.2rem'}}>
                 {[...Array(5)].map((_, i) => (
-                  <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={i < t.rating ? "var(--accent-orange)" : "rgba(255,255,255,0.1)"} stroke="none">
+                  <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={i < t.rating ? "var(--accent-orange, #f97316)" : "var(--border-color)"} stroke="none">
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                   </svg>
                 ))}
               </div>
-              <p style={{fontSize: '1.1rem', fontStyle: 'italic', color: 'var(--text-dim)', lineHeight: 1.6}}>&quot;{t.content}&quot;</p>
-              <div style={{display: 'flex', alignItems: 'center', gap: '1rem', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)'}}>
+              <p style={{fontSize: '1.1rem', fontStyle: 'italic', color: 'var(--text-700, #475569)', lineHeight: 1.6}}>&quot;{t.content}&quot;</p>
+              <div style={{display: 'flex', alignItems: 'center', gap: '1rem', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--card-border)'}}>
                 <img 
                   src={t.image_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100'} 
                   alt={t.name} 
-                  style={{width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--accent-orange)'}} 
+                  style={{width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--accent-orange, #f97316)'}} 
                 />
                 <div>
-                  <div style={{fontWeight: 700, color: '#fff'}}>{t.name}</div>
-                  <div style={{fontSize: '0.85rem', color: 'var(--accent-orange)'}}>{t.role}</div>
+                  <div style={{fontWeight: 700, color: 'var(--heading-color)'}}>{t.name}</div>
+                  <div style={{fontSize: '0.85rem', color: 'var(--accent-orange, #f97316)'}}>{t.role}</div>
                 </div>
               </div>
             </div>

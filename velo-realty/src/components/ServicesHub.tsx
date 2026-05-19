@@ -128,7 +128,6 @@ export function ServicesHub() {
 
         <div id="refer-earn" className="referral-banner-premium">
           <div className="referral-text-content">
-            <div className="badge-exclusive"><Sparkles size={12} /> App Exclusive</div>
             <h3>Refer a High-Net-Worth Peer</h3>
             <p>Unlock elite rewards and strategic investment credits for every successful acquisition within your trusted network.</p>
             <div className="referral-perks-row">

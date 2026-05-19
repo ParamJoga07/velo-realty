@@ -114,6 +114,7 @@ export function Navbar({ favoritesCount, theme, onThemeToggle, onFilterSelect, d
         { label: 'Property Valuation', href: '#services' },
         { label: 'Refer & Earn', href: '#refer-earn' },
         { label: 'Home Loans', href: '#services' },
+        { label: 'Interior Designing', href: '#services' },
       ],
     },
     {
