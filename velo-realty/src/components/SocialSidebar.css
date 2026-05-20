@@ -1,0 +1,137 @@
+.social-sidebar {
+  position: fixed;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  z-index: 100;
+  pointer-events: auto;
+}
+
+.social-sidebar-line {
+  width: 1px;
+  background-color: var(--text-500);
+  opacity: 0.6;
+  flex-grow: 1;
+  transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.social-sidebar-line.top-line {
+  height: 60px;
+}
+
+.social-sidebar-line.bottom-line {
+  height: 60px;
+}
+
+.social-sidebar:hover .social-sidebar-line {
+  height: 40px;
+}
+
+.social-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-500);
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.social-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.social-link:hover {
+  color: var(--accent-orange);
+  transform: translateY(-3px) scale(1.1);
+}
+
+.social-link:hover .social-icon-wrapper {
+  background: rgba(var(--accent-orange-rgb, 212, 175, 55), 0.05); /* Soft gold/orange background if variable missing fallback to subtle */
+  border-color: rgba(var(--accent-orange-rgb, 212, 175, 55), 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.social-tooltip {
+  position: absolute;
+  left: calc(100% + 15px);
+  background: var(--surface-0);
+  color: var(--navy-900);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-10px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.social-link:hover .social-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
+/* Add a subtle glow for the dark theme */
+[data-theme='dark'] .social-link:hover .social-icon-wrapper {
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.05), inset 0 0 10px rgba(255, 255, 255, 0.02);
+}
+
+[data-theme='dark'] .social-tooltip {
+  background: rgba(20, 20, 20, 0.85);
+  color: #ffffff;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile styling: convert to a horizontal floating bar at the bottom */
+@media (max-width: 768px) {
+  .social-sidebar {
+    top: auto;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: row;
+    gap: 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    padding: 0.4rem 1.2rem;
+    border-radius: 999px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .social-sidebar-line {
+    display: none;
+  }
+
+  .social-tooltip {
+    display: none; /* Tooltips don't work well on mobile/touch anyway */
+  }
+  
+  .social-icon-wrapper {
+    width: 36px;
+    height: 36px;
+  }
+}

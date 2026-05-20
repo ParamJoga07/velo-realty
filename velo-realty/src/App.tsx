@@ -17,6 +17,7 @@ import type { ListingType, Property, Developer, Guide, Category, Zone } from './
 import { AdminDashboard } from './components/AdminDashboard'
 import { AdminLogin } from './components/AdminLogin'
 import { IdentityModal } from './components/IdentityModal'
+import { SocialSidebar } from './components/SocialSidebar'
 import API_BASE_URL from './config'
 
 const DEFAULT_PROJECT_IMAGES = [
@@ -537,6 +538,7 @@ function App() {
         <AdminLogin onLogin={handleLogin} onCancel={() => setShowAdminLogin(false)} />
       )}
       <PriceTicker areaRates={areaRates} />
+      <SocialSidebar />
       <Navbar
         favoritesCount={favorites.size}
         theme={theme}

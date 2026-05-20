@@ -21,8 +21,12 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
       const res = await fetch(
         `${API_BASE_URL}/api/developer-profiles/search?name=${encodeURIComponent(developerName)}`
       );
+      if (!res.ok) {
+        throw new Error('Developer profile not found');
+      }
       const data = await res.json();
       if (data.error) throw new Error(data.error);
+      if (data.detail) throw new Error(data.detail);
       return data as DeveloperProfile;
     },
     enabled: !!developerName
@@ -31,11 +35,17 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
   const [selectedProjectSlug, setSelectedProjectSlug] = useState<string | null>(null);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
 
-  const { data: selectedProject, isLoading: isLoadingProject } = useQuery<ProjectDetail>({
+  const { data: selectedProject, isLoading: isLoadingProject, error: projectError } = useQuery<ProjectDetail>({
     queryKey: ['project', selectedProjectSlug],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/api/projects/${selectedProjectSlug}`);
-      return res.json();
+      const res = await fetch(`${API_BASE_URL}/api/projects/${encodeURIComponent(selectedProjectSlug as string)}`);
+      if (!res.ok) {
+        throw new Error('Project not found');
+      }
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      if (data.detail) throw new Error(data.detail);
+      return data;
     },
     enabled: !!selectedProjectSlug
   });
@@ -48,6 +58,25 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
   };
 
   // --- PROJECT DETAIL VIEW ---
+  if (selectedProjectSlug && projectError) {
+    return (
+      <div className="dev-modal-overlay" onClick={onClose}>
+        <div className="dev-modal-content dev-modal-project" onClick={(e) => e.stopPropagation()}>
+          <button className="dev-modal-close" onClick={onClose}>×</button>
+          <button className="dev-modal-back" onClick={() => setSelectedProjectSlug(null)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to {profile?.name || 'Developer'}
+          </button>
+          <div className="dev-modal-empty" style={{ marginTop: '4rem' }}>
+            <div className="dev-empty-icon">⚠️</div>
+            <h3>Project Not Found</h3>
+            <p>{(projectError as Error).message || 'Unable to load project details.'}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (selectedProject) {
     const images = selectedProject.images || [];
     const highlights = selectedProject.highlights?.split(';').map(h => h.trim()).filter(Boolean) || [];
