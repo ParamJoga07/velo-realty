@@ -16,7 +16,9 @@ export function TeamSection() {
     queryFn: () =>
       fetch(`${API_BASE_URL}/api/team`).then((res) =>
         res.json().then((data) =>
-          Array.isArray(data) ? [...data].sort((a, b) => a.id - b.id) : []
+          Array.isArray(data)
+            ? [...data].sort((a, b) => (a.order ?? a.id) - (b.order ?? b.id))
+            : []
         )
       ),
   });

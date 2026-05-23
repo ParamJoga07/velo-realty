@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict
 from sqlalchemy.orm import Session, joinedload
 from database import get_db, engine
 import models
@@ -462,6 +462,35 @@ def get_developer_profile(slug: str, db: Session = Depends(get_db)):
         "project_items": projects
     }
 
+from sqlalchemy.orm import joinedload
+
+@app.get("/api/projects/featured")
+def get_featured_projects(db: Session = Depends(get_db)):
+    projects = db.query(models.ProjectModel).options(joinedload(models.ProjectModel.images)).filter(models.ProjectModel.is_featured == True).order_by(models.ProjectModel.id.asc()).all()
+    result = []
+    for p in projects:
+        result.append({
+            "id": p.id,
+            "developer_id": p.developer_id,
+            "corridor_id": p.corridor_id,
+            "name": p.name,
+            "slug": p.slug,
+            "location": p.location,
+            "sub_location": p.sub_location,
+            "project_type": p.project_type,
+            "configurations": p.configurations,
+            "price_range": p.price_range,
+            "price_start": p.price_start,
+            "possession": p.possession,
+            "status": p.status,
+            "amenities": p.amenities,
+            "description": p.description,
+            "highlights": p.highlights,
+            "is_featured": True,
+            "images": [{"image_url": img.image_url} for img in p.images]
+        })
+    return result
+
 @app.get("/api/projects/{slug}")
 def get_project_detail(slug: str, db: Session = Depends(get_db)):
     """Get full project details with all images"""
@@ -490,9 +519,11 @@ def get_project_detail(slug: str, db: Session = Depends(get_db)):
         "possession": project.possession,
         "status": project.status,
         "clubhouse_size": project.clubhouse_size,
+        "amenities": project.amenities,
         "description": project.description,
         "highlights": project.highlights,
         "connectivity": project.connectivity,
+        "is_featured": project.is_featured or False,
         "images": [{
             "id": img.id,
             "image_url": img.image_url,
@@ -642,7 +673,6 @@ def get_user_leads(db: Session = Depends(get_db), admin: models.AdminUser = Depe
     } for u in users]
 
 
-from sqlalchemy.orm import joinedload
 
 @app.get("/api/projects")
 def get_projects(db: Session = Depends(get_db)):
@@ -673,13 +703,24 @@ def get_projects(db: Session = Depends(get_db)):
             "description": p.description,
             "highlights": p.highlights,
             "connectivity": p.connectivity,
+            "is_featured": p.is_featured or False,
             "images": [{"image_url": img.image_url} for img in p.images]
         })
     return result
 
 @app.get("/api/team")
 def get_team(db: Session = Depends(get_db)):
-    return db.query(models.TeamMemberModel).order_by(models.TeamMemberModel.id.asc()).all()
+    return db.query(models.TeamMemberModel).order_by(models.TeamMemberModel.order.asc(), models.TeamMemberModel.id.asc()).all()
+
+class TeamReorderRequest(BaseModel):
+    items: List[Dict[str, int]]  # list of {"id": X, "order": Y}
+
+@app.patch("/api/admin/team/reorder")
+def reorder_team(request: TeamReorderRequest, db: Session = Depends(get_db)):
+    for item in request.items:
+        db.query(models.TeamMemberModel).filter(models.TeamMemberModel.id == item["id"]).update({"order": item["order"]})
+    db.commit()
+    return {"status": "success"}
 
 # --- Admin Auth Endpoints ---
 @app.post("/api/admin/login", response_model=Token)
@@ -756,6 +797,15 @@ def update_project(proj_id: int, proj: ProjectCreate, db: Session = Depends(get_
     db.commit()
     db.refresh(db_proj)
     return db_proj
+
+@app.patch("/api/admin/projects/{proj_id}/star")
+def toggle_project_star(proj_id: int, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    db_proj = db.query(models.ProjectModel).filter(models.ProjectModel.id == proj_id).first()
+    if not db_proj:
+        raise HTTPException(status_code=404, detail="Project not found")
+    db_proj.is_featured = not (db_proj.is_featured or False)
+    db.commit()
+    return {"id": proj_id, "is_featured": db_proj.is_featured}
 
 @app.delete("/api/admin/projects/{proj_id}")
 def delete_project(proj_id: int, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):

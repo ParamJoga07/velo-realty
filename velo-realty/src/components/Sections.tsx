@@ -184,14 +184,14 @@ export function Sections({
                 </div>
               </div>
             </div>
-            <div className="about-stats">
+            {/* <div className="about-stats">
               {aboutStats.map((stat) => (
                 <div className="about-stat" key={stat.value}>
                   <strong>{stat.value}</strong>
                   <span>{stat.label}</span>
                 </div>
               ))}
-            </div>
+            </div> */}
           </article>
           <aside className="about-visual" aria-label="City skyline preview">
             {SKYLINE_IMAGES.map((img, i) => (

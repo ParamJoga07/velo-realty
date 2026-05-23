@@ -84,6 +84,13 @@ function DropdownGroup({ group, onClose, onFilterSelect }: { group: NavGroup; on
 
 export function Navbar({ favoritesCount, theme, onThemeToggle, onFilterSelect, dbCorridors = [] }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [activeGroupLabel, setActiveGroupLabel] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!mobileOpen) {
+      setActiveGroupLabel(null);
+    }
+  }, [mobileOpen]);
 
   const handleItemClick = (item: NavItem) => {
     if (onFilterSelect && item.href === '#properties') {
@@ -198,30 +205,69 @@ export function Navbar({ favoritesCount, theme, onThemeToggle, onFilterSelect, d
         {/* ── MOBILE MENU ── */}
         {mobileOpen && (
           <div className="nav-mobile-panel">
-            {NAV_GROUPS.map((group) => (
-              <div key={group.label} className="nav-mobile-group">
-                <p className="nav-mobile-heading">{group.label}</p>
-                {group.items.map((item) => (
-                  <a
-                    key={item.label}
-                    className="nav-mobile-item"
-                    href={item.href}
-                    onClick={(e) => { e.preventDefault(); handleItemClick(item); }}
+            {activeGroupLabel === null ? (
+              // Level 1: Top-level groups
+              <div className="nav-mobile-menu-list">
+                {NAV_GROUPS.map((group) => (
+                  <button
+                    key={group.label}
+                    type="button"
+                    className="nav-mobile-menu-group-btn"
+                    onClick={() => setActiveGroupLabel(group.label)}
                   >
-                    {item.label}
-                  </a>
+                    <span>{group.label}</span>
+                    <span className="nav-mobile-arrow">→</span>
+                  </button>
                 ))}
+                
+                {/* Contact Us button inside the menu */}
+                <div className="nav-mobile-contact-container">
+                  <a
+                    className="btn btn-primary nav-mobile-contact-btn"
+                    href="#contact"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      closeMobile();
+                      scrollToSection('#contact');
+                    }}
+                  >
+                    Contact Us
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginLeft: '8px' }}>
+                      <path d="M3.5 8H12.5M12.5 8L8.5 4M12.5 8L8.5 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </a>
+                </div>
               </div>
-            ))}
-            <div className="nav-mobile-footer">
-              <a
-                className="btn btn-primary"
-                href="#contact"
-                onClick={(e) => { e.preventDefault(); closeMobile(); scrollToSection('#contact'); }}
-              >
-                Contact Us →
-              </a>
-            </div>
+            ) : (
+              // Level 2: Sub-items
+              <div className="nav-mobile-menu-list">
+                <button
+                  type="button"
+                  className="nav-mobile-back-btn"
+                  onClick={() => setActiveGroupLabel(null)}
+                >
+                  ← Back to Menu
+                </button>
+                
+                <h3 className="nav-mobile-group-title">{activeGroupLabel}</h3>
+                
+                <div className="nav-mobile-subitems">
+                  {NAV_GROUPS.find(g => g.label === activeGroupLabel)?.items.map((item) => (
+                    <a
+                      key={item.label}
+                      className="nav-mobile-item"
+                      href={item.href}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleItemClick(item);
+                      }}
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

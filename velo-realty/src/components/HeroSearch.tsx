@@ -137,12 +137,12 @@ export function HeroSearch({
           </button>
         </div>
         <div className="hero-metrics">
-          {heroStats.slice(0, 3).map((stat, i) => (
+          {/* {heroStats.slice(0, 3).map((stat, i) => (
             <div key={i}>
               <strong>{stat.value}</strong>
               <span>{stat.label}</span>
             </div>
-          ))}
+          ))} */}
           {heroStats.length === 0 && (
             <>
               <div>

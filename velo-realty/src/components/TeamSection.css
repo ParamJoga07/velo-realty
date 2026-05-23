@@ -359,12 +359,12 @@
   }
 }
 
-/* ── MOBILE: stack vertically, cube BELOW CEO ── */
+/* ── MOBILE: stack vertically, CEO ALWAYS on top ── */
 @media (max-width: 800px) {
   .team-stage {
     flex-direction: column;
     align-items: center;
-    gap: 5rem; /* Large gap to prevent 3D overflow overlap */
+    gap: 2.5rem;
     padding: 0 1.5rem;
   }
 
@@ -372,7 +372,24 @@
     flex: none;
     width: 100%;
     max-width: 360px;
-    order: 1;
+    order: 0; /* CEO always first */
+    height: auto;
+  }
+
+  .carousel-slot {
+    order: 1; /* Carousel after CEO */
+    width: 100%;
+    max-width: 100%;
+    /* Remove the left-fade mask on mobile so full-width shows */
+    -webkit-mask-image: linear-gradient(to right, black 0%, black 85%, transparent 100%);
+    mask-image: linear-gradient(to right, black 0%, black 85%, transparent 100%);
+    overflow: hidden;
+  }
+
+  .carousel-slot.ticker-mode {
+    width: calc(100% + 3rem);
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
   }
 
   .cube-slot {
@@ -384,15 +401,8 @@
   }
 
   .team-card-v3 {
-    height: auto; /* Dynamic height on mobile */
-    min-height: 480px;
-  }
-
-  .cube-scene {
-    width: 100%;
-    max-width: 340px;
-    height: 520px; /* Match new card verticality */
-    margin: 0 auto;
+    height: auto;
+    min-height: 460px;
   }
 
   .cube-scene {
@@ -404,6 +414,7 @@
 
   .card-image-wrap {
     aspect-ratio: 3 / 2.5;
+    height: auto;
   }
 
   .card-info {

@@ -254,10 +254,10 @@ export const partners: string[] = [
 ]
 
 export const aboutStats = [
-  { value: '₹4.2k+', label: 'Cr Properties Managed' },
-  { value: '250+', label: 'Transactions Closed' },
-  { value: '15+', label: 'Strategic Corridors' },
-  { value: '100%', label: 'Capital Protection' },
+  // { value: '₹4.2k+', label: 'Cr Properties Managed' },
+  // { value: '250+', label: 'Transactions Closed' },
+  // { value: '15+', label: 'Strategic Corridors' },
+  // { value: '100%', label: 'Capital Protection' },
 ]
 
 export const areaRates = [

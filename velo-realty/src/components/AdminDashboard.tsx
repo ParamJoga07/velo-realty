@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   LayoutDashboard, HardHat, Globe, TrendingUp, Users, 
@@ -44,6 +44,9 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
   const [developerFilter, setDeveloperFilter] = useState('All');
   const [corridorFilter, setCorridorFilter] = useState('All');
   const [statusFilter] = useState('All');
+
+  const dragItem = useRef<number | null>(null);
+  const dragOverItem = useRef<number | null>(null);
 
   const [formData, setFormData] = useState<any>({});
   const [imageLinks, setImageLinks] = useState<string[]>(['']);
@@ -141,6 +144,25 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
     }
   });
 
+  const starMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch(`${API_BASE_URL}/api/admin/projects/${id}/star`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Star toggle failed');
+      return res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-data'] });
+      queryClient.invalidateQueries({ queryKey: ['all-projects'] });
+      showNotification(data.is_featured ? '⭐ Project marked as Featured!' : '✦ Project removed from Featured');
+    },
+    onError: (error: any) => {
+      showNotification(error.message || 'Star toggle failed', 'error');
+    }
+  });
+
   const saveMutation = useMutation({
     mutationFn: async (payload: any) => {
       const method = editingItem ? 'PUT' : 'POST';
@@ -167,6 +189,50 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
       showNotification(error.message || 'Save failed', 'error');
     }
   });
+
+  const reorderMutation = useMutation({
+    mutationFn: async (items: {id: number, order: number}[]) => {
+      const res = await fetch(`${API_BASE_URL}/api/admin/team/reorder`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ items })
+      });
+      if (!res.ok) throw new Error('Failed to reorder');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-data'] });
+      showNotification('Team order saved successfully');
+    },
+    onError: (error: any) => {
+      showNotification(error.message || 'Reorder failed', 'error');
+    }
+  });
+
+  const handleSort = () => {
+    if (activeTab !== 'team') return;
+    if (dragItem.current === null || dragOverItem.current === null) return;
+    
+    // We modify the data array to preview the change
+    const _items = [...filteredData];
+    const draggedItemContent = _items.splice(dragItem.current, 1)[0];
+    _items.splice(dragOverItem.current, 0, draggedItemContent);
+    
+    dragItem.current = null;
+    dragOverItem.current = null;
+    
+    // Optimistic UI update by setting query data immediately
+    const newData = data.map(d => {
+      const updatedItem = _items.find(i => i.id === d.id);
+      return updatedItem ? updatedItem : d; // Note: for a true optimistic update, we might need a more robust swap logic for 'data', but doing it via mutation and invalidation is safer. 
+    });
+
+    // Actually, simpler to just map the updates and mutate
+    const updates = _items.map((item, index) => ({ id: item.id, order: index }));
+    reorderMutation.mutate(updates);
+    
+    // As a simple optimistic visual, we could setQueryData but invalidating is fine because the network is fast.
+  };
 
   const filteredData = useMemo(() => {
     return data.filter(item => {
@@ -507,11 +573,24 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredData.map((item: any) => (
-                        <tr key={item.id}>
+                      {filteredData.map((item: any, index: number) => (
+                        <tr 
+                          key={item.id}
+                          draggable={activeTab === 'team'}
+                          onDragStart={() => { if (activeTab === 'team') dragItem.current = index; }}
+                          onDragEnter={() => { if (activeTab === 'team') dragOverItem.current = index; }}
+                          onDragEnd={handleSort}
+                          onDragOver={(e) => { if (activeTab === 'team') e.preventDefault(); }}
+                          style={{ cursor: activeTab === 'team' ? 'grab' : 'default' }}
+                        >
                           <td>
                             <div style={{display: 'flex', flexDirection: 'column'}}>
                               <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                                {activeTab === 'projects' && (
+                                  <span title={item.is_featured ? 'Featured' : 'Not Featured'} style={{fontSize: 14, lineHeight: 1}}>
+                                    {item.is_featured ? '⭐' : '✦'}
+                                  </span>
+                                )}
                                 <span style={{fontWeight: 700, color: '#fff'}}>{item.title || item.name || item.area}</span>
                                 {(activeTab === 'developers' || activeTab === 'corridors') && (
                                   <span style={{fontSize: 8, background: 'rgba(255,255,255,0.05)', padding: '1px 4px', borderRadius: 2, color: 'var(--accent-orange)'}}>#{item.id}</span>
@@ -557,6 +636,16 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
                           <td><span className="tag-v3">{activeTab === 'leads' ? (item.status || 'Pending') : (item.status || 'Active')}</span></td>
                           <td>
                             <div style={{display: 'flex', gap: '0.4rem', justifyContent: 'flex-end'}}>
+                              {activeTab === 'projects' && (
+                                <button 
+                                  className="btn-action-v3" 
+                                  title={item.is_featured ? 'Unstar (remove from Featured)' : 'Star (add to Featured)'}
+                                  onClick={() => starMutation.mutate(item.id)}
+                                  style={{color: item.is_featured ? '#f59e0b' : undefined}}
+                                >
+                                  {item.is_featured ? '⭐' : '✦'}
+                                </button>
+                              )}
                               {activeTab !== 'leads' && <button className="btn-action-v3" onClick={() => openEditForm(item)}><Edit3 size={12}/></button>}
                               <button className="btn-action-v3" onClick={() => handleDelete(activeTab, item.id)}><Trash2 size={12}/></button>
                             </div>

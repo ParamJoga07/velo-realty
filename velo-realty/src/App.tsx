@@ -94,6 +94,15 @@ function App() {
     ...queryOptions
   })
 
+  const { data: featuredProjects = [] } = useQuery<any[]>({
+    queryKey: ['featured-projects'],
+    queryFn: () => fetch(`${API_BASE_URL}/api/projects/featured`).then(res => {
+      if (!res.ok) throw new Error('Failed to fetch featured projects');
+      return res.json();
+    }),
+    ...queryOptions
+  })
+
   const { data: aboutStats = [] } = useQuery<any[]>({
     queryKey: ['stats'],
     queryFn: () => fetch(`${API_BASE_URL}/api/stats`).then(res => res.json()),
@@ -199,6 +208,11 @@ function App() {
   const [contactEmail, setContactEmail] = useState('')
   const [contactPhone, setContactPhone] = useState('')
   const [contactStatus, setContactStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
+  const [brochureProperty, setBrochureProperty] = useState<Property | null>(null)
+  const [brochureName, setBrochureName] = useState('')
+  const [brochureEmail, setBrochureEmail] = useState('')
+  const [brochurePhone, setBrochurePhone] = useState('')
+  const [brochureStatus, setBrochureStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -233,6 +247,37 @@ function App() {
     } catch (err) {
       console.error(err)
       setContactStatus('error')
+    }
+  }
+
+  const handleBrochureSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!brochureProperty) return
+    setBrochureStatus('submitting')
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/contact-requests`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: brochureName,
+          email: brochureEmail,
+          phone: brochurePhone,
+          message: `Brochure request for "${brochureProperty.title}" by "${brochureProperty.developer}". Please send the brochure to the provided contact details.`,
+          property_id: null
+        })
+      })
+      if (res.ok) {
+        setBrochureStatus('success')
+        setBrochureName('')
+        setBrochureEmail('')
+        setBrochurePhone('')
+        setTimeout(() => { setBrochureProperty(null); setBrochureStatus('idle') }, 2000)
+      } else {
+        setBrochureStatus('error')
+      }
+    } catch (err) {
+      console.error(err)
+      setBrochureStatus('error')
     }
   }
 
@@ -406,85 +451,92 @@ function App() {
     }
   };
 
+  const [navFilter, setNavFilter] = useState<string | null>(null)
+
+  const mapDbProjectToProperty = (p: any): Property => {
+    // Find developer and corridor names with perfect formatting and fallback mapping
+    const devObj = developers.find(d => d.id === p.developer_id);
+    const devName = devObj ? devObj.name : (p.developer_slug ? p.developer_slug.split('-').map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ') : "Velo Partner");
+    const corrObj = communities.find(c => c.id === p.corridor_id);
+    const corrName = corrObj ? corrObj.name : "Hyderabad Growth";
+
+    // Map project type to PropertyType
+    let pType: Property['type'] = 'Apartment';
+    const typeStr = (p.project_type || '').toLowerCase();
+    if (typeStr.includes('villa')) {
+      pType = 'Villa';
+    } else if (typeStr.includes('commercial') || typeStr.includes('retail') || typeStr.includes('office') || typeStr.includes('township')) {
+      pType = 'Commercial Space';
+    } else if (typeStr.includes('plot') || typeStr.includes('land')) {
+      pType = 'Plot or Land';
+    }
+
+    // Map status to ListingType including support for new Rentals and Resale
+    let pListingType: string = 'Off-Plan'; 
+    const statusStr = (p.status || '').toLowerCase();
+    if (statusStr.includes('pre-launch') || statusStr.includes('launch')) {
+      pListingType = 'Pre-Launch';
+    } else if (statusStr.includes('ready') || statusStr.includes('delivered') || statusStr.includes('completed')) {
+      pListingType = 'Ready';
+    } else if (statusStr.includes('rent')) {
+      pListingType = 'Rentals';
+    } else if (statusStr.includes('resale')) {
+      pListingType = 'Resale';
+    }
+
+    // Map priceValue
+    const priceVal = p.price_start || 0;
+
+    // Extract configurations and beds/baths
+    let beds = 3;
+    const configStr = (p.configurations || '').toLowerCase();
+    if (configStr.includes('2')) beds = 2;
+    if (configStr.includes('4')) beds = 4;
+    if (configStr.includes('5')) beds = 5;
+
+    // Default high-quality placeholder image if no images uploaded
+    let imgUrl = DEFAULT_PROJECT_IMAGES[(p.id || 0) % DEFAULT_PROJECT_IMAGES.length];
+    if (Array.isArray(p.images) && p.images.length > 0) {
+      const firstImg = p.images[0];
+      if (typeof firstImg === 'string') {
+        imgUrl = firstImg;
+      } else if (firstImg && typeof firstImg === 'object' && firstImg.image_url) {
+        imgUrl = firstImg.image_url;
+      }
+    } else if (p.primary_image) {
+      imgUrl = p.primary_image;
+    }
+
+    return {
+      id: p.id,
+      title: p.name || 'Premium Property',
+      location: corrName.replace(/ corridor/gi, ''),
+      community: p.sub_location || p.location || 'Premium Location',
+      developer: devName,
+      type: pType,
+      listingType: pListingType as any,
+      price: p.price_range || 'Price on Request',
+      priceValue: priceVal,
+      beds: beds,
+      baths: beds, // Match baths to beds
+      area: 1800,
+      handover: p.possession || '2028',
+      status: (p.status === 'Ready to Move' ? 'Ready' : p.status) as Property['status'],
+      image: imgUrl,
+      description: p.description || 'Premium residential gated community with luxury amenities.',
+      amenities: p.amenities,
+      highlights: p.highlights
+    };
+  };
+
+  const mappedFeaturedProperties = useMemo(() => {
+    if (!Array.isArray(featuredProjects)) return [];
+    return featuredProjects.map(mapDbProjectToProperty);
+  }, [featuredProjects, developers, communities]);
+
   const filteredProperties = useMemo(() => {
     // Map all database projects from project_details table to the high-fidelity showcase Property cards
-    const mappedProperties: Property[] = allProjects.map((p) => {
-      // Find developer and corridor names with perfect formatting and fallback mapping
-      const devObj = developers.find(d => d.id === p.developer_id);
-      const devName = devObj ? devObj.name : (p.developer_slug ? p.developer_slug.split('-').map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ') : "Velo Partner");
-      const corrObj = communities.find(c => c.id === p.corridor_id);
-      const corrName = corrObj ? corrObj.name : "Hyderabad Growth";
-
-      // Map project type to PropertyType
-      let pType: Property['type'] = 'Apartment';
-      const typeStr = (p.project_type || '').toLowerCase();
-      if (typeStr.includes('villa')) {
-        pType = 'Villa';
-      } else if (typeStr.includes('commercial') || typeStr.includes('retail') || typeStr.includes('office') || typeStr.includes('township')) {
-        pType = 'Commercial Space';
-      } else if (typeStr.includes('plot') || typeStr.includes('land')) {
-        pType = 'Plot or Land';
-      }
-
-      // Map status to ListingType including support for new Rentals and Resale
-      let pListingType: string = 'Off-Plan'; 
-      const statusStr = (p.status || '').toLowerCase();
-      if (statusStr.includes('pre-launch') || statusStr.includes('launch')) {
-        pListingType = 'Pre-Launch';
-      } else if (statusStr.includes('ready') || statusStr.includes('delivered') || statusStr.includes('completed')) {
-        pListingType = 'Ready';
-      } else if (statusStr.includes('rent')) {
-        pListingType = 'Rentals';
-      } else if (statusStr.includes('resale')) {
-        pListingType = 'Resale';
-      }
-
-      // Map priceValue
-      const priceVal = p.price_start || 0;
-
-      // Extract configurations and beds/baths
-      let beds = 3;
-      const configStr = (p.configurations || '').toLowerCase();
-      if (configStr.includes('2')) beds = 2;
-      if (configStr.includes('4')) beds = 4;
-      if (configStr.includes('5')) beds = 5;
-
-      // Default high-quality placeholder image if no images uploaded
-      let imgUrl = DEFAULT_PROJECT_IMAGES[(p.id || 0) % DEFAULT_PROJECT_IMAGES.length];
-      if (Array.isArray(p.images) && p.images.length > 0) {
-        const firstImg = p.images[0];
-        if (typeof firstImg === 'string') {
-          imgUrl = firstImg;
-        } else if (firstImg && typeof firstImg === 'object' && firstImg.image_url) {
-          imgUrl = firstImg.image_url;
-        }
-      } else if (p.primary_image) {
-        imgUrl = p.primary_image;
-      }
-
-      return {
-        id: p.id,
-        title: p.name || 'Premium Property',
-        location: corrName.replace(/ corridor/gi, ''),
-        community: p.sub_location || p.location || 'Premium Location',
-        developer: devName,
-        type: pType,
-        listingType: pListingType as any,
-        price: p.price_range || 'Price on Request',
-        priceValue: priceVal,
-        beds: beds,
-        baths: beds, // Match baths to beds
-        area: 1800,
-        handover: p.possession || '2028',
-        status: (p.status === 'Ready to Move' ? 'Ready' : p.status) as Property['status'],
-        image: imgUrl,
-        description: p.description || 'Premium residential gated community with luxury amenities.',
-        amenities: p.amenities,
-        highlights: p.highlights
-      };
-    });
-
-    const combined = [...mappedProperties];
+    const combined = allProjects.map(mapDbProjectToProperty);
 
     const filtered = combined.filter((item) => {
       // Force empty state for Coming Soon tabs
@@ -548,17 +600,17 @@ function App() {
       />
       <HeroSearch
         tab={tab}
-        setTab={setTab}
+        setTab={(val) => { setTab(val); setNavFilter(null); }}
         location={location}
-        setLocation={setLocation}
+        setLocation={(val) => { setLocation(val); setNavFilter(null); }}
         zone={zone}
-        setZone={setZone}
+        setZone={(val) => { setZone(val); setNavFilter(null); }}
         category={category}
-        setCategory={setCategory}
+        setCategory={(val) => { setCategory(val); setNavFilter(null); }}
         propertyType={propertyType}
-        setPropertyType={setPropertyType}
+        setPropertyType={(val) => { setPropertyType(val); setNavFilter(null); }}
         bedrooms={bedrooms}
-        setBedrooms={setBedrooms}
+        setBedrooms={(val) => { setBedrooms(val); setNavFilter(null); }}
         communities={communities}
         zones={dbZones}
         categories={dbCategories}
@@ -569,6 +621,7 @@ function App() {
       <main>
         <PropertyShowcase
           properties={filteredProperties}
+          featuredProjects={mappedFeaturedProperties}
           favorites={favorites}
           onToggleFavorite={toggleFavorite}
           viewMode={viewMode}
@@ -577,6 +630,7 @@ function App() {
           setSortBy={setSortBy}
           setSelectedProperty={setSelectedProperty}
           onDeveloperClick={setSelectedDeveloperName}
+          navFilter={navFilter}
           emptyStateMessage={['Ready', 'Resale', 'Rentals'].includes(tab) ? 'We are coming soon or launching soon' : undefined}
         />
         <Sections
@@ -674,6 +728,13 @@ function App() {
                   onClick={() => setContactProperty(selectedProperty)}
                 >
                   Contact Agent
+                </button>
+                <button 
+                  className="btn btn-ghost" 
+                  type="button" 
+                  onClick={() => setBrochureProperty(selectedProperty)}
+                >
+                  📄 Download Brochure
                 </button>
                 <button 
                   className="btn btn-ghost" 
@@ -791,6 +852,56 @@ function App() {
           }}
           onSubmit={handleIdentitySubmit}
         />
+      )}
+
+      {brochureProperty && (
+        <div className="contact-agent-modal-overlay" onClick={() => setBrochureProperty(null)}>
+          <div className="contact-agent-card" onClick={e => e.stopPropagation()}>
+            <div className="contact-agent-header">
+              <h3>📄 Download Brochure</h3>
+              <div className="contact-agent-project-tag">{brochureProperty.title}</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                {brochureProperty.developer} · {brochureProperty.location} Corridor
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '6px', opacity: 0.8 }}>
+                Fill in your details and our team will send the brochure to you.
+              </div>
+            </div>
+            <form onSubmit={handleBrochureSubmit} className="contact-agent-body">
+              {brochureStatus === 'success' ? (
+                <div style={{ textAlign: 'center', padding: '2rem 0' }}>
+                  <div style={{ fontSize: '3rem', color: 'var(--teal-500)', marginBottom: '1rem' }}>✓</div>
+                  <h4 style={{ color: 'var(--heading-color)', fontSize: '1.2rem', marginBottom: '0.5rem' }}>Request Sent!</h4>
+                  <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>We'll send the brochure to your email shortly.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="contact-agent-field">
+                    <label htmlFor="brochure-name">Full Name</label>
+                    <input id="brochure-name" type="text" placeholder="Your name" required value={brochureName} onChange={e => setBrochureName(e.target.value)} />
+                  </div>
+                  <div className="contact-agent-field">
+                    <label htmlFor="brochure-email">Email Address</label>
+                    <input id="brochure-email" type="email" placeholder="you@example.com" required value={brochureEmail} onChange={e => setBrochureEmail(e.target.value)} />
+                  </div>
+                  <div className="contact-agent-field">
+                    <label htmlFor="brochure-phone">Phone Number</label>
+                    <input id="brochure-phone" type="tel" placeholder="+91 XXXXXXXXXX" required value={brochurePhone} onChange={e => setBrochurePhone(e.target.value)} />
+                  </div>
+                  {brochureStatus === 'error' && (
+                    <div style={{ color: '#ef4444', fontSize: '0.8rem', marginBottom: '1rem' }}>Failed to submit. Please try again.</div>
+                  )}
+                  <div className="contact-agent-actions">
+                    <button className="btn btn-ghost" type="button" onClick={() => setBrochureProperty(null)}>Cancel</button>
+                    <button className="btn btn-primary" type="submit" disabled={brochureStatus === 'submitting'}>
+                      {brochureStatus === 'submitting' ? 'Sending...' : 'Request Brochure'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </form>
+          </div>
+        </div>
       )}
     </div>
   )

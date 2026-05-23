@@ -138,6 +138,7 @@ class ProjectModel(Base):
     description = Column(Text, nullable=True)
     highlights = Column(Text, nullable=True)
     connectivity = Column(Text, nullable=True)
+    is_featured = Column(Boolean, default=False)
 
     developer = relationship("DeveloperProfileModel", back_populates="project_list")
     corridor = relationship("CorridorModel", back_populates="project_list")
@@ -184,6 +185,7 @@ class TeamMemberModel(Base):
     role = Column(String)
     image = Column(String)
     bio = Column(Text)
+    order = Column(Integer, default=0)
 
 class GuideModel(Base):
     __tablename__ = "guides"
