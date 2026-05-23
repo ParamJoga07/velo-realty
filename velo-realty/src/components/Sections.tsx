@@ -25,7 +25,7 @@ export function Sections({
   communities, 
   guides, 
   partners, 
-  aboutStats, 
+  aboutStats: _aboutStats, 
   onDeveloperClick,
   projectStats
 }: SectionsProps) {

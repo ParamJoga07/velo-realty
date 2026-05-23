@@ -221,17 +221,9 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
     dragItem.current = null;
     dragOverItem.current = null;
     
-    // Optimistic UI update by setting query data immediately
-    const newData = data.map(d => {
-      const updatedItem = _items.find(i => i.id === d.id);
-      return updatedItem ? updatedItem : d; // Note: for a true optimistic update, we might need a more robust swap logic for 'data', but doing it via mutation and invalidation is safer. 
-    });
-
-    // Actually, simpler to just map the updates and mutate
+    // Map new order and persist to backend
     const updates = _items.map((item, index) => ({ id: item.id, order: index }));
     reorderMutation.mutate(updates);
-    
-    // As a simple optimistic visual, we could setQueryData but invalidating is fine because the network is fast.
   };
 
   const filteredData = useMemo(() => {

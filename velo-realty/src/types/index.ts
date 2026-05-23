@@ -121,5 +121,6 @@ export type ProjectDetail = {
   description: string | null
   highlights: string | null
   connectivity: string | null
+  amenities: string | null
   images: ProjectImage[]
 }
