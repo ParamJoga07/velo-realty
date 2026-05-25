@@ -143,10 +143,6 @@
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.5);
   line-height: 1.65;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 /* ─── CEO SPECIAL (Glow Edition) ─── */
@@ -428,7 +424,6 @@
 
   .card-bio {
     font-size: 0.82rem;
-    -webkit-line-clamp: 2;
   }
 }
 
