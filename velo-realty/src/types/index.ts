@@ -23,6 +23,8 @@ export type Property = {
   description: string
   amenities?: string
   highlights?: string
+  categories?: string[]
+  zones?: string[]
 }
 
 export type Developer = {

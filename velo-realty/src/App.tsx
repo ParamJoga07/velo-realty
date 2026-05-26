@@ -525,7 +525,9 @@ function App() {
       image: imgUrl,
       description: p.description || 'Premium residential gated community with luxury amenities.',
       amenities: p.amenities,
-      highlights: p.highlights
+      highlights: p.highlights,
+      categories: p.categories || [],
+      zones: p.zones || []
     };
   };
 
@@ -548,11 +550,15 @@ function App() {
       const isSpecialType = ['Plot or Land', 'Commercial Space'].includes(propertyType);
       const tabMatch = isSpecialType || item.listingType === tab;
       
-      const locationMatch = location === 'All Locations' || location === 'All Corridors' || item.location === location;
+      const normalizeLocation = (loc: string) => loc.replace(/ corridor/gi, '').trim().toLowerCase();
+      const locationMatch = location === 'All Locations' || location === 'All Corridors' || normalizeLocation(item.location) === normalizeLocation(location);
+      
       const typeMatch = propertyType === 'Any Type' || item.type === propertyType;
       const bedMatch = bedrooms === 'Any' || String(item.beds) === bedrooms;
+      const zoneMatch = zone === 'All Zones' || (item.zones && item.zones.includes(zone));
+      const categoryMatch = category === 'All Categories' || (item.categories && item.categories.includes(category));
       
-      return tabMatch && locationMatch && typeMatch && bedMatch;
+      return tabMatch && locationMatch && typeMatch && bedMatch && zoneMatch && categoryMatch;
     });
 
     const rankByStatus: Record<string, number> = {
@@ -576,7 +582,7 @@ function App() {
       const rankB = rankByStatus[b.status] !== undefined ? rankByStatus[b.status] : 99;
       return rankA - rankB;
     });
-  }, [tab, location, propertyType, bedrooms, sortBy, allProjects, developers, communities]);
+  }, [tab, location, zone, category, propertyType, bedrooms, sortBy, allProjects, developers, communities]);
 
   if (adminToken) {
     return <AdminDashboard token={adminToken} onLogout={handleLogout} theme={theme} />

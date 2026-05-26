@@ -466,7 +466,11 @@ from sqlalchemy.orm import joinedload
 
 @app.get("/api/projects/featured")
 def get_featured_projects(db: Session = Depends(get_db)):
-    projects = db.query(models.ProjectModel).options(joinedload(models.ProjectModel.images)).filter(models.ProjectModel.is_featured == True).order_by(models.ProjectModel.id.asc()).all()
+    projects = db.query(models.ProjectModel).options(
+        joinedload(models.ProjectModel.images),
+        joinedload(models.ProjectModel.categories),
+        joinedload(models.ProjectModel.zones)
+    ).filter(models.ProjectModel.is_featured == True).order_by(models.ProjectModel.id.asc()).all()
     result = []
     for p in projects:
         result.append({
@@ -487,7 +491,9 @@ def get_featured_projects(db: Session = Depends(get_db)):
             "description": p.description,
             "highlights": p.highlights,
             "is_featured": True,
-            "images": [{"image_url": img.image_url} for img in p.images]
+            "images": [{"image_url": img.image_url} for img in p.images],
+            "categories": [c.name for c in p.categories],
+            "zones": [z.name for z in p.zones]
         })
     return result
 
@@ -676,7 +682,11 @@ def get_user_leads(db: Session = Depends(get_db), admin: models.AdminUser = Depe
 
 @app.get("/api/projects")
 def get_projects(db: Session = Depends(get_db)):
-    projects = db.query(models.ProjectModel).options(joinedload(models.ProjectModel.images)).order_by(models.ProjectModel.id.asc()).all()
+    projects = db.query(models.ProjectModel).options(
+        joinedload(models.ProjectModel.images),
+        joinedload(models.ProjectModel.categories),
+        joinedload(models.ProjectModel.zones)
+    ).order_by(models.ProjectModel.id.asc()).all()
     result = []
     for p in projects:
         result.append({
@@ -704,7 +714,9 @@ def get_projects(db: Session = Depends(get_db)):
             "highlights": p.highlights,
             "connectivity": p.connectivity,
             "is_featured": p.is_featured or False,
-            "images": [{"image_url": img.image_url} for img in p.images]
+            "images": [{"image_url": img.image_url} for img in p.images],
+            "categories": [c.name for c in p.categories],
+            "zones": [z.name for z in p.zones]
         })
     return result
 
