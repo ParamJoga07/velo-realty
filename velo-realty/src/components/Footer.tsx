@@ -1,3 +1,5 @@
+import { Shield } from 'lucide-react';
+
 export function Footer({ onSignInClick }: { onSignInClick: () => void }) {
   return (
     <footer className="footer">
@@ -37,9 +39,12 @@ export function Footer({ onSignInClick }: { onSignInClick: () => void }) {
             <p>Info@velorealty.com · +91 7207214848</p>
           </div>
           <p className="footer-address">Divya Diamonds Buildings, 1st Floor, Kavuri Hills, Madhapur, Hyderabad, 500081</p>
-          <button className="superadmin-link" onClick={onSignInClick}>Superadmin Access</button>
+          <button className="superadmin-link" onClick={onSignInClick} title="Security portal">
+            <Shield size={16} />
+          </button>
         </div>
       </div>
     </footer>
   );
 }
+

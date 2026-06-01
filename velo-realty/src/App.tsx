@@ -18,6 +18,7 @@ import { AdminDashboard } from './components/AdminDashboard'
 import { AdminLogin } from './components/AdminLogin'
 import { IdentityModal } from './components/IdentityModal'
 import { SocialSidebar } from './components/SocialSidebar'
+import { CtaSidebar } from './components/CtaSidebar'
 import API_BASE_URL from './config'
 
 const DEFAULT_PROJECT_IMAGES = [
@@ -597,6 +598,7 @@ function App() {
       )}
       <PriceTicker areaRates={areaRates} />
       <SocialSidebar />
+      <CtaSidebar />
       <Navbar
         favoritesCount={favorites.size}
         theme={theme}
@@ -719,7 +721,7 @@ function App() {
                     <h4 style={{marginTop: '1.5rem'}}>Amenities</h4>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
                       {selectedProperty.amenities.split(',').map((a, i) => (
-                        <span key={i} style={{ background: 'rgba(255,255,255,0.05)', padding: '0.3rem 0.8rem', borderRadius: '4px', fontSize: '0.85rem', color: 'var(--text-900)' }}>
+                        <span key={i} style={{ background: 'rgba(255,255,255,0.05)', padding: '0.3rem 0.8rem', borderRadius: '4px', fontSize: '0.85rem', color: 'var(--body-color)' }}>
                           {a.trim()}
                         </span>
                       ))}

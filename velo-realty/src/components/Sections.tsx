@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import type { Community, Developer, Guide } from '../types'
 import { Building2 } from 'lucide-react'
 import { CORRIDOR_MAPS } from './maps/CorridorMaps'
+import API_BASE_URL from '../config'
 
 type SectionsProps = {
   developers: Developer[]
@@ -13,13 +15,6 @@ type SectionsProps = {
   projectStats: { devCounts: Record<number, number>, corrCounts: Record<number, number> }
 }
 
-const SKYLINE_IMAGES = [
-  "/images-1.jpeg",
-  "/IMAGE2.jpg",
-  "/IMAGE3.jpg",
-  "/IMAGE4.jpg"
-];
-
 export function Sections({ 
   developers, 
   communities, 
@@ -30,14 +25,20 @@ export function Sections({
   projectStats
 }: SectionsProps) {
   const [showAllPartners, setShowAllPartners] = useState(false);
-  const [currentSkyline, setCurrentSkyline] = useState(0);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSkyline((prev) => (prev + 1) % SKYLINE_IMAGES.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
+  const { data: teamMembers = [] } = useQuery<any[]>({
+    queryKey: ['team'],
+    queryFn: () =>
+      fetch(`${API_BASE_URL}/api/team`).then((res) =>
+        res.json().then((data) =>
+          Array.isArray(data)
+            ? [...data].sort((a, b) => (a.order ?? a.id) - (b.order ?? b.id))
+            : []
+        )
+      ),
+  });
+
+  const founderImage = teamMembers[0]?.image || "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600&auto=format&fit=crop";
 
   // Inline expansion logic will be applied at the developer section below.
 
@@ -143,9 +144,13 @@ export function Sections({
       <section id="about" className="section about-panel">
         <div className="container about-grid">
           <article className="about-content">
-            <p className="eyebrow">About Velo Realty Pvt. Ltd.</p>
-            <h2>Where Speed Meets Realty</h2>
+            <p className="eyebrow">ABOUT VELO REALTY</p>
+            <h2>Specializing in Premium residential &amp; investment properties</h2>
             <div className="about-description">
+              <p style={{ fontSize: '1.15rem', lineHeight: '1.7', color: 'var(--body-color)', marginBottom: '1.5rem', fontWeight: 400 }}>
+                Velo Realty is a Hyderabad-based real estate consultancy specializing in premium residential and investment properties. 
+                We help clients discover trusted projects with complete transparency, expert guidance, and personalized support.
+              </p>
               <div className="mission-vision">
                 <div className="mv-card">
                   <h3>Vision</h3>
@@ -162,52 +167,132 @@ export function Sections({
                   </p>
                 </div>
               </div>
-              <div className="core-objectives">
-                <h3>Core Objectives</h3>
-                <div className="objectives-grid">
-                  <div className="objective">
-                    <strong>Velocity</strong>
-                    <span>Executing transactions with unmatched efficiency and transparent precision.</span>
-                  </div>
-                  <div className="objective">
-                    <strong>Excellence</strong>
-                    <span>Curating a portfolio of high-yield, premium properties that set new standards.</span>
-                  </div>
-                  <div className="objective">
-                    <strong>Longevity</strong>
-                    <span>Focusing on strategic capital appreciation to build enduring wealth.</span>
-                  </div>
-                  <div className="objective">
-                    <strong>Omnipresence</strong>
-                    <span>Creating a seamless investment bridge across Hyderabad's premium corridors.</span>
-                  </div>
-                </div>
+            </div>
+          </article>
+          
+          <aside className="about-interactive-showcase" aria-label="Velo Realty Showcase">
+            <style>{`
+              .about-interactive-showcase {
+                display: flex;
+                flex-direction: column;
+                justify-content: stretch;
+                gap: 1rem;
+                height: 100%;
+              }
+              .about-horizontal-card {
+                display: flex;
+                align-items: center;
+                gap: 1.25rem;
+                padding: 1.15rem;
+                background: var(--card-bg);
+                border: 1px solid var(--card-border);
+                border-radius: 18px;
+                transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                flex: 1;
+              }
+              .about-horizontal-card:hover {
+                transform: translateY(-4px);
+                border-color: var(--teal-500);
+                box-shadow: 0 12px 30px rgba(0, 168, 150, 0.2);
+                background: rgba(255, 255, 255, 0.05);
+              }
+              [data-theme='light'] .about-horizontal-card:hover {
+                background: rgba(15, 23, 42, 0.02);
+                box-shadow: 0 12px 30px rgba(0, 168, 150, 0.1);
+              }
+              .about-card-img-wrapper {
+                width: 140px;
+                height: 100px;
+                border-radius: 12px;
+                overflow: hidden;
+                flex-shrink: 0;
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                background: rgba(0, 0, 0, 0.2);
+              }
+              [data-theme='light'] .about-card-img-wrapper {
+                border-color: rgba(0, 0, 0, 0.05);
+              }
+              .about-card-img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                object-position: center;
+                transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+              }
+              .about-horizontal-card:hover .about-card-img {
+                transform: scale(1.08);
+              }
+              .about-card-info {
+                display: flex;
+                flex-direction: column;
+                gap: 0.35rem;
+              }
+              .about-card-info h3 {
+                margin: 0;
+                font-size: 1.25rem;
+                color: var(--heading-color);
+                font-family: 'EB Garamond Custom', serif;
+                font-weight: 700;
+              }
+              .about-card-info p {
+                margin: 0;
+                font-size: 0.9rem;
+                line-height: 1.45;
+                color: var(--body-color);
+              }
+              @media (max-width: 576px) {
+                .about-horizontal-card {
+                  flex-direction: column;
+                  align-items: flex-start;
+                  gap: 0.85rem;
+                }
+                .about-card-img-wrapper {
+                  width: 100%;
+                  height: 160px;
+                }
+              }
+            `}</style>
+
+            <div className="about-horizontal-card">
+              <div className="about-card-img-wrapper">
+                <img 
+                  src={founderImage} 
+                  alt="Founder of Velo Realty" 
+                  className="about-card-img"
+                />
+              </div>
+              <div className="about-card-info">
+                <h3>The Founder</h3>
+                <p>Visionary leadership guiding premium investments across Hyderabad's fastest growing markets.</p>
               </div>
             </div>
-            {/* <div className="about-stats">
-              {aboutStats.map((stat) => (
-                <div className="about-stat" key={stat.value}>
-                  <strong>{stat.value}</strong>
-                  <span>{stat.label}</span>
-                </div>
-              ))}
-            </div> */}
-          </article>
-          <aside className="about-visual" aria-label="City skyline preview">
-            {SKYLINE_IMAGES.map((img, i) => (
-              <div 
-                key={i}
-                className={`skyline-slide ${i === currentSkyline ? 'active' : ''}`}
-                style={{ backgroundImage: `linear-gradient(to top, rgba(10, 24, 36, 0.95), transparent), url(${img})` }}
-              ></div>
-            ))}
-            <div className="about-visual-content">
-              <div className="about-visual-badge">The Skyline Era</div>
-              <p>Empowering the next generation of real estate investors.</p>
-              <div className="carousel-indicators">
-                {SKYLINE_IMAGES.map((_, i) => (
-                  <div key={i} className={`indicator ${i === currentSkyline ? 'active' : ''}`}></div>
-                ))}
+
+            <div className="about-horizontal-card">
+              <div className="about-card-img-wrapper">
+                <img 
+                  src="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=600&auto=format&fit=crop" 
+                  alt="Velo Realty Corporate Office" 
+                  className="about-card-img"
+                />
+              </div>
+              <div className="about-card-info">
+                <h3>Corporate Office</h3>
+                <p>Divya Diamonds Buildings, Kavuri Hills, Madhapur. Specially designed for high-end client consulting.</p>
+              </div>
+            </div>
+
+            <div className="about-horizontal-card">
+              <div className="about-card-img-wrapper">
+                <img 
+                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=600&auto=format&fit=crop" 
+                  alt="Velo Realty Advisory Team" 
+                  className="about-card-img"
+                />
+              </div>
+              <div className="about-card-info">
+                <h3>Advisory Team</h3>
+                <p>Professional advisors committed to transparent transactions and long-term capital appreciation.</p>
               </div>
             </div>
           </aside>
@@ -229,37 +314,45 @@ export function Sections({
           <div className="service-grid">
             <article className="service-card premium-card visual-card">
               <div className="card-media">
-                <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2000&auto=format&fit=crop" alt="Luxury Hyderabad Skyline" />
+                <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2000&auto=format&fit=crop" alt="Verified Properties" />
                 <div className="card-media-overlay"></div>
               </div>
               <div className="card-body">
-                
-                <h3>Local Market Mastery</h3>
-                <p>Expert navigation through the luxury landscapes of Hyderabad's growth corridors.</p>
+                <h3>Verified Properties</h3>
+                <p>Every listing is carefully verified.</p>
               </div>
             </article>
 
             <article className="service-card premium-card visual-card">
               <div className="card-media">
-                <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2000&auto=format&fit=crop" alt="Data Analytics" />
+                <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=2000&auto=format&fit=crop" alt="Expert Guidance" />
                 <div className="card-media-overlay"></div>
               </div>
               <div className="card-body">
-                
-                <h3>Data-Driven Curation</h3>
-                <p>We analyze long-term appreciation potential to protect your capital, not just list properties.</p>
+                <h3>Expert Guidance</h3>
+                <p>Professional consultation for buyers and investors.</p>
               </div>
             </article>
 
             <article className="service-card premium-card visual-card">
               <div className="card-media">
-                <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2000&auto=format&fit=crop" alt="Premium Interior" />
+                <img src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=2000&auto=format&fit=crop" alt="Best Deals" />
                 <div className="card-media-overlay"></div>
               </div>
               <div className="card-body">
-                
-                <h3>Seamless Acquisition</h3>
-                <p>Handling all transaction complexities from discovery to final handover.</p>
+                <h3>Best Deals</h3>
+                <p>Access exclusive pricing and offers.</p>
+              </div>
+            </article>
+
+            <article className="service-card premium-card visual-card">
+              <div className="card-media">
+                <img src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?q=80&w=2000&auto=format&fit=crop" alt="Site Visit Assistance" />
+                <div className="card-media-overlay"></div>
+              </div>
+              <div className="card-body">
+                <h3>Site Visit Assistance</h3>
+                <p>End-to-end support during property visits.</p>
               </div>
             </article>
           </div>
@@ -360,7 +453,24 @@ export function Sections({
             </div>
           </div>
           <div className="blog-grid">
-            {guides.map((item) => (
+            {(guides && guides.length > 0 ? guides : [
+              {
+                title: "Best Areas to Invest in Hyderabad",
+                description: "Discover Hyderabad's fastest-growing residential and investment corridors, featuring Kokapet, Tellapur, and Gachibowli."
+              },
+              {
+                title: "Upcoming Luxury Projects",
+                description: "An exclusive look into the most anticipated premium gated villas and ultra-luxury high-rise launches in 2026."
+              },
+              {
+                title: "Real Estate Investment Tips",
+                description: "Expert advice on structural appreciation, capital protection, and navigating pre-launch pricing advantages."
+              },
+              {
+                title: "Villa vs Apartment",
+                description: "A comprehensive comparison of luxury villas versus high-rise apartments, focusing on security, lifestyle, and resale value."
+              }
+            ]).map((item) => (
               <a href="#guides" className="blog-card premium-card" key={item.title}>
                 <div className="card-inner">
                   <h3>{item.title}</h3>

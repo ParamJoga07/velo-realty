@@ -49,10 +49,9 @@ export function HeroSearch({
       <div className="container hero-content">
         <div className="hero-shell">
           <p className="eyebrow">Velo Realty Pvt. Ltd.</p>
-          <h1>Elevated Skyline Living Meets Accelerated Investment Discovery.</h1>
+          <h1>Discover Premium Properties in Hyderabad</h1>
           <p className="hero-copy">
-            Experience premium homes and curated communities from trusted developers, engineered for long-term value and
-            a faster path to your next great investment.
+            Explore verified villas, apartments, and investment opportunities across Hyderabad’s fastest-growing locations.
           </p>
           <div className="hero-leadbar">
             <input type="email" placeholder="Enter your email for curated launches" />
