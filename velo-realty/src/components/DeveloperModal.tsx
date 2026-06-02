@@ -9,6 +9,8 @@ type DeveloperModalProps = {
   developerName: string;
   onClose: () => void;
   theme?: 'light' | 'dark';
+  compareIds?: number[];
+  onToggleCompare?: (propertyId: number) => void;
 };
 
 import API_BASE_URL from '../config';
@@ -96,7 +98,7 @@ function BrochureModal({ projectName, onClose }: { projectName: string; onClose:
   );
 }
 
-export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) {
+export function DeveloperModal({ developerName, onClose, compareIds = [], onToggleCompare }: DeveloperModalProps) {
   const { data: profile, isLoading: isLoadingProfile } = useQuery<DeveloperProfile>({
     queryKey: ['developer', developerName],
     queryFn: async () => {
@@ -369,6 +371,18 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
                                  <span className="dpc-price">{prop.price}</span>
                                  <span className="dpc-config">{prop.beds}B • {prop.area} FT²</span>
                               </div>
+                              {onToggleCompare && (
+                                <button
+                                  className={`compare-card-btn ${compareIds.includes(prop.id) ? 'active' : ''}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onToggleCompare(prop.id);
+                                  }}
+                                  style={{ marginTop: '0.75rem', width: '100%' }}
+                                >
+                                  {compareIds.includes(prop.id) ? '✓ Compare' : '+ Compare'}
+                                </button>
+                              )}
                            </div>
                         </div>
                       ))}
@@ -395,12 +409,27 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
                               <span className="dpc-price">{project.price_range}</span>
                               <span className="dpc-config">{project.configurations}</span>
                             </div>
-                            <button
-                              className="dpc-brochure-btn"
-                              onClick={e => { e.stopPropagation(); setBrochureProject(project.name); }}
-                            >
-                              📄 Download Brochure
-                            </button>
+                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+                              <button
+                                className="dpc-brochure-btn"
+                                style={{ flex: 1 }}
+                                onClick={e => { e.stopPropagation(); setBrochureProject(project.name); }}
+                              >
+                                📄 Brochure
+                              </button>
+                              {onToggleCompare && project.id && (
+                                <button
+                                  className={`compare-card-btn ${compareIds.includes(project.id) ? 'active' : ''}`}
+                                  style={{ flex: 1 }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onToggleCompare(project.id);
+                                  }}
+                                >
+                                  {compareIds.includes(project.id) ? '✓ Compare' : '+ Compare'}
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -432,6 +461,18 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
                                <span className="dpc-price">{prop.price}</span>
                                <span className="dpc-config">{prop.beds}B • {prop.area} FT²</span>
                             </div>
+                            {onToggleCompare && (
+                              <button
+                                className={`compare-card-btn ${compareIds.includes(prop.id) ? 'active' : ''}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onToggleCompare(prop.id);
+                                }}
+                                style={{ marginTop: '0.75rem', width: '100%' }}
+                              >
+                                {compareIds.includes(prop.id) ? '✓ Compare' : '+ Compare'}
+                              </button>
+                            )}
                          </div>
                       </div>
                     ))}
@@ -467,12 +508,27 @@ export function DeveloperModal({ developerName, onClose }: DeveloperModalProps) 
                             {project.price_range && <span className="dpc-price">{project.price_range}</span>}
                             <span className="dpc-config">{project.configurations || project.project_type}</span>
                           </div>
-                          <button
-                            className="dpc-brochure-btn"
-                            onClick={e => { e.stopPropagation(); setBrochureProject(project.name); }}
-                          >
-                            📄 Download Brochure
-                          </button>
+                          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+                            <button
+                              className="dpc-brochure-btn"
+                              style={{ flex: 1 }}
+                              onClick={e => { e.stopPropagation(); setBrochureProject(project.name); }}
+                            >
+                              📄 Brochure
+                            </button>
+                            {onToggleCompare && project.id && (
+                              <button
+                                className={`compare-card-btn ${compareIds.includes(project.id) ? 'active' : ''}`}
+                                style={{ flex: 1 }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onToggleCompare(project.id);
+                                }}
+                              >
+                                {compareIds.includes(project.id) ? '✓ Compare' : '+ Compare'}
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}

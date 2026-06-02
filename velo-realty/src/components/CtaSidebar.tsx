@@ -1,7 +1,14 @@
+import { useRef } from 'react';
 import { Compass, Calendar } from 'lucide-react';
 import './CtaSidebar.css';
 
-export function CtaSidebar() {
+interface CtaSidebarProps {
+  onScheduleClick?: (ref: React.RefObject<HTMLButtonElement | null>) => void
+}
+
+export function CtaSidebar({ onScheduleClick }: CtaSidebarProps) {
+  const scheduleButtonRef = useRef<HTMLButtonElement | null>(null);
+
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
@@ -25,7 +32,14 @@ export function CtaSidebar() {
       </button>
 
       <button 
-        onClick={() => scrollToSection('contact')} 
+        ref={scheduleButtonRef}
+        onClick={() => {
+          if (onScheduleClick) {
+            onScheduleClick(scheduleButtonRef);
+          } else {
+            scrollToSection('contact');
+          }
+        }} 
         className="cta-button schedule" 
         aria-label="Schedule Site Visit"
       >

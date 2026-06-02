@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import './App.css'
 import { BackToTop } from './components/BackToTop'
@@ -19,6 +19,8 @@ import { AdminLogin } from './components/AdminLogin'
 import { IdentityModal } from './components/IdentityModal'
 import { SocialSidebar } from './components/SocialSidebar'
 import { CtaSidebar } from './components/CtaSidebar'
+import { CompareModal } from './components/CompareModal'
+import { SiteVisitModal } from './components/SiteVisitModal'
 import API_BASE_URL from './config'
 
 const DEFAULT_PROJECT_IMAGES = [
@@ -44,6 +46,11 @@ function App() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
   const [showBackToTop, setShowBackToTop] = useState(false)
+  const [compareIds, setCompareIds] = useState<number[]>([])
+  const [showCompareModal, setShowCompareModal] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showSiteVisitModal, setShowSiteVisitModal] = useState(false)
+  const siteVisitTriggerRef = useRef<HTMLButtonElement | null>(null)
   const queryOptions = {
     retry: 1, // Only retry once for initial load to avoid long hangs
     staleTime: 60000,
@@ -537,9 +544,45 @@ function App() {
     return featuredProjects.map(mapDbProjectToProperty);
   }, [featuredProjects, developers, communities]);
 
+  const allMappedProperties = useMemo(() => {
+    if (!Array.isArray(allProjects)) return [];
+    return allProjects.map(mapDbProjectToProperty);
+  }, [allProjects, developers, communities]);
+
+  const comparedProperties = useMemo(() => {
+    return allMappedProperties.filter(p => compareIds.includes(p.id));
+  }, [allMappedProperties, compareIds]);
+
+  const toggleCompare = (id: number) => {
+    setCompareIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((x) => x !== id);
+      }
+      if (prev.length >= 3) {
+        alert('You can compare up to 3 properties.');
+        return prev;
+      }
+      return [...prev, id];
+    });
+  };
+
+  const addToCompare = (id: number) => {
+    setCompareIds((prev) => {
+      if (prev.includes(id)) return prev;
+      if (prev.length >= 3) {
+        alert('You can compare up to 3 properties.');
+        return prev;
+      }
+      return [...prev, id];
+    });
+  };
+
+  const removeFromCompare = (id: number) => {
+    setCompareIds((prev) => prev.filter((x) => x !== id));
+  };
+
   const filteredProperties = useMemo(() => {
-    // Map all database projects from project_details table to the high-fidelity showcase Property cards
-    const combined = allProjects.map(mapDbProjectToProperty);
+    const combined = allMappedProperties;
 
     const filtered = combined.filter((item) => {
       // Force empty state for Coming Soon tabs
@@ -559,7 +602,14 @@ function App() {
       const zoneMatch = zone === 'All Zones' || (item.zones && item.zones.includes(zone));
       const categoryMatch = category === 'All Categories' || (item.categories && item.categories.includes(category));
       
-      return tabMatch && locationMatch && typeMatch && bedMatch && zoneMatch && categoryMatch;
+      const queryMatch = !searchQuery || 
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.developer.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.community.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      return tabMatch && locationMatch && typeMatch && bedMatch && zoneMatch && categoryMatch && queryMatch;
     });
 
     const rankByStatus: Record<string, number> = {
@@ -583,7 +633,7 @@ function App() {
       const rankB = rankByStatus[b.status] !== undefined ? rankByStatus[b.status] : 99;
       return rankA - rankB;
     });
-  }, [tab, location, zone, category, propertyType, bedrooms, sortBy, allProjects, developers, communities]);
+  }, [tab, location, zone, category, propertyType, bedrooms, sortBy, allMappedProperties, searchQuery]);
 
   if (adminToken) {
     return <AdminDashboard token={adminToken} onLogout={handleLogout} theme={theme} />
@@ -598,7 +648,12 @@ function App() {
       )}
       <PriceTicker areaRates={areaRates} />
       <SocialSidebar />
-      <CtaSidebar />
+      <CtaSidebar
+        onScheduleClick={(ref) => {
+          siteVisitTriggerRef.current = ref.current
+          setShowSiteVisitModal(true)
+        }}
+      />
       <Navbar
         favoritesCount={favorites.size}
         theme={theme}
@@ -625,6 +680,11 @@ function App() {
         heroStats={aboutStats}
         dbTypes={dbPropertyTypes}
         dbBedrooms={dbBedrooms}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        properties={allMappedProperties}
+        onDeveloperClick={setSelectedDeveloperName}
+        setSelectedProperty={setSelectedProperty}
       />
       <main>
         <PropertyShowcase
@@ -640,6 +700,8 @@ function App() {
           onDeveloperClick={setSelectedDeveloperName}
           navFilter={navFilter}
           emptyStateMessage={['Ready', 'Resale', 'Rentals'].includes(tab) ? 'We are coming soon or launching soon' : undefined}
+          compareIds={compareIds}
+          onToggleCompare={toggleCompare}
         />
         <Sections
           developers={developers}
@@ -849,6 +911,8 @@ function App() {
           developerName={selectedDeveloperName}
           onClose={() => setSelectedDeveloperName(null)}
           theme={theme}
+          compareIds={compareIds}
+          onToggleCompare={toggleCompare}
         />
       )}
 
@@ -911,6 +975,81 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Floating Compare Bar */}
+      {compareIds.length > 0 && !showCompareModal && (
+        <div className="compare-floating-bar">
+          <div className="compare-bar-items-list">
+            {comparedProperties.map((p) => (
+              <div key={`bar-${p.id}`} className="compare-bar-item">
+                <img src={p.image} alt={p.title} />
+                <button 
+                  className="compare-bar-remove-item" 
+                  onClick={() => removeFromCompare(p.id)}
+                  title="Remove"
+                  type="button"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+            {compareIds.length < 3 && (
+              <div 
+                className="compare-bar-item" 
+                style={{ 
+                  background: 'rgba(255,255,255,0.05)', 
+                  border: '1.5px dashed rgba(255,255,255,0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'rgba(255,255,255,0.4)',
+                  fontSize: '18px',
+                  fontWeight: 600
+                }}
+              >
+                +
+              </div>
+            )}
+          </div>
+          <div className="compare-bar-actions">
+            <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
+              {compareIds.length}/3 selected
+            </span>
+            <button 
+              className="compare-bar-btn-primary"
+              onClick={() => setShowCompareModal(true)}
+              type="button"
+            >
+              Compare Now
+            </button>
+            <button 
+              className="compare-bar-clear-btn"
+              onClick={() => setCompareIds([])}
+              type="button"
+            >
+              Clear All
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Compare Modal */}
+      {showCompareModal && (
+        <CompareModal
+          compareIds={compareIds}
+          onClose={() => setShowCompareModal(false)}
+          onRemove={removeFromCompare}
+          onAdd={addToCompare}
+          properties={allMappedProperties}
+        />
+      )}
+
+      {/* Site Visit Modal */}
+      <SiteVisitModal
+        isOpen={showSiteVisitModal}
+        onClose={() => setShowSiteVisitModal(false)}
+        triggerRef={siteVisitTriggerRef}
+      />
     </div>
   )
 }

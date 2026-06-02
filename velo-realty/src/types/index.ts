@@ -126,3 +126,50 @@ export type ProjectDetail = {
   amenities: string | null
   images: ProjectImage[]
 }
+
+export type CompareProjectMeta = {
+  id: number
+  name: string
+  slug: string
+  developer_name: string
+  developer_logo: string | null
+  corridor_name: string
+  price_range: string
+  configurations: string[]
+  sizes: string[]
+  status: string
+  primary_image: string | null
+  is_sponsored: boolean
+}
+
+export type CompareField = {
+  label: string
+  values: string[]
+}
+
+export type CompareCategoryGroup = {
+  category: string
+  fields: CompareField[]
+}
+
+export type CompareResponse = {
+  projects: CompareProjectMeta[]
+  comparisons: CompareCategoryGroup[]
+}
+
+export type SearchResultItem = {
+  id: number
+  name?: string
+  title?: string
+  slug: string
+  location?: string
+  price?: string
+}
+
+export type SearchResponse = {
+  developers: SearchResultItem[]
+  projects: SearchResultItem[]
+  properties: SearchResultItem[]
+  corridors: SearchResultItem[]
+}
+

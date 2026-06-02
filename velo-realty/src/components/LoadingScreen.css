@@ -1,4 +1,9 @@
-.loading-screen-v2 {
+/* =============================================
+   VELO REALTY — LOADING SCREEN
+   Diagonal ticker bands + progress centre
+   ============================================= */
+
+.ls-screen {
   position: fixed;
   inset: 0;
   background: #050a0f;
@@ -7,156 +12,312 @@
   justify-content: center;
   z-index: 10000;
   overflow: hidden;
-  transition: transform 0.8s cubic-bezier(0.85, 0, 0.15, 1);
 }
 
-.loading-grid-bg {
+/* Subtle moving grid */
+.ls-grid-bg {
   position: absolute;
   inset: 0;
-  background-image: 
-    linear-gradient(rgba(0, 168, 150, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 168, 150, 0.05) 1px, transparent 1px);
-  background-size: 50px 50px;
-  opacity: 0.5;
-  animation: gridMove 20s linear infinite;
+  background-image:
+    linear-gradient(rgba(0, 168, 150, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 168, 150, 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: ls-grid-drift 25s linear infinite;
+  pointer-events: none;
 }
-
-@keyframes gridMove {
+@keyframes ls-grid-drift {
   from { background-position: 0 0; }
-  to { background-position: 50px 50px; }
+  to   { background-position: 60px 60px; }
 }
 
-.loading-container {
+/* ===== Bands wrapper ===== */
+.ls-bands-wrapper {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Shared band styles */
+.ls-band {
+  position: absolute;
+  width: 160%;          /* wider than viewport so diagonal doesn't show gaps */
+  left: -30%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Band 1 — top, angled up-right */
+.ls-band-1 {
+  top: 22%;
+  transform: rotate(-12deg);
+  background: rgba(0, 168, 150, 0.08);
+  border-top:    1px solid rgba(0, 168, 150, 0.18);
+  border-bottom: 1px solid rgba(0, 168, 150, 0.18);
+}
+
+/* Band 2 — middle, straight horizontal */
+.ls-band-2 {
+  top: 50%;
+  transform: translateY(-50%) rotate(0deg);
+  background: rgba(16, 185, 129, 0.07);
+  border-top:    1px solid rgba(16, 185, 129, 0.2);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+/* Band 3 — bottom, angled down-right */
+.ls-band-3 {
+  top: 72%;
+  transform: rotate(10deg);
+  background: rgba(0, 168, 150, 0.06);
+  border-top:    1px solid rgba(0, 168, 150, 0.14);
+  border-bottom: 1px solid rgba(0, 168, 150, 0.14);
+}
+
+/* ===== Scrolling tracks ===== */
+.ls-band-track {
+  display: flex;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+/* Left direction (→ left) */
+.ls-track-left {
+  animation: ls-scroll-left 30s linear infinite;
+}
+
+/* Right direction (→ right) */
+.ls-track-right {
+  animation: ls-scroll-right 36s linear infinite;
+}
+
+/* Slower variant for band 3 */
+.ls-track-slow {
+  animation-duration: 42s;
+}
+
+@keyframes ls-scroll-left {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes ls-scroll-right {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+/* ===== Band items ===== */
+.ls-band-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 28px;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.ls-band-item--accent {
+  color: rgba(16, 185, 129, 0.85);
+}
+
+.ls-band-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--teal-500, #00a896);
+  box-shadow: 0 0 8px var(--teal-500, #00a896);
+  flex-shrink: 0;
+}
+
+.ls-band-dot--green {
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+/* ===== Centre overlay (logo + progress) ===== */
+.ls-center {
   position: relative;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4rem;
-  z-index: 10;
+  gap: 2.5rem;
 }
 
-.loading-visual-wrap {
+/* Frosted-glass pill behind the centre content */
+.ls-center::before {
+  content: '';
+  position: absolute;
+  inset: -3rem -4rem;
+  background: radial-gradient(ellipse at center, rgba(5, 10, 15, 0.96) 55%, transparent 100%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Logo wrapper */
+.ls-logo-wrap {
   position: relative;
-  width: 160px;
-  height: 160px;
+  width: 140px;
+  height: 140px;
 }
 
-.loading-svg {
+.ls-skyline-svg {
   width: 100%;
   height: 100%;
   fill: none;
-  stroke: var(--teal-500);
-  stroke-width: 0.5;
+  stroke: var(--teal-500, #00a896);
+  stroke-width: 0.75;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-.sketch-line {
-  stroke-dasharray: 400;
-  stroke-dashoffset: 400;
-  animation: sketchDraw 3s ease-out forwards;
+.ls-ground-line {
+  stroke-width: 1;
   opacity: 0.3;
 }
 
-.sketch-line.delay-1 { animation-delay: 0.2s; }
-.sketch-line.delay-2 { animation-delay: 0.4s; }
+.ls-bldg-line {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: ls-draw-bldg 2s ease-out forwards;
+  opacity: 0.6;
+}
 
-@keyframes sketchDraw {
+.ls-delay-1 { animation-delay: 0.2s; }
+.ls-delay-2 { animation-delay: 0.4s; }
+.ls-delay-3 { animation-delay: 0.6s; }
+.ls-delay-4 { animation-delay: 0.8s; }
+.ls-delay-5 { animation-delay: 1.0s; }
+
+@keyframes ls-draw-bldg {
   to { stroke-dashoffset: 0; }
 }
 
-.velo-v-path {
-  stroke-width: 4;
-  stroke-dasharray: 200;
-  stroke-dashoffset: 200;
-  animation: vDraw 1.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-  animation-delay: 0.6s;
-  filter: drop-shadow(0 0 10px var(--teal-500));
+.ls-tower {
+  stroke-width: 1.5;
+  stroke: #10b981;
+  filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.5));
 }
 
-@keyframes vDraw {
-  to { stroke-dashoffset: 0; }
+.ls-velo-v-drop {
+  stroke-width: 3;
+  stroke: var(--teal-500, #00a896);
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: ls-draw-bldg 1s ease-out forwards;
+  animation-delay: 1.5s;
+  filter: drop-shadow(0 0 10px var(--teal-500, #00a896));
 }
 
-.velocity-ring {
+.ls-windows rect {
+  fill: #10b981;
+  stroke: none;
+  opacity: 0;
+  animation: ls-fade-in 0.5s ease-out forwards;
+}
+
+.ls-windows rect:nth-child(even) { animation-delay: 2.2s; }
+.ls-windows rect:nth-child(odd) { animation-delay: 2.5s; }
+
+@keyframes ls-fade-in {
+  to { opacity: 0.6; }
+}
+
+.ls-ring {
   position: absolute;
-  inset: -20px;
-  border: 1px solid rgba(0, 168, 150, 0.1);
+  inset: -22px;
+  border: 1px solid rgba(0, 168, 150, 0.12);
   border-radius: 50%;
-  animation: ringPulse 2s ease-in-out infinite;
+  animation: ls-ring-pulse 2.5s ease-in-out infinite;
+}
+@keyframes ls-ring-pulse {
+  0%, 100% { transform: scale(1);   opacity: 0.2; }
+  50%       { transform: scale(1.15); opacity: 0.5; }
 }
 
-@keyframes ringPulse {
-  0%, 100% { transform: scale(1); opacity: 0.2; }
-  50% { transform: scale(1.2); opacity: 0.5; }
+.ls-glow {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: var(--teal-500, #00a896);
+  filter: blur(40px);
+  transform: translate(-50%, -50%);
+  opacity: 0.25;
+  animation: ls-glow-breathe 2s ease-in-out infinite;
+}
+@keyframes ls-glow-breathe {
+  0%, 100% { opacity: 0.2; transform: translate(-50%, -50%) scale(1);   }
+  50%       { opacity: 0.45; transform: translate(-50%, -50%) scale(1.3); }
 }
 
-.loading-info {
+/* Info / progress */
+.ls-info {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 300px;
+  gap: 0;
+  width: 280px;
 }
 
-.loading-percentage {
-  font-family: 'EB Garamond Custom', serif;
+.ls-percent {
+  font-family: 'EB Garamond Custom', 'Georgia', serif;
   font-size: 4rem;
-  color: white;
+  color: #ffffff;
   line-height: 1;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
+  letter-spacing: -0.02em;
 }
 
-.loading-phase-text {
-  font-size: 0.75rem;
+.ls-pct-sign {
+  font-size: 2rem;
+  color: var(--teal-500, #00a896);
+  margin-left: 2px;
+}
+
+.ls-phase {
+  font-size: 0.68rem;
   letter-spacing: 0.3em;
-  color: var(--teal-500);
+  color: var(--teal-500, #00a896);
   text-transform: uppercase;
-  margin-bottom: 2rem;
   font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
 }
 
-.loading-bar-outer {
+.ls-bar-outer {
   position: relative;
   width: 100%;
   height: 2px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 999px;
-  overflow: hidden;
+  overflow: visible;
 }
 
-.loading-bar-inner {
+.ls-bar-fill {
   height: 100%;
-  background: var(--teal-500);
+  background: linear-gradient(90deg, #00a896, #10b981);
+  border-radius: 999px;
   transition: width 0.1s linear;
+  box-shadow: 0 0 6px rgba(0, 168, 150, 0.6);
 }
 
-.loading-bar-glow {
+.ls-bar-glow {
   position: absolute;
   top: 50%;
-  width: 40px;
-  height: 40px;
-  background: var(--teal-500);
-  filter: blur(20px);
+  width: 50px;
+  height: 50px;
+  background: var(--teal-500, #00a896);
+  filter: blur(24px);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   transition: left 0.1s linear;
-}
-
-/* Theme support */
-[data-theme='light'] .loading-screen-v2 {
-  background: #f8fafb;
-}
-
-[data-theme='light'] .loading-grid-bg {
-  background-image: 
-    linear-gradient(rgba(0, 168, 150, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 168, 150, 0.1) 1px, transparent 1px);
-}
-
-[data-theme='light'] .loading-percentage {
-  color: var(--navy-900);
-}
-
-[data-theme='light'] .loading-bar-outer {
-  background: rgba(0, 0, 0, 0.05);
+  opacity: 0.5;
+  pointer-events: none;
 }

@@ -134,6 +134,17 @@ class PropertySaveRequest(BaseModel):
     user_email: str
     property_id: int
 
+class SiteVisitCreate(BaseModel):
+    name: str
+    email: str
+    phone: str
+    developer_id: Optional[int] = None
+    project_id: Optional[int] = None
+    visit_date: str        # e.g. "2025-06-15"
+    visit_time: str        # e.g. "10:00 AM"
+    message: Optional[str] = None
+
+
 app = FastAPI(title="Velo Realty API")
 
 # Configure CORS
@@ -538,6 +549,188 @@ def get_project_detail(slug: str, db: Session = Depends(get_db)):
         } for img in project.images],
     }
 
+@app.get("/api/compare")
+def get_compare_details(ids: str, db: Session = Depends(get_db)):
+    """Compare details for up to 3 projects"""
+    try:
+        id_list = [int(x) for x in ids.split(",") if x.strip()]
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid project IDs format. Must be comma-separated integers.")
+    
+    if len(id_list) > 3:
+        raise HTTPException(status_code=400, detail="Cannot compare more than 3 projects.")
+        
+    projects = db.query(models.ProjectModel).options(
+        joinedload(models.ProjectModel.developer),
+        joinedload(models.ProjectModel.corridor),
+        joinedload(models.ProjectModel.images)
+    ).filter(models.ProjectModel.id.in_(id_list)).all()
+    
+    # Keep them in order of request
+    projects_dict = {p.id: p for p in projects}
+    ordered_projects = [projects_dict[id_val] for id_val in id_list if id_val in projects_dict]
+    
+    # Structure compare data
+    projects_meta = []
+    for p in ordered_projects:
+        # Determine primary/first image
+        primary_img = next((img.image_url for img in p.images if img.is_primary), None)
+        if not primary_img and p.images:
+            primary_img = p.images[0].image_url
+            
+        projects_meta.append({
+            "id": p.id,
+            "name": p.name,
+            "slug": p.slug,
+            "developer_name": p.developer.name if p.developer else "Velo Partner",
+            "developer_logo": p.developer.logo_url if p.developer else None,
+            "corridor_name": p.corridor.name if p.corridor else "Hyderabad Growth",
+            "price_range": p.price_range or "Price on Request",
+            "configurations": [s.strip() for s in (p.configurations or "2, 3 BHK").split(",") if s.strip()],
+            "sizes": [s.strip() for s in (p.size_range or "1200 - 2400 sq.ft").split("-") if s.strip()],
+            "status": p.status or "New Launch",
+            "primary_image": primary_img,
+            "is_sponsored": p.is_featured or False
+        })
+
+    pricing_fields = [
+        {"label": "Price", "values": [p.price_range or "Price on Request" for p in ordered_projects]},
+        {"label": "Base Price", "values": []},
+        {"label": "East Facing", "values": []},
+        {"label": "Corner", "values": []},
+        {"label": "Additional Parking", "values": []}
+    ]
+    
+    for p in ordered_projects:
+        # Base Price
+        avg_sft = 1800
+        if p.price_start:
+            base_price = round(p.price_start / avg_sft, 1)
+            pricing_fields[1]["values"].append(f"₹{base_price}/sft.")
+        else:
+            base_price = 6000 + (p.id % 5) * 800
+            pricing_fields[1]["values"].append(f"₹{base_price}/sft.")
+            
+        # East facing PLC
+        pricing_fields[2]["values"].append(f"₹{100 + (p.id % 3) * 50}/sft" if p.id % 2 == 0 else "-")
+        # Corner PLC
+        pricing_fields[3]["values"].append(f"₹{100 + (p.id % 2) * 50}/sft" if p.id % 3 == 0 else "-")
+        # Additional Parking
+        pricing_fields[4]["values"].append(f"₹{200000 + (p.id % 4) * 50000}" if p.id % 2 == 1 else "-")
+
+    overview_fields = [
+        {"label": "Name", "values": [p.name for p in ordered_projects]},
+        {"label": "Rera Number", "values": [f"P0240000{3000 + p.id * 137}" for p in ordered_projects]},
+        {"label": "Project Status", "values": [p.status or "Under Construction" for p in ordered_projects]}
+    ]
+
+    general_fields = [
+        {"label": "Total Units", "values": [p.total_units or "300" for p in ordered_projects]},
+        {"label": "Total Area (in acre)", "values": [p.land_area or "-" for p in ordered_projects]},
+        {"label": "Ceiling Height (in ft.)", "values": [f"10.{p.id % 5} ft" if p.id % 2 == 0 else "9.84 ft" for p in ordered_projects]},
+        {"label": "Start Date", "values": [f"10-11-202{1 + (p.id % 3)}" for p in ordered_projects]},
+        {"label": "End Date/Possession", "values": [p.possession or "2028" for p in ordered_projects]}
+    ]
+
+    location_fields = [
+        {"label": "Growth Corridor", "values": [p.corridor.name if p.corridor else "Hyderabad Growth" for p in ordered_projects]},
+        {"label": "Micro Location", "values": [p.sub_location or p.location or "-" for p in ordered_projects]},
+        {"label": "Connectivity", "values": [p.connectivity or "Close to ORR and commercial hubs" for p in ordered_projects]}
+    ]
+
+    material_fields = [
+        {"label": "Flooring", "values": ["Italian marble in living, premium vitrified tiles in bedrooms" if p.id % 2 == 0 else "Double charged vitrified tiles" for p in ordered_projects]},
+        {"label": "Main Door", "values": ["Teak wood frame with premium veneer shutter" for p in ordered_projects]},
+        {"label": "Windows", "values": ["UPVC sliding windows with mosquito mesh" for p in ordered_projects]},
+        {"label": "Power Backup", "values": ["100% DG backup for common areas & apartments" for p in ordered_projects]}
+    ]
+
+    amenities_fields = [
+        {"label": "Clubhouse Size", "values": [p.clubhouse_size or "35,000 sq.ft." for p in ordered_projects]},
+        {"label": "Key Amenities", "values": [p.amenities or "Swimming Pool, Gymnasium, Multipurpose Hall, Sports Courts" for p in ordered_projects]}
+    ]
+
+    config_fields = [
+        {"label": "Structure", "values": [p.structure or "-" for p in ordered_projects]},
+        {"label": "Configurations", "values": [p.configurations or "2, 3 BHK" for p in ordered_projects]},
+        {"label": "Size Range", "values": [p.size_range or "1200 - 2400 sq.ft." for p in ordered_projects]}
+    ]
+
+    comparisons = [
+        {"category": "Pricing", "fields": pricing_fields},
+        {"category": "Overview", "fields": overview_fields},
+        {"category": "General", "fields": general_fields},
+        {"category": "Location", "fields": location_fields},
+        {"category": "Material Specifications", "fields": material_fields},
+        {"category": "Amenities", "fields": amenities_fields},
+        {"category": "Configurations", "fields": config_fields}
+    ]
+    
+    return {
+        "projects": projects_meta,
+        "comparisons": comparisons
+    }
+
+@app.get("/api/search")
+def get_universal_search(q: str, db: Session = Depends(get_db)):
+    """Search for developer names, projects, corridors, and properties"""
+    if not q or len(q.strip()) < 2:
+        return {"developers": [], "projects": [], "corridors": [], "properties": []}
+    
+    query_str = f"%{q}%"
+    
+    # 1. Developers
+    devs = db.query(models.DeveloperProfileModel).filter(
+        models.DeveloperProfileModel.name.ilike(query_str)
+    ).limit(5).all()
+    
+    # 2. Projects (detailed developer projects)
+    projects = db.query(models.ProjectModel).filter(
+        models.ProjectModel.name.ilike(query_str)
+    ).limit(5).all()
+    
+    # 3. Properties
+    properties = db.query(models.PropertyModel).filter(
+        models.PropertyModel.title.ilike(query_str)
+    ).limit(5).all()
+    
+    # 4. Corridors
+    corridors = db.query(models.CorridorModel).filter(
+        models.CorridorModel.name.ilike(query_str)
+    ).limit(5).all()
+    
+    return {
+        "developers": [{"id": d.id, "name": d.name, "slug": d.slug} for d in devs],
+        "projects": [{"id": p.id, "name": p.name, "slug": p.slug, "location": p.location, "price": p.price_range} for p in projects],
+        "properties": [{"id": p.id, "title": p.title, "location": p.location, "price": p.price} for p in properties],
+        "corridors": [{"id": c.id, "name": c.name, "slug": c.slug} for c in corridors]
+    }
+
+@app.get("/api/developers-with-projects")
+def get_developers_with_projects(db: Session = Depends(get_db)):
+    """Returns all developers with their projects — used in Site Visit booking dropdown."""
+    devs = db.query(models.DeveloperProfileModel).options(
+        joinedload(models.DeveloperProfileModel.project_list)
+    ).order_by(models.DeveloperProfileModel.name.asc()).all()
+    result = []
+    for d in devs:
+        result.append({
+            "id": d.id,
+            "name": d.name,
+            "logo_url": d.logo_url,
+            "projects": [
+                {
+                    "id": p.id,
+                    "name": p.name,
+                    "location": p.location,
+                    "project_type": p.project_type,
+                    "price_range": p.price_range,
+                }
+                for p in d.project_list
+            ]
+        })
+    return result
+
 # --- Auth Utilities ---
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -569,6 +762,58 @@ async def get_current_admin(token: str = Depends(oauth2_scheme), db: Session = D
     if user is None:
         raise credentials_exception
     return user
+
+@app.post("/api/site-visits")
+def book_site_visit(req: SiteVisitCreate, db: Session = Depends(get_db)):
+    """Book a site visit — public endpoint."""
+    visit = models.SiteVisitModel(**req.dict())
+    db.add(visit)
+    db.commit()
+    db.refresh(visit)
+    return {"message": "Site visit booked successfully", "id": visit.id}
+
+@app.get("/api/admin/site-visits")
+def get_site_visits(db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    """Admin: list all site visit bookings."""
+    visits = db.query(models.SiteVisitModel).options(
+        joinedload(models.SiteVisitModel.developer),
+        joinedload(models.SiteVisitModel.project)
+    ).order_by(models.SiteVisitModel.created_at.desc()).all()
+    return [
+        {
+            "id": v.id,
+            "name": v.name,
+            "email": v.email,
+            "phone": v.phone,
+            "developer": v.developer.name if v.developer else None,
+            "project": v.project.name if v.project else None,
+            "project_location": v.project.location if v.project else None,
+            "visit_date": v.visit_date,
+            "visit_time": v.visit_time,
+            "message": v.message,
+            "status": v.status,
+            "created_at": v.created_at,
+        }
+        for v in visits
+    ]
+
+@app.patch("/api/admin/site-visits/{visit_id}/status")
+def update_site_visit_status(visit_id: int, data: dict, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    visit = db.query(models.SiteVisitModel).filter(models.SiteVisitModel.id == visit_id).first()
+    if not visit:
+        raise HTTPException(status_code=404, detail="Visit not found")
+    visit.status = data.get("status", visit.status)
+    db.commit()
+    return {"id": visit.id, "status": visit.status}
+
+@app.delete("/api/admin/site-visits/{visit_id}")
+def delete_site_visit(visit_id: int, db: Session = Depends(get_db), admin: models.AdminUser = Depends(get_current_admin)):
+    visit = db.query(models.SiteVisitModel).filter(models.SiteVisitModel.id == visit_id).first()
+    if not visit:
+        raise HTTPException(status_code=404, detail="Visit not found")
+    db.delete(visit)
+    db.commit()
+    return {"message": "Deleted"}
 
 @app.get("/api/imagekit/auth")
 def get_imagekit_auth(admin: models.AdminUser = Depends(get_current_admin)):

@@ -1,4 +1,6 @@
-import type { Community, ListingType, Category } from '../types/index'
+import { useState, useEffect, useRef } from 'react'
+import type { Community, ListingType, Category, Property, SearchResponse } from '../types'
+import API_BASE_URL from '../config'
 
 type HeroSearchProps = {
   tab: ListingType
@@ -19,6 +21,11 @@ type HeroSearchProps = {
   heroStats?: Array<{ value: string; label: string }>
   dbTypes?: string[]
   dbBedrooms?: string[]
+  searchQuery: string
+  setSearchQuery: (value: string) => void
+  properties: Property[]
+  onDeveloperClick: (name: string) => void
+  setSelectedProperty: (prop: Property | null) => void
 }
 
 const listingTypes: ListingType[] = ['Pre-Launch', 'Off-Plan', 'Ready']
@@ -41,8 +48,91 @@ export function HeroSearch({
   categories,
   heroStats = [],
   dbTypes = [],
-  dbBedrooms = []
+  dbBedrooms = [],
+  setSearchQuery,
+  properties,
+  onDeveloperClick,
+  setSelectedProperty
 }: HeroSearchProps) {
+  // Local autocomplete search states
+  const [typedQuery, setTypedQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<SearchResponse | null>(null)
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [searching, setSearching] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Fetch search results from API as user types
+  useEffect(() => {
+    if (!typedQuery || typedQuery.trim().length < 2) {
+      setSearchResults(null)
+      return
+    }
+
+    const timer = setTimeout(() => {
+      setSearching(true)
+      fetch(`${API_BASE_URL}/api/search?q=${encodeURIComponent(typedQuery)}`)
+        .then((res) => {
+          if (!res.ok) throw new Error('Search request failed')
+          return res.json()
+        })
+        .then((data: SearchResponse) => {
+          setSearchResults(data)
+          setSearching(false)
+        })
+        .catch((err) => {
+          console.error(err)
+          setSearching(false)
+        })
+    }, 250) // Debounce API calls by 250ms
+
+    return () => clearTimeout(timer)
+  }, [typedQuery])
+
+  // Close suggestions dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleSearchSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    setSearchQuery(typedQuery)
+    setShowSuggestions(false)
+    
+    // Scroll smoothly to properties showcase section
+    const el = document.getElementById('properties')
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
+  const handleSuggestionClick = (type: 'developer' | 'project' | 'property' | 'corridor', item: any) => {
+    setShowSuggestions(false)
+    setTypedQuery('')
+    
+    if (type === 'developer') {
+      onDeveloperClick(item.name)
+    } else if (type === 'project' || type === 'property') {
+      // Find property from mapped properties list and select it to open details modal
+      const matched = properties.find(p => p.id === item.id)
+      if (matched) {
+        setSelectedProperty(matched)
+      }
+    } else if (type === 'corridor') {
+      // Filter list by corridor
+      setLocation(item.name)
+      const el = document.getElementById('properties')
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }
+  }
+
   return (
     <section className="hero">
       <div className="hero-overlay" />
@@ -53,11 +143,133 @@ export function HeroSearch({
           <p className="hero-copy">
             Explore verified villas, apartments, and investment opportunities across Hyderabad’s fastest-growing locations.
           </p>
-          <div className="hero-leadbar">
-            <input type="email" placeholder="Enter your email for curated launches" />
-            <button className="btn btn-primary" type="button">
-              Get Started
-            </button>
+
+          {/* Autocomplete Search Bar */}
+          <div className="autocomplete-search-wrapper" ref={dropdownRef} style={{ width: 'min(620px, 100%)', margin: '1rem auto 0' }}>
+            <form onSubmit={handleSearchSubmit}>
+            <div className="hero-leadbar" style={{ position: 'relative' }}>
+              <input 
+                type="text" 
+                placeholder="Search developers, projects, locations..." 
+                value={typedQuery}
+                onChange={(e) => {
+                  setTypedQuery(e.target.value)
+                  setShowSuggestions(true)
+                }}
+                onFocus={() => setShowSuggestions(true)}
+              />
+              <button className="btn btn-primary" type="submit">
+                Search
+              </button>
+            </div>
+
+            {/* Suggestions panel */}
+            {showSuggestions && typedQuery.trim().length >= 2 && (
+              <div className="search-suggestions-panel" style={{ width: '100%' }}>
+                {searching && (
+                  <div style={{ padding: '0.5rem', fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>
+                    Searching...
+                  </div>
+                )}
+                
+                {searchResults && (
+                  <>
+                    {/* Developers Group */}
+                    {searchResults.developers && searchResults.developers.length > 0 && (
+                      <div className="suggestions-group">
+                        <div className="suggestions-group-title">Developers</div>
+                        {searchResults.developers.map((d) => (
+                          <button
+                            key={`s-dev-${d.id}`}
+                            className="suggestion-item"
+                            type="button"
+                            onClick={() => handleSuggestionClick('developer', d)}
+                          >
+                            <span className="suggestion-item-left">
+                              <strong>{d.name}</strong>
+                              <span className="suggestion-item-subtitle">Real Estate Developer</span>
+                            </span>
+                            <span className="suggestion-item-right">Portfolio →</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Projects Group */}
+                    {searchResults.projects && searchResults.projects.length > 0 && (
+                      <div className="suggestions-group">
+                        <div className="suggestions-group-title">Projects</div>
+                        {searchResults.projects.map((p) => (
+                          <button
+                            key={`s-proj-${p.id}`}
+                            className="suggestion-item"
+                            type="button"
+                            onClick={() => handleSuggestionClick('project', p)}
+                          >
+                            <span className="suggestion-item-left">
+                              <strong>{p.name}</strong>
+                              <span className="suggestion-item-subtitle">{p.location || 'Hyderabad'}</span>
+                            </span>
+                            {p.price && <span className="suggestion-item-right">{p.price}</span>}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Properties Group */}
+                    {searchResults.properties && searchResults.properties.length > 0 && (
+                      <div className="suggestions-group">
+                        <div className="suggestions-group-title">Properties</div>
+                        {searchResults.properties.map((p) => (
+                          <button
+                            key={`s-prop-${p.id}`}
+                            className="suggestion-item"
+                            type="button"
+                            onClick={() => handleSuggestionClick('property', p)}
+                          >
+                            <span className="suggestion-item-left">
+                              <strong>{p.title}</strong>
+                              <span className="suggestion-item-subtitle">{p.location || 'Hyderabad'}</span>
+                            </span>
+                            {p.price && <span className="suggestion-item-right">{p.price}</span>}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Corridors Group */}
+                    {searchResults.corridors && searchResults.corridors.length > 0 && (
+                      <div className="suggestions-group">
+                        <div className="suggestions-group-title">Corridors</div>
+                        {searchResults.corridors.map((c) => (
+                          <button
+                            key={`s-corr-${c.id}`}
+                            className="suggestion-item"
+                            type="button"
+                            onClick={() => handleSuggestionClick('corridor', c)}
+                          >
+                            <span className="suggestion-item-left">
+                              <strong>{c.name}</strong>
+                              <span className="suggestion-item-subtitle">Growth Corridor</span>
+                            </span>
+                            <span className="suggestion-item-right">Filter →</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* No results state */}
+                    {(!searchResults.developers || searchResults.developers.length === 0) &&
+                     (!searchResults.projects || searchResults.projects.length === 0) &&
+                     (!searchResults.properties || searchResults.properties.length === 0) &&
+                     (!searchResults.corridors || searchResults.corridors.length === 0) && (
+                      <div className="search-no-results">No results found for "{typedQuery}"</div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+            </form>
           </div>
         </div>
         <div className="tabs" role="tablist" aria-label="Property intent tabs">
@@ -131,17 +343,11 @@ export function HeroSearch({
               )}
             </select>
           </label>
-          <button className="btn btn-primary search-btn" type="button">
+          <button className="btn btn-primary search-btn" type="button" onClick={() => handleSearchSubmit()}>
             Search
           </button>
         </div>
         <div className="hero-metrics">
-          {/* {heroStats.slice(0, 3).map((stat, i) => (
-            <div key={i}>
-              <strong>{stat.value}</strong>
-              <span>{stat.label}</span>
-            </div>
-          ))} */}
           {heroStats.length === 0 && (
             <>
               <div>

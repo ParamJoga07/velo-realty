@@ -1,0 +1,771 @@
+/* Overlay Background with smooth backdrop blur fade-in */
+.sv-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  background: rgba(6, 15, 25, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  animation: sv-overlay-fade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sv-overlay-fade {
+  from {
+    background: rgba(6, 15, 25, 0);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+  to {
+    background: rgba(6, 15, 25, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+/* Premium Zoom / Expand Animation originating from the trigger button */
+.sv-panel {
+  width: 100%;
+  max-width: 540px;
+  background: var(--surface-0, #0a1824);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow: hidden;
+  position: relative;
+  
+  /* Origin Zoom Animation variables passed from JS */
+  transform-origin: var(--sv-origin-x, 50%) var(--sv-origin-y, 50%);
+  animation: sv-zoom-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sv-zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Header style */
+.sv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sv-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sv-header-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(0, 168, 150, 0.1);
+  color: var(--teal-400, #00a896);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sv-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary, #ffffff);
+}
+
+.sv-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-500, rgba(255, 255, 255, 0.5));
+  margin: 2px 0 0 0;
+}
+
+.sv-close {
+  background: transparent;
+  border: none;
+  color: var(--text-500, rgba(255, 255, 255, 0.4));
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.sv-close:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary, #ffffff);
+}
+
+/* Step Progress Indicator */
+.sv-steps {
+  display: flex;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.01);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  justify-content: space-between;
+}
+
+.sv-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-500, rgba(255, 255, 255, 0.4));
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.sv-step:disabled {
+  cursor: not-allowed;
+}
+
+.sv-step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--text-500, rgba(255, 255, 255, 0.2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.sv-step--active {
+  color: var(--teal-400, #00a896);
+  font-weight: 700;
+}
+
+.sv-step--active .sv-step-num {
+  border-color: var(--teal-400, #00a896);
+  background: var(--teal-400, #00a896);
+  color: #ffffff;
+}
+
+.sv-step--done {
+  color: var(--teal-400, #00a896);
+}
+
+.sv-step--done .sv-step-num {
+  border-color: var(--teal-400, #00a896);
+  background: rgba(0, 168, 150, 0.1);
+  color: var(--teal-400, #00a896);
+}
+
+.sv-step-label {
+  display: inline-block;
+}
+
+/* Modal Body */
+.sv-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.sv-step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  height: 100%;
+}
+
+.sv-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary, #ffffff);
+  margin: 0 0 0.5rem 0;
+}
+
+/* Fields & inputs */
+.sv-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sv-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.sv-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-300, rgba(255, 255, 255, 0.7));
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sv-select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sv-select, .sv-input, .sv-textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: var(--text-primary, #ffffff);
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.sv-select:focus, .sv-input:focus, .sv-textarea:focus {
+  border-color: var(--teal-500, #00a896);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 3px rgba(0, 168, 150, 0.15);
+}
+
+.sv-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+
+.sv-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sv-select-arrow {
+  position: absolute;
+  right: 1rem;
+  pointer-events: none;
+  color: var(--text-500, rgba(255, 255, 255, 0.4));
+  display: flex;
+  align-items: center;
+}
+
+/* Project Card Summary */
+.sv-project-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 0.5rem;
+}
+
+.sv-project-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sv-dev-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #ffffff;
+  padding: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sv-project-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary, #ffffff);
+}
+
+.sv-project-meta {
+  font-size: 0.75rem;
+  color: var(--text-500, rgba(255, 255, 255, 0.5));
+  margin-top: 2px;
+}
+
+.sv-project-price {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--teal-400, #00a896);
+  background: rgba(0, 168, 150, 0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+/* React Datepicker styling override */
+.sv-calendar-wrapper {
+  display: flex;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.react-datepicker {
+  background: transparent !important;
+  border: none !important;
+  font-family: inherit !important;
+  color: var(--text-primary, #ffffff) !important;
+}
+
+.react-datepicker__header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding-top: 0 !important;
+}
+
+.react-datepicker__current-month {
+  color: var(--text-primary, #ffffff) !important;
+  font-weight: 700 !important;
+  font-size: 0.95rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.react-datepicker__day-name {
+  color: var(--text-500, rgba(255, 255, 255, 0.4)) !important;
+  font-weight: 600 !important;
+  width: 2.2rem !important;
+  line-height: 2.2rem !important;
+}
+
+.react-datepicker__day {
+  color: var(--text-primary, #ffffff) !important;
+  width: 2.2rem !important;
+  line-height: 2.2rem !important;
+  border-radius: 50% !important;
+  transition: all 0.15s ease !important;
+}
+
+.react-datepicker__day:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #ffffff !important;
+}
+
+.react-datepicker__day--selected {
+  background: var(--teal-500, #00a896) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.react-datepicker__day--disabled {
+  color: rgba(255, 255, 255, 0.15) !important;
+  cursor: not-allowed !important;
+}
+
+.react-datepicker__day--disabled:hover {
+  background: transparent !important;
+}
+
+/* Time Slots styling */
+.sv-timeslots-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.sv-timeslots-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-300, rgba(255, 255, 255, 0.7));
+}
+
+.sv-timeslots {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.sv-slot {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  color: var(--text-primary, #ffffff);
+  padding: 0.6rem 0.25rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sv-slot:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.sv-slot--active {
+  background: var(--teal-500, #00a896) !important;
+  border-color: var(--teal-500, #00a896) !important;
+  color: #ffffff !important;
+}
+
+/* Contact step summary & fields */
+.sv-summary {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sv-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.sv-summary-row span {
+  color: var(--text-500, rgba(255, 255, 255, 0.4));
+}
+
+.sv-summary-row strong {
+  color: var(--text-primary, #ffffff);
+}
+
+.sv-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.sv-textarea {
+  resize: none;
+}
+
+/* Footers and buttons */
+.sv-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 1.25rem;
+}
+
+.sv-btn {
+  padding: 0.7rem 1.5rem;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+}
+
+.sv-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sv-btn-primary {
+  background: var(--teal-500, #00a896);
+  color: #ffffff;
+}
+
+.sv-btn-primary:hover:not(:disabled) {
+  background: var(--teal-600, #028a7d);
+  transform: translateY(-1px);
+}
+
+.sv-btn-ghost {
+  background: transparent;
+  color: var(--text-300, rgba(255, 255, 255, 0.7));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sv-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary, #ffffff);
+}
+
+.sv-btn-submit {
+  min-width: 160px;
+  justify-content: center;
+}
+
+/* Spinners and loaders */
+.sv-loading {
+  text-align: center;
+  color: var(--text-500, rgba(255, 255, 255, 0.4));
+  padding: 2rem 0;
+  font-size: 0.9rem;
+}
+
+.sv-error {
+  color: #f87171;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.sv-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: sv-spin 0.6s linear infinite;
+}
+
+@keyframes sv-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Success panel styling */
+.sv-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1rem;
+  gap: 1rem;
+}
+
+.sv-success-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+}
+
+.sv-success h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.sv-success p {
+  font-size: 0.92rem;
+  color: var(--text-300, rgba(255, 255, 255, 0.7));
+  margin: 0;
+  line-height: 1.5;
+}
+
+.sv-success-note {
+  font-size: 0.8rem !important;
+  color: var(--text-500, rgba(255, 255, 255, 0.4)) !important;
+}
+
+/* Light Theme support override style definitions */
+.page[data-theme='light'] .sv-panel {
+  background: var(--surface-0, #ffffff);
+  border-color: rgba(15, 23, 42, 0.08);
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.15);
+}
+
+.page[data-theme='light'] .sv-overlay {
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.page[data-theme='light'] .sv-header {
+  border-bottom-color: rgba(15, 23, 42, 0.08);
+}
+
+.page[data-theme='light'] .sv-title {
+  color: var(--navy-900, #0f172a);
+}
+
+.page[data-theme='light'] .sv-subtitle {
+  color: var(--text-500, #475569);
+}
+
+.page[data-theme='light'] .sv-steps {
+  background: rgba(15, 23, 42, 0.01);
+  border-bottom-color: rgba(15, 23, 42, 0.08);
+}
+
+.page[data-theme='light'] .sv-step {
+  color: var(--text-500, #64748b);
+}
+
+.page[data-theme='light'] .sv-step-num {
+  border-color: var(--text-500, #cbd5e1);
+}
+
+.page[data-theme='light'] .sv-section-title {
+  color: var(--navy-900, #0f172a);
+}
+
+.page[data-theme='light'] .sv-label {
+  color: var(--text-300, #475569);
+}
+
+.page[data-theme='light'] .sv-select, 
+.page[data-theme='light'] .sv-input, 
+.page[data-theme='light'] .sv-textarea {
+  background: rgba(15, 23, 42, 0.02);
+  border-color: rgba(15, 23, 42, 0.08);
+  color: var(--navy-900, #0f172a);
+}
+
+.page[data-theme='light'] .sv-select:focus, 
+.page[data-theme='light'] .sv-input:focus, 
+.page[data-theme='light'] .sv-textarea:focus {
+  background: #ffffff;
+}
+
+.page[data-theme='light'] .sv-project-card {
+  background: rgba(15, 23, 42, 0.02);
+  border-color: rgba(15, 23, 42, 0.06);
+}
+
+.page[data-theme='light'] .sv-project-name {
+  color: var(--navy-900, #0f172a);
+}
+
+.page[data-theme='light'] .sv-project-meta {
+  color: var(--text-500, #64748b);
+}
+
+.page[data-theme='light'] .sv-calendar-wrapper {
+  background: rgba(15, 23, 42, 0.01);
+  border-color: rgba(15, 23, 42, 0.06);
+}
+
+.page[data-theme='light'] .react-datepicker__current-month {
+  color: var(--navy-900, #0f172a) !important;
+}
+
+.page[data-theme='light'] .react-datepicker__day-name {
+  color: var(--text-500, #64748b) !important;
+}
+
+.page[data-theme='light'] .react-datepicker__day {
+  color: var(--navy-900, #0f172a) !important;
+}
+
+.page[data-theme='light'] .react-datepicker__day:hover {
+  background: rgba(15, 23, 42, 0.06) !important;
+}
+
+.page[data-theme='light'] .react-datepicker__day--disabled {
+  color: rgba(15, 23, 42, 0.15) !important;
+}
+
+.page[data-theme='light'] .sv-slot {
+  background: rgba(15, 23, 42, 0.02);
+  border-color: rgba(15, 23, 42, 0.06);
+  color: var(--navy-900, #0f172a);
+}
+
+.page[data-theme='light'] .sv-slot:hover {
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.page[data-theme='light'] .sv-summary {
+  background: rgba(15, 23, 42, 0.01);
+  border-color: rgba(15, 23, 42, 0.05);
+}
+
+.page[data-theme='light'] .sv-summary-row span {
+  color: var(--text-500, #64748b);
+}
+
+.page[data-theme='light'] .sv-summary-row strong {
+  color: var(--navy-900, #0f172a);
+}
+
+.page[data-theme='light'] .sv-btn-ghost {
+  color: var(--text-300, #475569);
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+.page[data-theme='light'] .sv-btn-ghost:hover {
+  background: rgba(15, 23, 42, 0.04);
+  color: var(--navy-900, #0f172a);
+}
+
+.page[data-theme='light'] .sv-success h3 {
+  color: var(--navy-900, #0f172a);
+}
+
+.page[data-theme='light'] .sv-success p {
+  color: var(--text-300, #475569);
+}
+
+.page[data-theme='light'] .sv-success-note {
+  color: var(--text-500, #64748b) !important;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 600px) {
+  .sv-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+  
+  .sv-panel {
+    max-height: 92vh;
+    border-radius: 20px 20px 0 0;
+    border-bottom: none;
+    animation: sv-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform-origin: bottom center;
+  }
+  
+  @keyframes sv-slide-up {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  
+  .sv-field-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .sv-timeslots {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .sv-steps {
+    padding: 0.75rem 1rem;
+  }
+
+  .sv-step-label {
+    display: none; /* Hide labels on small mobile to save space */
+  }
+
+  .sv-body {
+    padding: 1rem;
+  }
+}

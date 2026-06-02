@@ -18,6 +18,8 @@ type PropertyShowcaseProps = {
   onDeveloperClick: (name: string) => void;
   navFilter: string | null;
   emptyStateMessage?: string;
+  compareIds: number[];
+  onToggleCompare: (propertyId: number) => void;
 }
 
 export function PropertyShowcase({
@@ -33,6 +35,8 @@ export function PropertyShowcase({
   onDeveloperClick,
   navFilter,
   emptyStateMessage,
+  compareIds = [],
+  onToggleCompare
 }: PropertyShowcaseProps) {
   const [expanded, setExpanded] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -360,6 +364,30 @@ export function PropertyShowcase({
                           </button>
                           <button
                             type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onToggleCompare(item.id);
+                            }}
+                            style={{
+                              background: compareIds.includes(item.id) ? 'var(--teal-500)' : 'rgba(255, 255, 255, 0.1)',
+                              border: 'none',
+                              color: '#ffffff',
+                              borderRadius: '12px',
+                              padding: '0 1rem',
+                              height: '44px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: 'pointer',
+                              transition: 'all 0.3s ease',
+                              fontSize: '0.85rem',
+                              fontWeight: 700,
+                            }}
+                          >
+                            {compareIds.includes(item.id) ? '✓ Compare' : '+ Compare'}
+                          </button>
+                          <button
+                            type="button"
                             className={favorites.has(item.id) ? 'feat-fav-btn active' : 'feat-fav-btn'}
                             onClick={(e) => {
                               e.stopPropagation();
@@ -469,16 +497,28 @@ export function PropertyShowcase({
                 <div className="card-luxury-overlay">
                   <div className="card-luxury-header">
                     <span className="badge-premium">{item.status}</span>
-                    <button
-                      type="button"
-                      className={favorites.has(item.id) ? 'fav-btn active' : 'fav-btn'}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onToggleFavorite(item.id)
-                      }}
-                    >
-                      {favorites.has(item.id) ? '♥' : '♡'}
-                    </button>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <button
+                        type="button"
+                        className={compareIds.includes(item.id) ? 'compare-card-btn active' : 'compare-card-btn'}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleCompare(item.id);
+                        }}
+                      >
+                        {compareIds.includes(item.id) ? '✓ Compare' : '+ Compare'}
+                      </button>
+                      <button
+                        type="button"
+                        className={favorites.has(item.id) ? 'fav-btn active' : 'fav-btn'}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onToggleFavorite(item.id)
+                        }}
+                      >
+                        {favorites.has(item.id) ? '♥' : '♡'}
+                      </button>
+                    </div>
                   </div>
                   
                   <div className="card-luxury-content">

@@ -254,3 +254,20 @@ class SavedPropertyModel(Base):
     created_at = Column(String, default=lambda: datetime.now().isoformat())
     user = relationship("UserIdentityModel", back_populates="saved_properties")
     property = relationship("PropertyModel", back_populates="saved_by_users")
+
+class SiteVisitModel(Base):
+    __tablename__ = "site_visits"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    phone = Column(String, nullable=False)
+    developer_id = Column(Integer, ForeignKey("developer_profiles.id", ondelete="SET NULL"), nullable=True)
+    project_id = Column(Integer, ForeignKey("project_details.id", ondelete="SET NULL"), nullable=True)
+    visit_date = Column(String, nullable=False)        # ISO date string: 2025-06-15
+    visit_time = Column(String, nullable=False)        # e.g. "10:00 AM"
+    message = Column(Text, nullable=True)
+    status = Column(String, default="Pending")         # Pending | Confirmed | Cancelled
+    created_at = Column(String, default=lambda: datetime.now().isoformat())
+    developer = relationship("DeveloperProfileModel")
+    project = relationship("ProjectModel")
+
