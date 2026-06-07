@@ -1339,11 +1339,7 @@ textarea {
   margin-top: 3rem;
 }
 
-@media (max-width: 1024px) {
-  .service-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
+/* Keep service-grid inline on laptops/desktops */
 
 .about-visual {
   min-height: 480px;
