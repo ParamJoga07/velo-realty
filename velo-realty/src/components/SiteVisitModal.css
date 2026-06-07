@@ -30,7 +30,7 @@
 .sv-panel {
   width: 100%;
   max-width: 540px;
-  background: var(--surface-0, #0a1824);
+  background: #0d1a28;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
   box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5);
@@ -585,7 +585,7 @@
 
 /* Light Theme support override style definitions */
 .page[data-theme='light'] .sv-panel {
-  background: var(--surface-0, #ffffff);
+  background: #ffffff;
   border-color: rgba(15, 23, 42, 0.08);
   box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.15);
 }
@@ -768,4 +768,45 @@
   .sv-body {
     padding: 1rem;
   }
+}
+
+/* Explicit option element styling for cross-browser dropdown readability */
+.sv-select option {
+  background: #0d1a28;
+  color: #ffffff;
+}
+
+.page[data-theme='light'] .sv-select option {
+  background: #ffffff;
+  color: #0f172a;
+}
+
+/* Datepicker navigation icons visibility overrides */
+.react-datepicker__navigation-icon::before {
+  border-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.page[data-theme='light'] .react-datepicker__navigation-icon::before {
+  border-color: rgba(15, 23, 42, 0.6) !important;
+}
+
+.react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
+  border-color: var(--teal-500) !important;
+}
+
+.react-datepicker__header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.page[data-theme='light'] .react-datepicker__header {
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08) !important;
+}
+
+.react-datepicker__day--disabled {
+  color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.page[data-theme='light'] .react-datepicker__day--disabled {
+  color: rgba(15, 23, 42, 0.15) !important;
 }

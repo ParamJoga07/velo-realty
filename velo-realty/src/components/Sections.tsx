@@ -1,9 +1,7 @@
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useState, useEffect } from 'react'
 import type { Community, Developer, Guide } from '../types'
 import { Building2 } from 'lucide-react'
 import { CORRIDOR_MAPS } from './maps/CorridorMaps'
-import API_BASE_URL from '../config'
 
 type SectionsProps = {
   developers: Developer[]
@@ -26,19 +24,30 @@ export function Sections({
 }: SectionsProps) {
   const [showAllPartners, setShowAllPartners] = useState(false);
 
-  const { data: teamMembers = [] } = useQuery<any[]>({
-    queryKey: ['team'],
-    queryFn: () =>
-      fetch(`${API_BASE_URL}/api/team`).then((res) =>
-        res.json().then((data) =>
-          Array.isArray(data)
-            ? [...data].sort((a, b) => (a.order ?? a.id) - (b.order ?? b.id))
-            : []
-        )
-      ),
-  });
+  const skylineImages = [
+    {
+      src: "/IMG_8817.PNG",
+      alt: "Hyderabad Skyline View"
+    },
+    {
+      src: "/IMG_8818.PNG",
+      alt: "Modern High-Rise Development"
+    },
+    {
+      src: "/IMG_8819.PNG",
+      alt: "Luxury Urban Skyline"
+    }
+  ];
 
-  const founderImage = teamMembers[0]?.image || "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600&auto=format&fit=crop";
+  const [activeSkylineIdx, setActiveSkylineIdx] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveSkylineIdx((prev) => (prev + 1) % skylineImages.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
 
   // Inline expansion logic will be applied at the developer section below.
 
@@ -241,58 +250,108 @@ export function Sections({
                 line-height: 1.45;
                 color: var(--body-color);
               }
-              @media (max-width: 576px) {
-                .about-horizontal-card {
-                  flex-direction: column;
-                  align-items: flex-start;
-                  gap: 0.85rem;
-                }
-                .about-card-img-wrapper {
-                  width: 100%;
-                  height: 160px;
+              .about-carousel-container {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                border-radius: 24px;
+                overflow: hidden;
+                border: 1px solid var(--card-border);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+              }
+              .about-carousel-slide {
+                position: absolute;
+                inset: 0;
+                opacity: 0;
+                transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+                pointer-events: none;
+              }
+              .about-carousel-slide.active {
+                opacity: 1;
+                pointer-events: auto;
+              }
+              .about-carousel-img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transform: scale(1.08);
+                transition: transform 6s cubic-bezier(0.25, 1, 0.5, 1);
+              }
+              .about-carousel-slide.active .about-carousel-img {
+                transform: scale(1);
+              }
+              .about-carousel-overlay {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 40%;
+                background: linear-gradient(to top, rgba(13, 26, 40, 0.8), transparent);
+                pointer-events: none;
+              }
+              [data-theme='light'] .about-carousel-overlay {
+                background: linear-gradient(to top, rgba(255, 255, 255, 0.8), transparent);
+              }
+              .about-carousel-indicators {
+                position: absolute;
+                bottom: 1.5rem;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                gap: 0.5rem;
+                z-index: 10;
+              }
+              .about-carousel-dot {
+                width: 24px;
+                height: 4px;
+                border-radius: 2px;
+                background: rgba(255, 255, 255, 0.3);
+                cursor: pointer;
+                transition: all 0.3s ease;
+                border: none;
+                padding: 0;
+              }
+              .about-carousel-dot.active {
+                background: var(--teal-500);
+                width: 36px;
+              }
+              [data-theme='light'] .about-carousel-dot {
+                background: rgba(0, 0, 0, 0.2);
+              }
+              [data-theme='light'] .about-carousel-dot.active {
+                background: var(--teal-500);
+              }
+              @media (max-width: 768px) {
+                .about-carousel-container {
+                  height: 280px;
                 }
               }
             `}</style>
 
-            <div className="about-horizontal-card">
-              <div className="about-card-img-wrapper">
-                <img 
-                  src={founderImage} 
-                  alt="Founder of Velo Realty" 
-                  className="about-card-img"
-                />
-              </div>
-              <div className="about-card-info">
-                <h3>The Founder</h3>
-                <p>Visionary leadership guiding premium investments across Hyderabad's fastest growing markets.</p>
-              </div>
-            </div>
-
-            <div className="about-horizontal-card">
-              <div className="about-card-img-wrapper">
-                <img 
-                  src="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=600&auto=format&fit=crop" 
-                  alt="Velo Realty Corporate Office" 
-                  className="about-card-img"
-                />
-              </div>
-              <div className="about-card-info">
-                <h3>Corporate Office</h3>
-                <p>Divya Diamonds Buildings, Kavuri Hills, Madhapur. Specially designed for high-end client consulting.</p>
-              </div>
-            </div>
-
-            <div className="about-horizontal-card">
-              <div className="about-card-img-wrapper">
-                <img 
-                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=600&auto=format&fit=crop" 
-                  alt="Velo Realty Advisory Team" 
-                  className="about-card-img"
-                />
-              </div>
-              <div className="about-card-info">
-                <h3>Advisory Team</h3>
-                <p>Professional advisors committed to transparent transactions and long-term capital appreciation.</p>
+            <div className="about-carousel-container">
+              {skylineImages.map((img, idx) => (
+                <div 
+                  key={idx} 
+                  className={`about-carousel-slide ${activeSkylineIdx === idx ? 'active' : ''}`}
+                >
+                  <img 
+                    src={img.src} 
+                    alt={img.alt} 
+                    className="about-carousel-img"
+                  />
+                </div>
+              ))}
+              <div className="about-carousel-overlay" />
+              <div className="about-carousel-indicators">
+                {skylineImages.map((_, idx) => (
+                  <button
+                    key={idx}
+                    className={`about-carousel-dot ${activeSkylineIdx === idx ? 'active' : ''}`}
+                    onClick={() => setActiveSkylineIdx(idx)}
+                    type="button"
+                    aria-label={`Go to slide ${idx + 1}`}
+                  />
+                ))}
               </div>
             </div>
           </aside>
@@ -366,7 +425,7 @@ export function Sections({
               <h2>Hyderabad’s Growth Corridors</h2>
               <p className="section-subtitle">Strategically positioned investment hubs across the city.</p>
             </div>
-            <a href="#properties">Explore Corridor Projects</a>
+            <a href="#our-properties">Explore Corridor Projects</a>
           </div>
           <div className="corridor-impact-grid">
             {Array.isArray(communities) && communities.map((item) => (
@@ -452,50 +511,93 @@ export function Sections({
               <p className="section-subtitle">Research-driven intelligence for the modern investor.</p>
             </div>
           </div>
-          <div className="blog-grid">
-            {(guides && guides.length > 0 ? guides : [
-              {
-                title: "Best Areas to Invest in Hyderabad",
-                description: "Discover Hyderabad's fastest-growing residential and investment corridors, featuring Kokapet, Tellapur, and Gachibowli."
-              },
-              {
-                title: "Upcoming Luxury Projects",
-                description: "An exclusive look into the most anticipated premium gated villas and ultra-luxury high-rise launches in 2026."
-              },
-              {
-                title: "Real Estate Investment Tips",
-                description: "Expert advice on structural appreciation, capital protection, and navigating pre-launch pricing advantages."
-              },
-              {
-                title: "Villa vs Apartment",
-                description: "A comprehensive comparison of luxury villas versus high-rise apartments, focusing on security, lifestyle, and resale value."
-              }
-            ]).map((item) => (
-              <a href="#guides" className="blog-card premium-card" key={item.title}>
-                <div className="card-inner">
-                  <h3>{item.title}</h3>
-                  <p>{item.description}</p>
-                </div>
-                <div className="card-footer">
-                  <span className="read-link">
-                    Read guide{' '}
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <line x1="5" y1="12" x2="19" y2="12"></line>
-                      <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
-                  </span>
-                </div>
-              </a>
-            ))}
+          <div className="carousel-slot ticker-mode" style={{ WebkitMaskImage: 'none', maskImage: 'none', maxWidth: '100%', marginInline: 'auto' }}>
+            <div className="carousel-view">
+              <div className="carousel-track continuous-scroll" style={{ animationDuration: '35s' }}>
+                {(guides && guides.length > 0 ? [...guides, ...guides, ...guides] : [
+                  {
+                    title: "Best Areas to Invest in Hyderabad",
+                    description: "Discover Hyderabad's fastest-growing residential and investment corridors, featuring Kokapet, Tellapur, and Gachibowli."
+                  },
+                  {
+                    title: "Upcoming Luxury Projects",
+                    description: "An exclusive look into the most anticipated premium gated villas and ultra-luxury high-rise launches in 2026."
+                  },
+                  {
+                    title: "Real Estate Investment Tips",
+                    description: "Expert advice on structural appreciation, capital protection, and navigating pre-launch pricing advantages."
+                  },
+                  {
+                    title: "Villa vs Apartment",
+                    description: "A comprehensive comparison of luxury villas versus high-rise apartments, focusing on security, lifestyle, and resale value."
+                  },
+                  {
+                    title: "Best Areas to Invest in Hyderabad",
+                    description: "Discover Hyderabad's fastest-growing residential and investment corridors, featuring Kokapet, Tellapur, and Gachibowli."
+                  },
+                  {
+                    title: "Upcoming Luxury Projects",
+                    description: "An exclusive look into the most anticipated premium gated villas and ultra-luxury high-rise launches in 2026."
+                  },
+                  {
+                    title: "Real Estate Investment Tips",
+                    description: "Expert advice on structural appreciation, capital protection, and navigating pre-launch pricing advantages."
+                  },
+                  {
+                    title: "Villa vs Apartment",
+                    description: "A comprehensive comparison of luxury villas versus high-rise apartments, focusing on security, lifestyle, and resale value."
+                  },
+                  {
+                    title: "Best Areas to Invest in Hyderabad",
+                    description: "Discover Hyderabad's fastest-growing residential and investment corridors, featuring Kokapet, Tellapur, and Gachibowli."
+                  },
+                  {
+                    title: "Upcoming Luxury Projects",
+                    description: "An exclusive look into the most anticipated premium gated villas and ultra-luxury high-rise launches in 2026."
+                  },
+                  {
+                    title: "Real Estate Investment Tips",
+                    description: "Expert advice on structural appreciation, capital protection, and navigating pre-launch pricing advantages."
+                  },
+                  {
+                    title: "Villa vs Apartment",
+                    description: "A comprehensive comparison of luxury villas versus high-rise apartments, focusing on security, lifestyle, and resale value."
+                  }
+                ]).map((item, idx) => (
+                  <a 
+                    href={`?view=blog&title=${encodeURIComponent(item.title)}&desc=${encodeURIComponent(item.description)}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="blog-card premium-card carousel-item" 
+                    key={`${item.title}-${idx}`}
+                    style={{ flex: '0 0 350px', width: '350px', textDecoration: 'none' }}
+                  >
+                    <div className="card-inner">
+                      <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem', color: 'var(--heading-color)' }}>{item.title}</h3>
+                      <p style={{ fontSize: '0.88rem', color: 'var(--body-color)', lineHeight: '1.5' }}>{item.description}</p>
+                    </div>
+                    <div className="card-footer" style={{ marginTop: 'auto', paddingTop: '1rem' }}>
+                      <span className="read-link">
+                        Read guide{' '}
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                          <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                      </span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -855,73 +957,77 @@ export function TestimonialsSection({ testimonials: apiTestimonials = [] }: { te
             </div>
           </div>
 
-          {/* ─── GOOGLE REVIEWS LIST GRID ─── */}
-          <div className="google-reviews-grid-items">
-            {googleReviews.length > 0 ? (
-              googleReviews.map((r) => (
-                <div key={r.id} className="google-review-card">
-                  {/* Small G Logo decoration in corner */}
-                  <div className="google-card-header-badge">
-                    <svg width="16" height="16" viewBox="0 0 24 24">
-                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22c-.65-1.93-.65-4.13 0-6.06z"/>
-                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                    </svg>
-                  </div>
-
-                  <div className="google-review-user">
-                    <img 
-                      src={r.avatar} 
-                      alt={r.name} 
-                      className="google-user-avatar"
-                    />
-                    <div className="google-user-info-text">
-                      <div className="google-user-name">
-                        {r.name}
-                        {r.verified && (
-                          <span className="google-verified-check" title="Verified Customer">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                            </svg>
-                          </span>
-                        )}
-                      </div>
-                      <div className="google-user-role">{r.role}</div>
-                    </div>
-                  </div>
-
-                  <div className="google-stars-row">
-                    <div style={{ display: 'flex', gap: '0.15rem' }}>
-                      {[...Array(r.rating)].map((_, i) => (
-                        <svg key={i} width="15" height="15" viewBox="0 0 24 24" fill="#FBBC05" stroke="none">
-                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          {/* ─── GOOGLE REVIEWS LIST TICKER ─── */}
+          {googleReviews.length > 0 ? (
+            <div className="carousel-slot ticker-mode" style={{ WebkitMaskImage: 'none', maskImage: 'none', maxWidth: '100%', overflow: 'hidden' }}>
+              <div className="carousel-view">
+                <div className="carousel-track continuous-scroll" style={{ animationDuration: '50s' }}>
+                  {[...googleReviews, ...googleReviews, ...googleReviews].map((r, idx) => (
+                    <div key={`${r.id}-${idx}`} className="google-review-card carousel-item" style={{ flex: '0 0 350px', width: '350px' }}>
+                      {/* Small G Logo decoration in corner */}
+                      <div className="google-card-header-badge">
+                        <svg width="16" height="16" viewBox="0 0 24 24">
+                          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22c-.65-1.93-.65-4.13 0-6.06z"/>
+                          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                         </svg>
-                      ))}
-                    </div>
-                    <span className="google-rating-time">{r.relative_date}</span>
-                  </div>
+                      </div>
 
-                  <p className="google-review-body">
-                    &quot;{r.content}&quot;
-                  </p>
+                      <div className="google-review-user">
+                        <img 
+                          src={r.avatar} 
+                          alt={r.name} 
+                          className="google-user-avatar"
+                        />
+                        <div className="google-user-info-text">
+                          <div className="google-user-name">
+                            {r.name}
+                            {r.verified && (
+                              <span className="google-verified-check" title="Verified Customer">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                              </span>
+                            )}
+                          </div>
+                          <div className="google-user-role">{r.role}</div>
+                        </div>
+                      </div>
+
+                      <div className="google-stars-row">
+                        <div style={{ display: 'flex', gap: '0.15rem' }}>
+                          {[...Array(r.rating)].map((_, i) => (
+                            <svg key={i} width="15" height="15" viewBox="0 0 24 24" fill="#FBBC05" stroke="none">
+                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                          ))}
+                        </div>
+                        <span className="google-rating-time">{r.relative_date}</span>
+                      </div>
+
+                      <p className="google-review-body">
+                        &quot;{r.content}&quot;
+                      </p>
+                    </div>
+                  ))}
                 </div>
-              ))
-            ) : (
-              <div className="google-empty-state">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--accent-orange, #f97316)' }}>
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                </svg>
-                <div className="google-empty-title">Be the first to share your experience</div>
-                <p className="google-empty-text">
-                  No verified client reviews have been published yet. If you have transacted with Velo Realty, please write a review on our Google Maps business listing to share your feedback!
-                </p>
-                <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="google-btn google-btn-primary" style={{ width: 'auto', padding: '0.8rem 2rem' }}>
-                  Write a Google Review
-                </a>
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="google-empty-state">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--accent-orange, #f97316)' }}>
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <div className="google-empty-title">Be the first to share your experience</div>
+              <p className="google-empty-text">
+                No verified client reviews have been published yet. If you have transacted with Velo Realty, please write a review on our Google Maps business listing to share your feedback!
+              </p>
+              <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="google-btn google-btn-primary" style={{ width: 'auto', padding: '0.8rem 2rem' }}>
+                Write a Google Review
+              </a>
+            </div>
+          )}
         </div>
       </div>
     </section>

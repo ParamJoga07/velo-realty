@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { Heart, FileText, CheckCircle } from 'lucide-react'
 import './App.css'
 import { BackToTop } from './components/BackToTop'
 import { ContactSection } from './components/ContactSection'
@@ -21,6 +22,8 @@ import { SocialSidebar } from './components/SocialSidebar'
 import { CtaSidebar } from './components/CtaSidebar'
 import { CompareModal } from './components/CompareModal'
 import { SiteVisitModal } from './components/SiteVisitModal'
+import { BlogDetailPage, AboutStoryPage, ContactAgentPage } from './components/SubPages'
+import { DirectCompare } from './components/DirectCompare'
 import API_BASE_URL from './config'
 
 const DEFAULT_PROJECT_IMAGES = [
@@ -36,6 +39,16 @@ function App() {
     const savedTheme = window.localStorage.getItem('velo-theme')
     return savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : 'dark'
   })
+  
+  const [currentView] = useState<'main' | 'blog' | 'about-story' | 'contact-agent'>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const view = params.get('view');
+    if (view === 'blog') return 'blog';
+    if (view === 'about-story') return 'about-story';
+    if (view === 'contact-agent') return 'contact-agent';
+    return 'main';
+  });
+
   const [tab, setTab] = useState<ListingType>('Pre-Launch')
   const [location, setLocation] = useState('All Locations')
   const [zone, setZone] = useState('All Zones')
@@ -96,9 +109,12 @@ function App() {
     ...queryOptions
   })
 
-  const { data: allProjects = [], isLoading: isLoadingProjects } = useQuery<any[]>({
+  const { data: allProjects = [], isLoading: isLoadingProjects, isError: isErrorProjects } = useQuery<any[]>({
     queryKey: ['all-projects'],
-    queryFn: () => fetch(`${API_BASE_URL}/api/projects`).then(res => res.json()),
+    queryFn: () => fetch(`${API_BASE_URL}/api/projects`).then(res => {
+      if (!res.ok) throw new Error('Failed to fetch projects');
+      return res.json();
+    }),
     ...queryOptions
   })
 
@@ -177,22 +193,7 @@ function App() {
     return Array.from(beds).sort();
   }, [properties]);
 
-  useEffect(() => {
-    // Safety timeout: Hide loader after 10s regardless of state
-    const safetyTimer = setTimeout(() => setIsLoading(false), 10000);
-
-    const stillLoading = isLoadingProps || isLoadingDevs || isLoadingCorr || isLoadingProjects;
-    const hasError = isErrorProps || isErrorDevs || isErrorCorr;
-
-    if (!stillLoading || hasError) {
-      const timer = setTimeout(() => setIsLoading(false), 1000);
-      return () => {
-        clearTimeout(timer);
-        clearTimeout(safetyTimer);
-      };
-    }
-    return () => clearTimeout(safetyTimer);
-  }, [isLoadingProps, isLoadingDevs, isLoadingCorr, isLoadingProjects, isErrorProps, isErrorDevs, isErrorCorr]);
+  // Loading screen will only finish when data is fully loaded and onComplete is triggered
 
   // Admin States
   const [adminToken, setAdminToken] = useState<string | null>(() => window.localStorage.getItem('velo-admin-token'))
@@ -639,10 +640,32 @@ function App() {
     return <AdminDashboard token={adminToken} onLogout={handleLogout} theme={theme} />
   }
 
+  if (currentView === 'blog') {
+    return <BlogDetailPage theme={theme} onThemeToggle={toggleTheme} />;
+  }
+
+  if (currentView === 'about-story') {
+    return <AboutStoryPage theme={theme} onThemeToggle={toggleTheme} />;
+  }
+
+  if (currentView === 'contact-agent') {
+    return <ContactAgentPage theme={theme} onThemeToggle={toggleTheme} properties={allMappedProperties} />;
+  }
+
   return (
     <div className="page" data-theme={theme}>
       <div className="theme-sweep" />
-      {isLoading && <LoadingScreen />}
+      {isLoading && (
+        <LoadingScreen 
+          theme={theme}
+          dataLoaded={
+            (!isLoadingProps && !isLoadingDevs && !isLoadingCorr && !isLoadingProjects && 
+             properties.length > 0 && developers.length > 0 && allProjects.length > 0) || 
+            isErrorProps || isErrorDevs || isErrorCorr || isErrorProjects
+          } 
+          onComplete={() => setIsLoading(false)} 
+        />
+      )}
       {showAdminLogin && (
         <AdminLogin onLogin={handleLogin} onCancel={() => setShowAdminLogin(false)} />
       )}
@@ -660,6 +683,10 @@ function App() {
         onThemeToggle={toggleTheme}
         onFilterSelect={handleFilterSelect}
         dbCorridors={communities}
+        properties={allMappedProperties}
+        onDeveloperClick={setSelectedDeveloperName}
+        setSelectedProperty={setSelectedProperty}
+        setLocation={setLocation}
       />
       <HeroSearch
         tab={tab}
@@ -702,6 +729,14 @@ function App() {
           emptyStateMessage={['Ready', 'Resale', 'Rentals'].includes(tab) ? 'We are coming soon or launching soon' : undefined}
           compareIds={compareIds}
           onToggleCompare={toggleCompare}
+        />
+        <DirectCompare 
+          developers={developers}
+          properties={allMappedProperties}
+          onCompare={(id1, id2) => {
+            setCompareIds([id1, id2])
+            setShowCompareModal(true)
+          }}
         />
         <Sections
           developers={developers}
@@ -803,18 +838,36 @@ function App() {
                   className="btn btn-ghost" 
                   type="button" 
                   onClick={() => setBrochureProperty(selectedProperty)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  📄 Download Brochure
+                  <FileText size={16} /> Download Brochure
                 </button>
                 <button 
                   className="btn btn-ghost" 
                   type="button" 
                   onClick={() => toggleFavorite(selectedProperty.id)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  {favorites.has(selectedProperty.id) ? '♥ Saved' : '♡ Save Property'}
+                  <Heart 
+                    size={16} 
+                    fill={favorites.has(selectedProperty.id) ? "var(--teal-500)" : "none"}
+                    stroke={favorites.has(selectedProperty.id) ? "var(--teal-500)" : "currentColor"}
+                  />
+                  {favorites.has(selectedProperty.id) ? 'Saved' : 'Save Property'}
                 </button>
               </div>
             </div>
+          </div>
+          {/* Mobile Sticky Scrolling CTA Button */}
+          <div className="mobile-sticky-cta-bar" onClick={(e) => e.stopPropagation()}>
+            <a 
+              href={`?view=contact-agent&property_id=${selectedProperty.id}`} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="btn btn-primary sticky-cta-btn"
+            >
+              Contact Velo Agent Now
+            </a>
           </div>
         </div>
       )}
@@ -930,7 +983,7 @@ function App() {
         <div className="contact-agent-modal-overlay" onClick={() => setBrochureProperty(null)}>
           <div className="contact-agent-card" onClick={e => e.stopPropagation()}>
             <div className="contact-agent-header">
-              <h3>📄 Download Brochure</h3>
+              <h3><FileText size={18} style={{ marginRight: '8px', verticalAlign: 'middle' }} />Download Brochure</h3>
               <div className="contact-agent-project-tag">{brochureProperty.title}</div>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
                 {brochureProperty.developer} · {brochureProperty.location} Corridor
@@ -942,7 +995,9 @@ function App() {
             <form onSubmit={handleBrochureSubmit} className="contact-agent-body">
               {brochureStatus === 'success' ? (
                 <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-                  <div style={{ fontSize: '3rem', color: 'var(--teal-500)', marginBottom: '1rem' }}>✓</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                    <CheckCircle size={48} style={{ color: 'var(--teal-500)' }} />
+                  </div>
                   <h4 style={{ color: 'var(--heading-color)', fontSize: '1.2rem', marginBottom: '0.5rem' }}>Request Sent!</h4>
                   <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>We'll send the brochure to your email shortly.</p>
                 </div>

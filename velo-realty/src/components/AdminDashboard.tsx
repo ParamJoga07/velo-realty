@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   LayoutDashboard, HardHat, Globe, TrendingUp, Users, 
   Search, Plus, Trash2, Edit3, 
-  Mail, Download, Power, Zap, X, Bell, Settings, ArrowUpRight, MessageSquare
+  Mail, Download, Power, Zap, X, Bell, Settings, ArrowUpRight, MessageSquare, Star
 } from 'lucide-react';
 import { 
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, 
@@ -156,7 +156,7 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['admin-data'] });
       queryClient.invalidateQueries({ queryKey: ['all-projects'] });
-      showNotification(data.is_featured ? '⭐ Project marked as Featured!' : '✦ Project removed from Featured');
+      showNotification(data.is_featured ? 'Project marked as Featured!' : 'Project removed from Featured');
     },
     onError: (error: any) => {
       showNotification(error.message || 'Star toggle failed', 'error');
@@ -579,8 +579,8 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
                             <div style={{display: 'flex', flexDirection: 'column'}}>
                               <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
                                 {activeTab === 'projects' && (
-                                  <span title={item.is_featured ? 'Featured' : 'Not Featured'} style={{fontSize: 14, lineHeight: 1}}>
-                                    {item.is_featured ? '⭐' : '✦'}
+                                  <span title={item.is_featured ? 'Featured' : 'Not Featured'} style={{display: 'inline-flex', alignItems: 'center'}}>
+                                    <Star size={14} fill={item.is_featured ? "#f59e0b" : "none"} stroke={item.is_featured ? "#f59e0b" : "rgba(255,255,255,0.3)"} />
                                   </span>
                                 )}
                                 <span style={{fontWeight: 700, color: '#fff'}}>{item.title || item.name || item.area}</span>
@@ -633,9 +633,9 @@ export function AdminDashboard({ token, onLogout, theme }: AdminDashboardProps) 
                                   className="btn-action-v3" 
                                   title={item.is_featured ? 'Unstar (remove from Featured)' : 'Star (add to Featured)'}
                                   onClick={() => starMutation.mutate(item.id)}
-                                  style={{color: item.is_featured ? '#f59e0b' : undefined}}
+                                  style={{color: item.is_featured ? '#f59e0b' : 'rgba(255,255,255,0.4)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center'}}
                                 >
-                                  {item.is_featured ? '⭐' : '✦'}
+                                  <Star size={12} fill={item.is_featured ? "#f59e0b" : "none"} />
                                 </button>
                               )}
                               {activeTab !== 'leads' && <button className="btn-action-v3" onClick={() => openEditForm(item)}><Edit3 size={12}/></button>}

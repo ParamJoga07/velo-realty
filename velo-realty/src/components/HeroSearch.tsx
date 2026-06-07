@@ -35,17 +35,17 @@ export function HeroSearch({
   setTab,
   location,
   setLocation,
-  zone,
-  setZone,
-  category,
-  setCategory,
+  zone: _zone,
+  setZone: _setZone,
+  category: _category,
+  setCategory: _setCategory,
   propertyType,
   setPropertyType,
   bedrooms,
   setBedrooms,
   communities,
-  zones,
-  categories,
+  zones: _zones,
+  categories: _categories,
   heroStats = [],
   dbTypes = [],
   dbBedrooms = [],
@@ -105,7 +105,7 @@ export function HeroSearch({
     setShowSuggestions(false)
     
     // Scroll smoothly to properties showcase section
-    const el = document.getElementById('properties')
+    const el = document.getElementById('our-properties')
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
@@ -126,7 +126,7 @@ export function HeroSearch({
     } else if (type === 'corridor') {
       // Filter list by corridor
       setLocation(item.name)
-      const el = document.getElementById('properties')
+      const el = document.getElementById('our-properties')
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }
@@ -290,24 +290,6 @@ export function HeroSearch({
             <select value={location} onChange={(event) => setLocation(event.target.value)}>
               <option>All Corridors</option>
               {Array.isArray(communities) && communities.map((item) => (
-                <option key={item.name}>{item.name}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Zone
-            <select value={zone} onChange={(event) => setZone(event.target.value)}>
-              <option>All Zones</option>
-              {Array.isArray(zones) && zones.map((item) => (
-                <option key={item.name}>{item.name}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Category
-            <select value={category} onChange={(event) => setCategory(event.target.value)}>
-              <option>All Categories</option>
-              {Array.isArray(categories) && categories.map((item) => (
                 <option key={item.name}>{item.name}</option>
               ))}
             </select>

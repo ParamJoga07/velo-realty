@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { Building2, MapPin, Calendar, Clock } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import './SiteVisitModal.css'
@@ -282,9 +283,10 @@ export function SiteVisitModal({ isOpen, onClose, triggerRef }: SiteVisitModalPr
                         )}
                         <div>
                           <div className="sv-project-name">{selectedProject.name}</div>
-                          <div className="sv-project-meta">
-                            📍 {selectedProject.location}
-                            {selectedProject.project_type && <> · {selectedProject.project_type}</>}
+                          <div className="sv-project-meta" style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                            <MapPin size={12} style={{ color: 'var(--teal-500)' }} />
+                            <span>{selectedProject.location}</span>
+                            {selectedProject.project_type && <span style={{ opacity: 0.6 }}>· {selectedProject.project_type}</span>}
                           </div>
                         </div>
                       </div>
@@ -365,19 +367,19 @@ export function SiteVisitModal({ isOpen, onClose, triggerRef }: SiteVisitModalPr
               {/* Booking Summary */}
               <div className="sv-summary">
                 <div className="sv-summary-row">
-                  <span>🏢 Project</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Building2 size={14} style={{ color: 'var(--teal-500)' }} /> Project</span>
                   <strong>{selectedProject?.name}</strong>
                 </div>
                 <div className="sv-summary-row">
-                  <span>📍 Location</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><MapPin size={14} style={{ color: 'var(--teal-500)' }} /> Location</span>
                   <strong>{selectedProject?.location}</strong>
                 </div>
                 <div className="sv-summary-row">
-                  <span>📅 Date</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Calendar size={14} style={{ color: 'var(--teal-500)' }} /> Date</span>
                   <strong>{selectedDate?.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</strong>
                 </div>
                 <div className="sv-summary-row">
-                  <span>🕐 Time</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={14} style={{ color: 'var(--teal-500)' }} /> Time</span>
                   <strong>{selectedTime}</strong>
                 </div>
               </div>

@@ -21,9 +21,9 @@ export function Footer({ onSignInClick }: { onSignInClick: () => void }) {
               <a href="#services">Investment Advisory</a>
             </div>
             <div>
-              <a href="#properties">Buy Properties</a>
-              <a href="#properties">Rent Properties</a>
-              <a href="#properties">New Launches</a>
+              <a href="#our-properties">Buy Properties</a>
+              <a href="#our-properties">Rent Properties</a>
+              <a href="#our-properties">New Launches</a>
             </div>
             <div>
               <a href="#developers">Developers</a>

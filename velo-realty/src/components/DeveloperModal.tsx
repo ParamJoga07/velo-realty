@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { MapPin } from 'lucide-react';
+import { MapPin, FileText, CheckCircle, AlertTriangle, Building2, Sparkles, Calendar } from 'lucide-react';
 import { CORRIDOR_MAPS } from './maps/CorridorMaps';
 import type { DeveloperProfile, ProjectDetail } from '../types';
 import './DeveloperModal.css';
@@ -53,15 +53,15 @@ function BrochureModal({ projectName, onClose }: { projectName: string; onClose:
       <div className="brochure-modal-card" onClick={e => e.stopPropagation()}>
         <button className="brochure-modal-close" onClick={onClose}>×</button>
         <div className="brochure-modal-header">
-          <div className="brochure-icon">📄</div>
+          <div className="brochure-icon" style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}><FileText size={36} style={{ color: 'var(--teal-500)' }} /></div>
           <h3>Download Brochure</h3>
           <p className="brochure-project-name">{projectName}</p>
           <p className="brochure-subtitle">Our team will send the brochure to you shortly.</p>
         </div>
         <form onSubmit={handleSubmit} className="brochure-form">
           {status === 'success' ? (
-            <div className="brochure-success">
-              <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>✅</div>
+            <div className="brochure-success" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+              <CheckCircle size={48} style={{ color: 'var(--teal-500)', marginBottom: '0.5rem' }} />
               <h4>Request Sent!</h4>
               <p>We'll send the brochure to your email soon.</p>
             </div>
@@ -152,8 +152,8 @@ export function DeveloperModal({ developerName, onClose, compareIds = [], onTogg
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
             Back to {profile?.name || 'Developer'}
           </button>
-          <div className="dev-modal-empty" style={{ marginTop: '4rem' }}>
-            <div className="dev-empty-icon">⚠️</div>
+          <div className="dev-modal-empty" style={{ marginTop: '4rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+            <AlertTriangle size={48} style={{ color: '#ef4444', marginBottom: '0.5rem' }} />
             <h3>Project Not Found</h3>
             <p>{(projectError as Error).message || 'Unable to load project details.'}</p>
           </div>
@@ -185,7 +185,9 @@ export function DeveloperModal({ developerName, onClose, compareIds = [], onTogg
                   {images.length > 0 ? (
                     <img src={images[activeImageIdx]?.image_url} alt={selectedProject.name} />
                   ) : (
-                    <div className="pd-gallery-empty">🏗️</div>
+                    <div className="pd-gallery-empty">
+                      <Building2 size={48} style={{ color: 'rgba(255,255,255,0.15)' }} />
+                    </div>
                   )}
                   {images.length > 1 && (
                     <>
@@ -213,8 +215,9 @@ export function DeveloperModal({ developerName, onClose, compareIds = [], onTogg
                 <button
                   className="brochure-cta-btn"
                   onClick={() => setBrochureProject(selectedProject.name)}
+                  style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                 >
-                  📄 Download Brochure
+                  <FileText size={16} /> Download Brochure
                 </button>
               </div>
 
@@ -225,7 +228,10 @@ export function DeveloperModal({ developerName, onClose, compareIds = [], onTogg
                     {selectedProject.status || 'N/A'}
                   </span>
                   <h2 className="pd-title">{selectedProject.name}</h2>
-                  <p className="pd-location">📍 {selectedProject.location}{selectedProject.sub_location ? ` — ${selectedProject.sub_location}` : ''}</p>
+                  <p className="pd-location" style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                    <MapPin size={14} style={{ color: 'var(--teal-500)' }} />
+                    <span>{selectedProject.location}{selectedProject.sub_location ? ` — ${selectedProject.sub_location}` : ''}</span>
+                  </p>
                 </div>
 
                 {selectedProject.description && (
@@ -285,7 +291,10 @@ export function DeveloperModal({ developerName, onClose, compareIds = [], onTogg
                 {/* Amenities */}
                 {amenities.length > 0 && (
                   <div className="pd-section">
-                    <h4>🏊 Amenities</h4>
+                    <h4 style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.8rem' }}>
+                      <Sparkles size={16} style={{ color: 'var(--teal-500)' }} />
+                      Amenities
+                    </h4>
                     <div className="pd-amenities-chips">
                       {amenities.map((a: string, i: number) => <span key={i} className="pd-amenity-chip">{a}</span>)}
                     </div>
@@ -336,9 +345,19 @@ export function DeveloperModal({ developerName, onClose, compareIds = [], onTogg
                 </div>
                 <p className="dev-profile-about">{profile.about}</p>
                 <div className="dev-profile-chips">
-                  {profile.founded_year && <span className="dev-chip">🏛️ Est. {profile.founded_year}</span>}
-                  {profile.headquarters && <span className="dev-chip">📍 {profile.headquarters}</span>}
-                  <span className="dev-chip">🏗️ {profile.project_count || profile.project_items?.length || 0} Projects</span>
+                  {profile.founded_year && (
+                    <span className="dev-chip" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <Calendar size={12} style={{ color: 'var(--teal-500)' }} /> Est. {profile.founded_year}
+                    </span>
+                  )}
+                  {profile.headquarters && (
+                    <span className="dev-chip" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <MapPin size={12} style={{ color: 'var(--teal-500)' }} /> {profile.headquarters}
+                    </span>
+                  )}
+                  <span className="dev-chip" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <Building2 size={12} style={{ color: 'var(--teal-500)' }} /> {profile.project_count || profile.project_items?.length || 0} Projects
+                  </span>
                 </div>
               </div>
 
@@ -397,7 +416,9 @@ export function DeveloperModal({ developerName, onClose, compareIds = [], onTogg
                             {project.primary_image ? (
                               <img src={project.primary_image} alt={project.name} />
                             ) : (
-                              <div className="dpc-image-placeholder">🏢</div>
+                              <div className="dpc-image-placeholder">
+                                <Building2 size={24} style={{ color: 'rgba(255,255,255,0.15)' }} />
+                              </div>
                             )}
                             <div className="dpc-badge">{project.status}</div>
                             <div className="dpc-overlay"><span>View Details</span></div>
@@ -412,10 +433,10 @@ export function DeveloperModal({ developerName, onClose, compareIds = [], onTogg
                             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
                               <button
                                 className="dpc-brochure-btn"
-                                style={{ flex: 1 }}
+                                style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
                                 onClick={e => { e.stopPropagation(); setBrochureProject(project.name); }}
                               >
-                                📄 Brochure
+                                <FileText size={12} /> Brochure
                               </button>
                               {onToggleCompare && project.id && (
                                 <button
@@ -456,7 +477,10 @@ export function DeveloperModal({ developerName, onClose, compareIds = [], onTogg
                          </div>
                          <div className="dpc-body">
                             <h4 className="dpc-name">{prop.title}</h4>
-                            <p className="dpc-location">📍 {prop.location}</p>
+                            <p className="dpc-location" style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                               <MapPin size={12} style={{ color: 'var(--teal-500)' }} />
+                               <span>{prop.location}</span>
+                            </p>
                             <div className="dpc-footer">
                                <span className="dpc-price">{prop.price}</span>
                                <span className="dpc-config">{prop.beds}B • {prop.area} FT²</span>
@@ -489,7 +513,7 @@ export function DeveloperModal({ developerName, onClose, compareIds = [], onTogg
                             <img src={project.primary_image} alt={project.name} />
                           ) : (
                             <div className="dpc-image-placeholder">
-                              <span>🏗️</span>
+                              <Building2 size={24} style={{ color: 'rgba(255,255,255,0.15)' }} />
                             </div>
                           )}
                           {project.status && (
@@ -503,7 +527,10 @@ export function DeveloperModal({ developerName, onClose, compareIds = [], onTogg
                         </div>
                         <div className="dpc-body">
                           <h4 className="dpc-name">{project.name}</h4>
-                          <p className="dpc-location">📍 {project.location}</p>
+                          <p className="dpc-location" style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                             <MapPin size={12} style={{ color: 'var(--teal-500)' }} />
+                             <span>{project.location}</span>
+                          </p>
                           <div className="dpc-footer">
                             {project.price_range && <span className="dpc-price">{project.price_range}</span>}
                             <span className="dpc-config">{project.configurations || project.project_type}</span>
@@ -511,10 +538,10 @@ export function DeveloperModal({ developerName, onClose, compareIds = [], onTogg
                           <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
                             <button
                               className="dpc-brochure-btn"
-                              style={{ flex: 1 }}
+                              style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
                               onClick={e => { e.stopPropagation(); setBrochureProject(project.name); }}
                             >
-                              📄 Brochure
+                              <FileText size={12} /> Brochure
                             </button>
                             {onToggleCompare && project.id && (
                               <button
@@ -537,8 +564,8 @@ export function DeveloperModal({ developerName, onClose, compareIds = [], onTogg
               )}
             </>
           ) : (
-            <div className="dev-modal-empty">
-              <div className="dev-empty-icon">🏢</div>
+            <div className="dev-modal-empty" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+              <Building2 size={48} style={{ color: 'rgba(255,255,255,0.15)', marginBottom: '0.5rem' }} />
               <h3>{developerName}</h3>
               <p>Developer portfolio details coming soon.</p>
             </div>

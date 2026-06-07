@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { Sun, Moon, ChevronDown, Menu, X } from 'lucide-react';
+import { Sun, Moon, ChevronDown, Menu, X, Search, ArrowLeft } from 'lucide-react';
+import API_BASE_URL from '../config';
 
 type Community = { name: string; };
 
@@ -9,6 +10,10 @@ type NavbarProps = {
   onThemeToggle: () => void;
   onFilterSelect?: (label: string) => void;
   dbCorridors?: Community[];
+  properties?: any[];
+  onDeveloperClick?: (name: string) => void;
+  setSelectedProperty?: (prop: any | null) => void;
+  setLocation?: (value: string) => void;
 };
 
 type NavItem = {
@@ -62,12 +67,19 @@ function DropdownGroup({ group, onClose, onFilterSelect }: { group: NavGroup; on
               key={item.label}
               className="nav-dropdown-item"
               href={item.href}
+              target={item.isExternal ? "_blank" : undefined}
+              rel={item.isExternal ? "noopener noreferrer" : undefined}
               role="menuitem"
               onClick={(e) => {
+                if (item.isExternal) {
+                  setOpen(false);
+                  onClose();
+                  return;
+                }
                 e.preventDefault();
                 setOpen(false);
                 onClose();
-                if (onFilterSelect && item.href === '#properties') {
+                if (onFilterSelect && (item.href === '#properties' || item.href === '#our-properties')) {
                   onFilterSelect(item.label);
                 }
                 scrollToSection(item.href);
@@ -82,9 +94,25 @@ function DropdownGroup({ group, onClose, onFilterSelect }: { group: NavGroup; on
   );
 }
 
-export function Navbar({ favoritesCount, theme, onThemeToggle, onFilterSelect, dbCorridors = [] }: NavbarProps) {
+export function Navbar({ 
+  favoritesCount, 
+  theme, 
+  onThemeToggle, 
+  onFilterSelect, 
+  dbCorridors = [],
+  properties = [],
+  onDeveloperClick,
+  setSelectedProperty,
+  setLocation
+}: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeGroupLabel, setActiveGroupLabel] = useState<string | null>(null);
+
+  // Mobile search overlay states
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [typedQuery, setTypedQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any | null>(null);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     if (!mobileOpen) {
@@ -92,8 +120,56 @@ export function Navbar({ favoritesCount, theme, onThemeToggle, onFilterSelect, d
     }
   }, [mobileOpen]);
 
+  // Autocomplete fetch for mobile search
+  useEffect(() => {
+    if (!typedQuery || typedQuery.trim().length < 2) {
+      setSearchResults(null);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setSearching(true);
+      fetch(`${API_BASE_URL}/api/search?q=${encodeURIComponent(typedQuery)}`)
+        .then((res) => {
+          if (!res.ok) throw new Error('Search failed');
+          return res.json();
+        })
+        .then((data) => {
+          setSearchResults(data);
+          setSearching(false);
+        })
+        .catch((err) => {
+          console.error(err);
+          setSearching(false);
+        });
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [typedQuery]);
+
+  const handleSuggestionClick = (type: 'developer' | 'project' | 'property' | 'corridor', item: any) => {
+    setSearchOpen(false);
+    setTypedQuery('');
+    setSearchResults(null);
+    
+    if (type === 'developer') {
+      if (onDeveloperClick) onDeveloperClick(item.name);
+    } else if (type === 'project' || type === 'property') {
+      const matched = properties.find(p => p.id === item.id);
+      if (matched && setSelectedProperty) {
+        setSelectedProperty(matched);
+      }
+    } else if (type === 'corridor') {
+      if (setLocation) setLocation(item.name);
+      const el = document.getElementById('our-properties');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  };
+
   const handleItemClick = (item: NavItem) => {
-    if (onFilterSelect && item.href === '#properties') {
+    if (onFilterSelect && (item.href === '#properties' || item.href === '#our-properties')) {
       onFilterSelect(item.label);
     }
     scrollToSection(item.href);
@@ -103,14 +179,14 @@ export function Navbar({ favoritesCount, theme, onThemeToggle, onFilterSelect, d
   const NAV_GROUPS: NavGroup[] = [
     {
       label: 'Properties',
-      href: '#properties',
+      href: '#our-properties',
       items: [
-        { label: 'Ready to Move in', href: '#properties' },
-        { label: 'Under Construction', href: '#properties' },
-        { label: 'Plot or Land', href: '#properties' },
-        { label: 'Commercial', href: '#properties' },
-        { label: 'Rentals', href: '#properties' },
-        { label: 'Resale', href: '#properties' },
+        { label: 'Ready to Move in', href: '#our-properties' },
+        { label: 'Under Construction', href: '#our-properties' },
+        { label: 'Plot or Land', href: '#our-properties' },
+        { label: 'Commercial', href: '#our-properties' },
+        { label: 'Rentals', href: '#our-properties' },
+        { label: 'Resale', href: '#our-properties' },
       ],
     },
     {
@@ -127,18 +203,18 @@ export function Navbar({ favoritesCount, theme, onThemeToggle, onFilterSelect, d
     {
       label: 'Corridors',
       href: '#corridors',
-      items: dbCorridors.length > 0 ? dbCorridors.map(c => ({ label: c.name, href: '#properties' })) : [
-        { label: 'North Corridor', href: '#properties' },
-        { label: 'South Corridor', href: '#properties' },
-        { label: 'East Corridor', href: '#properties' },
-        { label: 'West Corridor', href: '#properties' },
+      items: dbCorridors.length > 0 ? dbCorridors.map(c => ({ label: c.name, href: '#our-properties' })) : [
+        { label: 'North Corridor', href: '#our-properties' },
+        { label: 'South Corridor', href: '#our-properties' },
+        { label: 'East Corridor', href: '#our-properties' },
+        { label: 'West Corridor', href: '#our-properties' },
       ],
     },
     {
       label: 'About Us',
       href: '#about',
       items: [
-        { label: 'Our Story', href: '#about' },
+        { label: 'Our Story', href: '?view=about-story', isExternal: true },
         { label: 'The Team', href: '#team' },
         { label: 'Strategic Network', href: '#developers' },
         { label: 'Contact Us', href: '#contact' },
@@ -173,6 +249,15 @@ export function Navbar({ favoritesCount, theme, onThemeToggle, onFilterSelect, d
 
           {/* ACTIONS */}
           <div className="nav-actions">
+            <button
+              className="btn icon-btn nav-search-btn"
+              onClick={() => setSearchOpen(true)}
+              type="button"
+              aria-label="Search properties"
+            >
+              <Search size={18} />
+            </button>
+
             <button
               className="btn theme-toggle-btn icon-btn"
               onClick={onThemeToggle}
@@ -257,7 +342,13 @@ export function Navbar({ favoritesCount, theme, onThemeToggle, onFilterSelect, d
                       key={item.label}
                       className="nav-mobile-item"
                       href={item.href}
+                      target={item.isExternal ? "_blank" : undefined}
+                      rel={item.isExternal ? "noopener noreferrer" : undefined}
                       onClick={(e) => {
+                        if (item.isExternal) {
+                          setMobileOpen(false);
+                          return;
+                        }
                         e.preventDefault();
                         handleItemClick(item);
                       }}
@@ -274,6 +365,137 @@ export function Navbar({ favoritesCount, theme, onThemeToggle, onFilterSelect, d
         <span className="shortlist-pill floating" aria-live="polite">
           Shortlist {favoritesCount}
         </span>
+
+        {/* Mobile Autocomplete Search Overlay */}
+        {searchOpen && (
+          <div className="mobile-search-overlay" onClick={() => setSearchOpen(false)}>
+            <div className="mobile-search-card" onClick={(e) => e.stopPropagation()}>
+              <div className="mobile-search-header">
+                <button 
+                  className="mobile-search-close-btn" 
+                  onClick={() => {
+                    setSearchOpen(false);
+                    setTypedQuery('');
+                    setSearchResults(null);
+                  }}
+                  type="button"
+                >
+                  <ArrowLeft size={20} />
+                </button>
+                <div className="mobile-search-input-wrap">
+                  <input
+                    type="text"
+                    placeholder="Search developers, projects, locations..."
+                    value={typedQuery}
+                    onChange={(e) => setTypedQuery(e.target.value)}
+                    autoFocus
+                  />
+                  {typedQuery && (
+                    <button 
+                      className="mobile-search-clear" 
+                      onClick={() => setTypedQuery('')}
+                      type="button"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="mobile-search-body">
+                {searching && (
+                  <div className="mobile-search-loading">Searching...</div>
+                )}
+                
+                {searchResults && (
+                  <div className="mobile-search-suggestions">
+                    {/* Developers Group */}
+                    {searchResults.developers && searchResults.developers.length > 0 && (
+                      <div className="mobile-suggestions-group">
+                        <div className="mobile-group-title">Developers</div>
+                        {searchResults.developers.map((d: any) => (
+                          <button
+                            key={`ms-dev-${d.id}`}
+                            className="mobile-suggestion-item"
+                            type="button"
+                            onClick={() => handleSuggestionClick('developer', d)}
+                          >
+                            <span className="item-title">{d.name}</span>
+                            <span className="item-action">Portfolio →</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Projects Group */}
+                    {searchResults.projects && searchResults.projects.length > 0 && (
+                      <div className="mobile-suggestions-group">
+                        <div className="mobile-group-title">Projects</div>
+                        {searchResults.projects.map((p: any) => (
+                          <button
+                            key={`ms-proj-${p.id}`}
+                            className="mobile-suggestion-item"
+                            type="button"
+                            onClick={() => handleSuggestionClick('project', p)}
+                          >
+                            <span className="item-title">{p.name}</span>
+                            {p.price && <span className="item-price">{p.price}</span>}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Properties Group */}
+                    {searchResults.properties && searchResults.properties.length > 0 && (
+                      <div className="mobile-suggestions-group">
+                        <div className="mobile-group-title">Properties</div>
+                        {searchResults.properties.map((p: any) => (
+                          <button
+                            key={`ms-prop-${p.id}`}
+                            className="mobile-suggestion-item"
+                            type="button"
+                            onClick={() => handleSuggestionClick('property', p)}
+                          >
+                            <span className="item-title">{p.title}</span>
+                            {p.price && <span className="item-price">{p.price}</span>}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Corridors Group */}
+                    {searchResults.corridors && searchResults.corridors.length > 0 && (
+                      <div className="mobile-suggestions-group">
+                        <div className="mobile-group-title">Corridors</div>
+                        {searchResults.corridors.map((c: any) => (
+                          <button
+                            key={`ms-corr-${c.id}`}
+                            className="mobile-suggestion-item"
+                            type="button"
+                            onClick={() => handleSuggestionClick('corridor', c)}
+                          >
+                            <span className="item-title">{c.name}</span>
+                            <span className="item-action">Filter →</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* No Results */}
+                    {(!searchResults.developers || searchResults.developers.length === 0) &&
+                     (!searchResults.projects || searchResults.projects.length === 0) &&
+                     (!searchResults.properties || searchResults.properties.length === 0) &&
+                     (!searchResults.corridors || searchResults.corridors.length === 0) && (
+                      <div className="mobile-search-no-results">
+                        No results found for "{typedQuery}"
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );

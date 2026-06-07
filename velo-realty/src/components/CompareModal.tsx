@@ -185,6 +185,12 @@ export function CompareModal({
               </button>
             </div>
             
+            {proj.primary_image && (
+              <div className="compare-card-image-wrap">
+                <img src={proj.primary_image} alt={proj.name} className="compare-card-image" />
+              </div>
+            )}
+            
             <div className="compare-card-dev-info">
               {proj.developer_logo ? (
                 <div className="compare-card-logo-wrap">
@@ -399,15 +405,6 @@ export function CompareModal({
           </div>
         </div>
 
-        {/* 1. Columns cards list */}
-        <div className="compare-grid-header">
-          <div className="compare-intro-col">
-            <h3>Parameters</h3>
-            <p>Select properties to analyze parameters side-by-side.</p>
-          </div>
-          {renderHeaderColumns()}
-        </div>
-
         {/* 2. Scroll Category tabs list */}
         <div className="compare-tabs-list-wrap">
           <div className="compare-tabs-list">
@@ -426,57 +423,72 @@ export function CompareModal({
 
         {/* 3. Detailed Specifications Scroll container */}
         <div className="compare-scroll-body" ref={scrollContainerRef}>
-          {loading ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '200px', gap: '1rem' }}>
-              <div style={{ border: '3px solid rgba(255,255,255,0.1)', borderTop: '3px solid var(--teal-500)', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite' }} />
-              <span style={{ color: 'var(--body-color)', fontSize: '0.9rem' }}>Loading comparison details...</span>
-              <style>{`
-                @keyframes spin {
-                  0% { transform: rotate(0deg); }
-                  100% { transform: rotate(360deg); }
-                }
-              `}</style>
-            </div>
-          ) : error ? (
-            <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#ef4444' }}>{error}</div>
-          ) : !data ? (
-            <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--body-color)' }}>Select properties to begin comparison.</div>
-          ) : (
-            data.comparisons.map((catGroup) => (
-              <div 
-                key={`group-${catGroup.category}`} 
-                className="compare-accordion-group"
-                ref={(el) => { categoryRefs.current[catGroup.category] = el }}
-              >
-                {/* Accordion header trigger */}
-                <button 
-                  className="compare-accordion-header"
-                  onClick={() => toggleCategory(catGroup.category)}
-                  type="button"
-                >
-                  <h2>{catGroup.category}</h2>
-                  <ChevronDown 
-                    size={18} 
-                    className={`compare-accordion-chevron ${expandedCategories[catGroup.category] ? 'expanded' : ''}`} 
-                  />
-                </button>
-
-                {/* Accordion body comparisons */}
-                {expandedCategories[catGroup.category] && (
-                  <div className="compare-accordion-content">
-                    {catGroup.fields.map((field) => (
-                      <div key={`row-${field.label}`} className="compare-table-row">
-                        <div className="compare-row-label">{field.label}</div>
-                        <div className="compare-cell-wrap">{renderComparisonValue(field.label, 0)}</div>
-                        <div className="compare-cell-wrap">{renderComparisonValue(field.label, 1)}</div>
-                        <div className="compare-cell-wrap">{renderComparisonValue(field.label, 2)}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+          {/* Horizontal scroll container (especially on mobile) */}
+          <div className="compare-horizontal-scroll-wrap">
+            <div className="compare-grid-content-width">
+              
+              {/* Columns cards list */}
+              <div className="compare-grid-header">
+                <div className="compare-intro-col">
+                  <h3>Parameters</h3>
+                  <p>Select properties to analyze parameters side-by-side.</p>
+                </div>
+                {renderHeaderColumns()}
               </div>
-            ))
-          )}
+
+              {loading ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '200px', gap: '1rem' }}>
+                  <div style={{ border: '3px solid rgba(255,255,255,0.1)', borderTop: '3px solid var(--teal-500)', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite' }} />
+                  <span style={{ color: 'var(--body-color)', fontSize: '0.9rem' }}>Loading comparison details...</span>
+                  <style>{`
+                    @keyframes spin {
+                      0% { transform: rotate(0deg); }
+                      100% { transform: rotate(360deg); }
+                    }
+                  `}</style>
+                </div>
+              ) : error ? (
+                <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#ef4444' }}>{error}</div>
+              ) : !data ? (
+                <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--body-color)' }}>Select properties to begin comparison.</div>
+              ) : (
+                data.comparisons.map((catGroup) => (
+                  <div 
+                    key={`group-${catGroup.category}`} 
+                    className="compare-accordion-group"
+                    ref={(el) => { categoryRefs.current[catGroup.category] = el }}
+                  >
+                    {/* Accordion header trigger */}
+                    <button 
+                      className="compare-accordion-header"
+                      onClick={() => toggleCategory(catGroup.category)}
+                      type="button"
+                    >
+                      <h2>{catGroup.category}</h2>
+                      <ChevronDown 
+                        size={18} 
+                        className={`compare-accordion-chevron ${expandedCategories[catGroup.category] ? 'expanded' : ''}`} 
+                      />
+                    </button>
+
+                    {/* Accordion body comparisons */}
+                    {expandedCategories[catGroup.category] && (
+                      <div className="compare-accordion-content">
+                        {catGroup.fields.map((field) => (
+                          <div key={`row-${field.label}`} className="compare-table-row">
+                            <div className="compare-row-label">{field.label}</div>
+                            <div className="compare-cell-wrap">{renderComparisonValue(field.label, 0)}</div>
+                            <div className="compare-cell-wrap">{renderComparisonValue(field.label, 1)}</div>
+                            <div className="compare-cell-wrap">{renderComparisonValue(field.label, 2)}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </div>
 
       </div>

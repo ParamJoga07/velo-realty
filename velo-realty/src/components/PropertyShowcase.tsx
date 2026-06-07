@@ -319,18 +319,35 @@ export function PropertyShowcase({
               }
               @media (max-width: 768px) {
                 .featured-cinematic-carousel {
-                  height: 380px;
+                  height: 240px !important;
+                  margin-bottom: 2rem !important;
                 }
-                .featured-desc {
-                  display: none;
+                .featured-slide-overlay {
+                  padding: 1.25rem !important;
+                }
+                .featured-slide-content {
+                  gap: 0.4rem !important;
+                }
+                .featured-title {
+                  font-size: 1.35rem !important;
+                  line-height: 1.2 !important;
+                }
+                .featured-badge {
+                  font-size: 0.65rem !important;
+                  padding: 0.15rem 0.5rem !important;
+                }
+                .featured-desc,
+                .featured-meta-row,
+                .featured-price-cta {
+                  display: none !important;
                 }
                 .feat-arrow {
-                  display: none;
+                  display: none !important;
                 }
                 .feat-dots {
-                  right: 50%;
-                  transform: translateX(50%);
-                  bottom: 1rem;
+                  right: 50% !important;
+                  transform: translateX(50%) !important;
+                  bottom: 0.6rem !important;
                 }
               }
             `}</style>
