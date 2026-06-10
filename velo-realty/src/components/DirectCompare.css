@@ -414,13 +414,13 @@
 
 /* Light Mode support */
 .page[data-theme='light'] .direct-compare-card-slot {
-  background: #ffffff;
+  background: #faf8f5;
   border-color: rgba(0, 0, 0, 0.06);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
 }
 
 .page[data-theme='light'] .direct-compare-card-slot.clickable:hover {
-  background: #f8fafc;
+  background: #f5f3ef;
   border-color: rgba(0, 0, 0, 0.1);
 }
 
@@ -537,5 +537,92 @@
 
   .selected-card-image {
     height: 120px;
+  }
+}
+
+/* Direct Compare Modal overlay styling */
+.compare-wizard-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 24, 36, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+[data-theme='light'] .compare-wizard-modal-overlay {
+  background: rgba(15, 23, 42, 0.75);
+}
+
+.compare-wizard-modal-card {
+  position: relative;
+  background: #0d1e2d;
+  width: min(1040px, 100%);
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+  padding: 2rem;
+  animation: modalScaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+[data-theme='light'] .compare-wizard-modal-card {
+  background: #faf8f5;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes modalScaleUp {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.compare-wizard-modal-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  color: #ffffff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+[data-theme='light'] .compare-wizard-modal-close {
+  background: rgba(0, 0, 0, 0.05);
+  color: #000000;
+}
+
+.compare-wizard-modal-close:hover {
+  background: #ef4444;
+  color: #ffffff;
+  transform: rotate(90deg);
+}
+
+@media (max-width: 768px) {
+  .compare-wizard-modal-overlay {
+    padding: 0.5rem;
+  }
+  .compare-wizard-modal-card {
+    padding: 1.25rem;
+    border-radius: 20px;
+    max-height: 95vh;
+  }
+  .compare-wizard-modal-close {
+    top: 1rem;
+    right: 1rem;
   }
 }

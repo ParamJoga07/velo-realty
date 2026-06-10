@@ -36,7 +36,7 @@ function SubPageHeader({ theme, onThemeToggle }: PageProps) {
 }
 
 // Helper to get real content from Website Changesss.docx for the 4 blogs
-function getBlogContent(title: string) {
+export function getBlogContent(title: string) {
   const normTitle = title.toLowerCase();
   
   if (normTitle.includes('areas to invest') || normTitle.includes('best areas')) {

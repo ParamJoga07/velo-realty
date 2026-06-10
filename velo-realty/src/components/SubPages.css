@@ -11,7 +11,10 @@
 }
 
 .subpage-container[data-theme='light'] {
-  background: #f8fafc;
+  background: 
+    radial-gradient(circle at 5% 8%, rgba(0, 168, 150, 0.04), transparent 25%),
+    radial-gradient(circle at 96% 2%, rgba(249, 115, 22, 0.04), transparent 20%),
+    linear-gradient(180deg, #f5f3ef 0%, #dcd6cd 100%);
 }
 
 /* SubPage Header */
@@ -290,7 +293,7 @@
 }
 
 .subpage-container[data-theme='light'] .advisory-card-widget {
-  background: #ffffff;
+  background: #faf8f5;
   border-color: #cbd5e1;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
 }
@@ -457,7 +460,7 @@
 }
 
 .subpage-container[data-theme='light'] .pillar-card {
-  background: #ffffff;
+  background: #faf8f5;
   border-color: #cbd5e1;
 }
 
@@ -630,7 +633,7 @@
 }
 
 .subpage-container[data-theme='light'] .subpage-footer {
-  background: #ffffff;
+  background: #e5dfd5;
   border-top-color: #cbd5e1;
 }
 
@@ -662,7 +665,7 @@
 }
 
 .subpage-container[data-theme='light'] .contact-card-glass {
-  background: #ffffff;
+  background: #faf8f5;
   border-color: rgba(0, 0, 0, 0.08);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
 }
@@ -776,7 +779,7 @@
 }
 
 .subpage-container[data-theme='light'] .premium-subpage-form input:focus {
-  background: #ffffff !important;
+  background: #faf8f5 !important;
   border-color: var(--teal-500) !important;
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
 }

@@ -108,7 +108,7 @@
 }
 
 .page[data-theme='light'] .compare-grid-header {
-  background: #ffffff;
+  background: #faf8f5;
   border-color: rgba(0, 0, 0, 0.06);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
 }
@@ -199,7 +199,7 @@
 }
 
 .page[data-theme='light'] .compare-header-card {
-  background: #f8fafc;
+  background: #f5f3ef;
   border-color: rgba(0, 0, 0, 0.05);
 }
 
@@ -337,7 +337,7 @@
 }
 
 .page[data-theme='light'] .compare-size-select {
-  background: #ffffff;
+  background: #faf8f5;
   border-color: rgba(0, 0, 0, 0.1);
   color: var(--navy-900);
 }
@@ -348,7 +348,7 @@
 }
 
 .page[data-theme='light'] .compare-size-select:hover {
-  background: #f1f5f9;
+  background: #f5f3ef;
 }
 
 .compare-select-chevron {
@@ -440,7 +440,7 @@
 }
 
 .page[data-theme='light'] .compare-tab-btn {
-  background: #ffffff;
+  background: #faf8f5;
   border-color: rgba(0, 0, 0, 0.06);
   color: #64748b;
   box-shadow: 0 2px 8px rgba(0,0,0,0.02);
@@ -452,7 +452,7 @@
 }
 
 .page[data-theme='light'] .compare-tab-btn:hover {
-  background: #f1f5f9;
+  background: #f5f3ef;
   color: var(--navy-900);
 }
 
@@ -491,7 +491,7 @@
 
 .page[data-theme='light'] .compare-accordion-group {
   border-color: rgba(0, 0, 0, 0.06);
-  background: #ffffff;
+  background: #faf8f5;
   box-shadow: 0 4px 20px rgba(0,0,0,0.02);
 }
 
@@ -509,7 +509,7 @@
 }
 
 .page[data-theme='light'] .compare-accordion-header {
-  background: #f8fafc;
+  background: #f5f3ef;
 }
 
 .compare-accordion-header:hover {
@@ -517,7 +517,7 @@
 }
 
 .page[data-theme='light'] .compare-accordion-header:hover {
-  background: #f1f5f9;
+  background: #eeeae1;
 }
 
 .compare-accordion-header h2 {
@@ -628,7 +628,7 @@
 }
 
 .page[data-theme='light'] .compare-floating-bar {
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(250, 248, 245, 0.92);
   border-color: rgba(0, 0, 0, 0.08);
   box-shadow: 0 16px 40px rgba(31, 57, 80, 0.12);
 }
@@ -748,7 +748,7 @@
 }
 
 .page[data-theme='light'] .search-suggestions-panel {
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(250, 248, 245, 0.98);
   border-color: rgba(0, 0, 0, 0.08);
   box-shadow: 0 16px 45px rgba(31, 57, 80, 0.12);
 }

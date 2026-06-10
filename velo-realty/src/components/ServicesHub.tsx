@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import './ServicesHub.css';
-import { Calculator, Home, BarChart3, Compass, Briefcase, Key, ArrowRight, X, User, Phone, Mail, Sparkles, Gift, Crown, MapPin, Activity, Clock } from 'lucide-react';
+import { Calculator, Home, BarChart3, Compass, Briefcase, Key, ArrowRight, X, User, Phone, Mail, Sparkles, Gift, Crown, Activity, Clock } from 'lucide-react';
 import API_BASE_URL from '../config';
 
 interface Service {
@@ -19,21 +19,11 @@ export function ServicesHub() {
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const [showReferralModal, setShowReferralModal] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
-  const [location, setLocation] = useState('Hitech City, Hyderabad');
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date().toLocaleTimeString());
     }, 1000);
-
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (_pos) => {
-          setLocation('Live: Hitech City Corridor');
-        },
-        () => setLocation('Hitech City, Hyderabad')
-      );
-    }
 
     // Scroll lock for modal
     if (showReferralModal || selectedCalc || selectedServiceId) {
@@ -91,10 +81,6 @@ export function ServicesHub() {
             <div className="screen-edge-glow"></div>
             <div className="dashboard-content">
               <div className="live-stat">
-                <div className="stat-label"><MapPin size={12} /> Geographical Node</div>
-                <p>{location}</p>
-              </div>
-              <div className="live-stat">
                 <div className="stat-label"><Clock size={12} /> Strategic Time</div>
                 <p>{currentTime}</p>
               </div>
@@ -141,16 +127,51 @@ export function ServicesHub() {
             </button>
           </div>
           <div className="referral-visual-side">
-            <div className="reward-cards-track">
-              <div className="reward-mini-card"><div className="reward-icon-box"><Gift size={20} /></div><div className="reward-info-text"><span>Luxury Travel</span><p>Global Trips</p></div></div>
-              <div className="reward-mini-card"><div className="reward-icon-box"><Crown size={20} /></div><div className="reward-info-text"><span>Exclusive Gold</span><p>24K Reward</p></div></div>
-              <div className="reward-mini-card"><div className="reward-icon-box"><Sparkles size={20} /></div><div className="reward-info-text"><span>Elite Hampers</span><p>Luxury Curation</p></div></div>
-              <div className="reward-mini-card"><div className="reward-icon-box"><Activity size={20} /></div><div className="reward-info-text"><span>Stock Credits</span><p>Invest Credits</p></div></div>
-              {/* Duplicate for infinite loop */}
-              <div className="reward-mini-card"><div className="reward-icon-box"><Gift size={20} /></div><div className="reward-info-text"><span>Luxury Travel</span><p>Global Trips</p></div></div>
-              <div className="reward-mini-card"><div className="reward-icon-box"><Crown size={20} /></div><div className="reward-info-text"><span>Exclusive Gold</span><p>24K Reward</p></div></div>
-              <div className="reward-mini-card"><div className="reward-icon-box"><Sparkles size={20} /></div><div className="reward-info-text"><span>Elite Hampers</span><p>Luxury Curation</p></div></div>
-              <div className="reward-mini-card"><div className="reward-icon-box"><Activity size={20} /></div><div className="reward-info-text"><span>Stock Credits</span><p>Invest Credits</p></div></div>
+            <div className="referral-mockup-wrapper">
+              {/* Booklet open */}
+              <div className="mockup-booklet">
+                <div className="booklet-spine"></div>
+                <div className="booklet-page booklet-page-left">
+                  <div className="booklet-content-left">
+                    <span className="visa-title">GOLDEN VISA</span>
+                    <span className="visa-subtitle">VELO EXCLUSIVE</span>
+                    <div className="visa-avatar"></div>
+                    <div className="visa-details">
+                      <div className="detail-line"></div>
+                      <div className="detail-line short"></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="booklet-page booklet-page-right">
+                  <div className="booklet-content-right">
+                    <div className="gold-card-holder">
+                      <div className="gold-card">
+                        <div className="gold-card-chip"></div>
+                        <div className="gold-card-text">
+                          <span className="card-brand">VELO ELITE</span>
+                          <span className="card-number">•••• •••• •••• 2026</span>
+                        </div>
+                      </div>
+                    </div>
+                    <img 
+                      src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/A_View_of_Downtown_Dubai_and_Burj_Khalifa.jpg/800px-A_View_of_Downtown_Dubai_and_Burj_Khalifa.jpg" 
+                      alt="High-rise View" 
+                      className="booklet-image" 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Passport book */}
+              <div className="mockup-passport">
+                <div className="passport-cover">
+                  <div className="passport-emboss">
+                    <div className="emboss-logo">V</div>
+                    <div className="emboss-title">VELO REALTY</div>
+                    <div className="emboss-crest">PASSPORT</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

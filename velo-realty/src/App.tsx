@@ -24,6 +24,8 @@ import { CompareModal } from './components/CompareModal'
 import { SiteVisitModal } from './components/SiteVisitModal'
 import { BlogDetailPage, AboutStoryPage, ContactAgentPage } from './components/SubPages'
 import { DirectCompare } from './components/DirectCompare'
+import { BlogModal } from './components/BlogModal'
+import { SmartPropertyCare } from './components/SmartPropertyCare'
 import API_BASE_URL from './config'
 
 const DEFAULT_PROJECT_IMAGES = [
@@ -61,6 +63,7 @@ function App() {
   const [showBackToTop, setShowBackToTop] = useState(false)
   const [compareIds, setCompareIds] = useState<number[]>([])
   const [showCompareModal, setShowCompareModal] = useState(false)
+  const [showDirectCompareModal, setShowDirectCompareModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [showSiteVisitModal, setShowSiteVisitModal] = useState(false)
   const siteVisitTriggerRef = useRef<HTMLButtonElement | null>(null)
@@ -201,6 +204,9 @@ function App() {
   
   // Developer Modal State
   const [selectedDeveloperName, setSelectedDeveloperName] = useState<string | null>(null)
+
+  // Blog Modal State
+  const [selectedBlog, setSelectedBlog] = useState<{ title: string; description: string } | null>(null)
 
   // User Identity State
   const [user, setUser] = useState<{ name: string; email: string; phone: string } | null>(() => {
@@ -351,13 +357,13 @@ function App() {
 
   // Global Scroll Lock for Modals
   useEffect(() => {
-    const isModalOpen = !!selectedDeveloperName || !!showAdminLogin || !!showIdentityModal || !!selectedProperty;
+    const isModalOpen = !!selectedDeveloperName || !!showAdminLogin || !!showIdentityModal || !!selectedProperty || !!selectedBlog;
     if (isModalOpen) {
       document.body.classList.add('modal-open');
     } else {
       document.body.classList.remove('modal-open');
     }
-  }, [selectedDeveloperName, showAdminLogin, showIdentityModal, selectedProperty]);
+  }, [selectedDeveloperName, showAdminLogin, showIdentityModal, selectedProperty, selectedBlog]);
 
 
   const toggleFavorite = async (propertyId: number) => {
@@ -687,6 +693,7 @@ function App() {
         onDeveloperClick={setSelectedDeveloperName}
         setSelectedProperty={setSelectedProperty}
         setLocation={setLocation}
+        onCompareClick={() => setShowDirectCompareModal(true)}
       />
       <HeroSearch
         tab={tab}
@@ -730,14 +737,6 @@ function App() {
           compareIds={compareIds}
           onToggleCompare={toggleCompare}
         />
-        <DirectCompare 
-          developers={developers}
-          properties={allMappedProperties}
-          onCompare={(id1, id2) => {
-            setCompareIds([id1, id2])
-            setShowCompareModal(true)
-          }}
-        />
         <Sections
           developers={developers}
           communities={communities}
@@ -746,14 +745,33 @@ function App() {
           aboutStats={aboutStats}
           onDeveloperClick={setSelectedDeveloperName}
           projectStats={projectStats}
+          onBlogClick={setSelectedBlog}
         />
         <ServicesHub />
         <TeamSection />
+        <SmartPropertyCare onConsultationClick={() => setShowSiteVisitModal(true)} />
         <TestimonialsSection testimonials={testimonials} />
         <ContactSection properties={allProjects} />
       </main>
       <Footer onSignInClick={() => setShowAdminLogin(true)} />
       <BackToTop visible={showBackToTop} />
+
+      {showDirectCompareModal && (
+        <div className="compare-wizard-modal-overlay" onClick={() => setShowDirectCompareModal(false)}>
+          <div className="compare-wizard-modal-card" onClick={(e) => e.stopPropagation()}>
+            <button className="compare-wizard-modal-close" onClick={() => setShowDirectCompareModal(false)} aria-label="Close Comparison">✕</button>
+            <DirectCompare 
+              developers={developers}
+              properties={allMappedProperties}
+              onCompare={(id1, id2) => {
+                setCompareIds([id1, id2])
+                setShowCompareModal(true)
+                setShowDirectCompareModal(false)
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {selectedProperty && (
         <div className="property-modal-overlay" onClick={() => setSelectedProperty(null)}>
@@ -1105,6 +1123,15 @@ function App() {
         onClose={() => setShowSiteVisitModal(false)}
         triggerRef={siteVisitTriggerRef}
       />
+
+      {/* Blog Detail Modal */}
+      {selectedBlog && (
+        <BlogModal
+          blog={selectedBlog}
+          onClose={() => setSelectedBlog(null)}
+          theme={theme}
+        />
+      )}
     </div>
   )
 }

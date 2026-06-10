@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Building2, MapPin, Calendar, Clock } from 'lucide-react'
+import { Building2, MapPin, Calendar, Clock, Headset } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import './SiteVisitModal.css'
@@ -111,7 +111,7 @@ export function SiteVisitModal({ isOpen, onClose, triggerRef }: SiteVisitModalPr
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name, email, phone, message,
+          name, email, phone, message: `Live Agent requested: ${message}`,
           developer_id: selectedDeveloper?.id ?? null,
           project_id: selectedProject?.id ?? null,
           visit_date: selectedDate.toISOString().split('T')[0],
@@ -140,20 +140,16 @@ export function SiteVisitModal({ isOpen, onClose, triggerRef }: SiteVisitModalPr
       style={{ '--sv-origin-x': animOrigin.x, '--sv-origin-y': animOrigin.y } as React.CSSProperties}
       onClick={(e) => { if (e.target === overlayRef.current) handleClose() }}
     >
-      <div className={`sv-panel ${isOpen ? 'sv-panel--open' : ''}`} role="dialog" aria-modal="true" aria-label="Schedule a Site Visit">
+      <div className={`sv-panel ${isOpen ? 'sv-panel--open' : ''}`} role="dialog" aria-modal="true" aria-label="Connect with a Live Agent">
         {/* Header */}
         <div className="sv-header">
           <div className="sv-header-left">
             <div className="sv-header-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="22" height="22">
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
+              <Headset size={22} className="teal-icon" />
             </div>
             <div>
-              <h2 className="sv-title">Schedule a Site Visit</h2>
-              <p className="sv-subtitle">We'll arrange a personal tour for you</p>
+              <h2 className="sv-title">Talk to a Live Agent</h2>
+              <p className="sv-subtitle">Get immediate expert consultation from our advisors</p>
             </div>
           </div>
           <button className="sv-close" onClick={handleClose} aria-label="Close">
@@ -166,7 +162,7 @@ export function SiteVisitModal({ isOpen, onClose, triggerRef }: SiteVisitModalPr
         {/* Step indicator */}
         {!success && (
           <div className="sv-steps">
-            {['Property', 'Date & Time', 'Your Details'].map((label, i) => (
+            {['Property Interest', 'Preferred Time', 'Your Details'].map((label, i) => (
               <button
                 key={label}
                 className={`sv-step ${step === i + 1 ? 'sv-step--active' : ''} ${step > i + 1 ? 'sv-step--done' : ''}`}
@@ -198,13 +194,13 @@ export function SiteVisitModal({ isOpen, onClose, triggerRef }: SiteVisitModalPr
                   <polyline points="20 6 9 17 4 12" transform="translate(2,2) scale(0.75)"/>
                 </svg>
               </div>
-              <h3>Visit Booked!</h3>
+              <h3>Connection Requested!</h3>
               <p>
-                Your site visit to <strong>{selectedProject?.name}</strong> is confirmed for{' '}
+                Your request to connect with a Live Agent regarding <strong>{selectedProject?.name}</strong> is confirmed for{' '}
                 <strong>{selectedDate?.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</strong>
                 {' '}at <strong>{selectedTime}</strong>.
               </p>
-              <p className="sv-success-note">Our team will reach you at <strong>{phone}</strong> to confirm details.</p>
+              <p className="sv-success-note">An executive advisor will reach out to you at <strong>{phone}</strong> at the selected time.</p>
               <button className="sv-btn sv-btn-primary" onClick={handleClose}>Done</button>
             </div>
           )}
@@ -212,7 +208,7 @@ export function SiteVisitModal({ isOpen, onClose, triggerRef }: SiteVisitModalPr
           {/* STEP 1 — Property Selection */}
           {!success && step === 1 && (
             <div className="sv-step-content">
-              <h3 className="sv-section-title">Select Developer &amp; Project</h3>
+              <h3 className="sv-section-title">Which property are you interested in?</h3>
 
               {loadingDevs ? (
                 <div className="sv-loading">Loading projects…</div>
@@ -223,17 +219,17 @@ export function SiteVisitModal({ isOpen, onClose, triggerRef }: SiteVisitModalPr
                     <label className="sv-label">Developer</label>
                     <div className="sv-select-wrapper">
                       <select
-                        className="sv-select"
-                        value={selectedDeveloper?.id ?? ''}
-                        onChange={(e) => {
-                          const dev = developers.find(d => d.id === Number(e.target.value)) ?? null
-                          setSelectedDeveloper(dev)
-                          setSelectedProject(null)
-                        }}
+                          className="sv-select"
+                          value={selectedDeveloper?.id ?? ''}
+                          onChange={(e) => {
+                            const dev = developers.find(d => d.id === Number(e.target.value)) ?? null
+                            setSelectedDeveloper(dev)
+                            setSelectedProject(null)
+                          }}
                       >
                         <option value="">— Choose a Developer —</option>
                         {developers.map(d => (
-                          <option key={d.id} value={d.id}>{d.name}</option>
+                            <option key={d.id} value={d.id}>{d.name}</option>
                         ))}
                       </select>
                       <span className="sv-select-arrow">
@@ -249,21 +245,21 @@ export function SiteVisitModal({ isOpen, onClose, triggerRef }: SiteVisitModalPr
                     <label className="sv-label">Project</label>
                     <div className="sv-select-wrapper">
                       <select
-                        className="sv-select"
-                        value={selectedProject?.id ?? ''}
-                        disabled={!selectedDeveloper}
-                        onChange={(e) => {
-                          const proj = selectedDeveloper?.projects.find(p => p.id === Number(e.target.value)) ?? null
-                          setSelectedProject(proj)
-                        }}
+                          className="sv-select"
+                          value={selectedProject?.id ?? ''}
+                          disabled={!selectedDeveloper}
+                          onChange={(e) => {
+                            const proj = selectedDeveloper?.projects.find(p => p.id === Number(e.target.value)) ?? null
+                            setSelectedProject(proj)
+                          }}
                       >
                         <option value="">
                           {selectedDeveloper ? '— Choose a Project —' : '← Select developer first'}
                         </option>
                         {selectedDeveloper?.projects.map(p => (
-                          <option key={p.id} value={p.id}>
-                            {p.name} — {p.location}
-                          </option>
+                            <option key={p.id} value={p.id}>
+                              {p.name} — {p.location}
+                            </option>
                         ))}
                       </select>
                       <span className="sv-select-arrow">
@@ -313,7 +309,7 @@ export function SiteVisitModal({ isOpen, onClose, triggerRef }: SiteVisitModalPr
           {/* STEP 2 — Date & Time */}
           {!success && step === 2 && (
             <div className="sv-step-content">
-              <h3 className="sv-section-title">Pick Your Preferred Date &amp; Time</h3>
+              <h3 className="sv-section-title">Select Your Preferred Call Time</h3>
 
               {/* Calendar */}
               <div className="sv-calendar-wrapper">
@@ -362,12 +358,12 @@ export function SiteVisitModal({ isOpen, onClose, triggerRef }: SiteVisitModalPr
           {/* STEP 3 — Contact Details */}
           {!success && step === 3 && (
             <div className="sv-step-content">
-              <h3 className="sv-section-title">Your Contact Details</h3>
+              <h3 className="sv-section-title">Advisor Request Details</h3>
 
               {/* Booking Summary */}
               <div className="sv-summary">
                 <div className="sv-summary-row">
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Building2 size={14} style={{ color: 'var(--teal-500)' }} /> Project</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Building2 size={14} style={{ color: 'var(--teal-500)' }} /> Property</span>
                   <strong>{selectedProject?.name}</strong>
                 </div>
                 <div className="sv-summary-row">
@@ -379,7 +375,7 @@ export function SiteVisitModal({ isOpen, onClose, triggerRef }: SiteVisitModalPr
                   <strong>{selectedDate?.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</strong>
                 </div>
                 <div className="sv-summary-row">
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={14} style={{ color: 'var(--teal-500)' }} /> Time</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={14} style={{ color: 'var(--teal-500)' }} /> Preferred Time</span>
                   <strong>{selectedTime}</strong>
                 </div>
               </div>
@@ -445,12 +441,8 @@ export function SiteVisitModal({ isOpen, onClose, triggerRef }: SiteVisitModalPr
                     <span className="sv-spinner" />
                   ) : (
                     <>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
-                        <rect x="3" y="4" width="18" height="18" rx="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
-                        <line x1="3" y1="10" x2="21" y2="10"/>
-                      </svg>
-                      Book Site Visit
+                      <Headset size={16} style={{ marginRight: '6px' }} />
+                      Connect with Live Agent
                     </>
                   )}
                 </button>

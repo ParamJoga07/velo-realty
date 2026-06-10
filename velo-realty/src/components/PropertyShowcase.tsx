@@ -105,373 +105,373 @@ export function PropertyShowcase({
             <p className="section-subtitle">Discover high-intent opportunities selected by our advisors.</p>
           </div>
         </div>
+      </div>
 
-        {featuredProjects.length === 0 ? (
+      {featuredProjects.length === 0 ? (
+        <div className="container">
           <p className="empty-state" style={{ marginBottom: '4rem' }}>No featured projects currently starred.</p>
-        ) : (
-          <div 
-            className="featured-cinematic-carousel"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
-            <style>{`
+        </div>
+      ) : (
+        <div 
+          className="featured-cinematic-carousel"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          <style>{`
+            .featured-cinematic-carousel {
+              position: relative;
+              width: 100%;
+              height: 580px;
+              overflow: hidden;
+              box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+              margin-bottom: 4rem;
+              background: #0a1824;
+              border-top: 1px solid rgba(255, 255, 255, 0.08);
+              border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            }
+            [data-theme='light'] .featured-cinematic-carousel {
+              box-shadow: 0 20px 40px rgba(31, 57, 80, 0.12);
+              border-top-color: rgba(0, 0, 0, 0.05);
+              border-bottom-color: rgba(0, 0, 0, 0.05);
+            }
+            .featured-slides-container {
+              position: relative;
+              width: 100%;
+              height: 100%;
+            }
+            .featured-slide {
+              position: absolute;
+              inset: 0;
+              opacity: 0;
+              visibility: hidden;
+              transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
+              cursor: pointer;
+            }
+            .featured-slide.active {
+              opacity: 1;
+              visibility: visible;
+            }
+            .featured-slide-img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              transition: transform 6s ease-out;
+            }
+            .featured-slide.active .featured-slide-img {
+              transform: scale(1.08);
+            }
+            .featured-slide-overlay {
+              position: absolute;
+              inset: 0;
+              background: linear-gradient(
+                90deg,
+                rgba(10, 24, 36, 0.95) 0%,
+                rgba(10, 24, 36, 0.65) 50%,
+                transparent 100%
+              );
+              display: flex;
+              align-items: center;
+              padding-left: max(1.25rem, calc((100vw - 1160px) / 2 + 1.25rem));
+              padding-right: max(1.25rem, calc((100vw - 1160px) / 2 + 1.25rem));
+            }
+            .featured-slide-content {
+              max-width: 540px;
+              display: flex;
+              flex-direction: column;
+              gap: 1rem;
+              z-index: 5;
+            }
+            .featured-badge {
+              display: inline-flex;
+              align-self: flex-start;
+              background: var(--teal-500);
+              color: #ffffff;
+              padding: 0.4rem 1rem;
+              border-radius: 50px;
+              font-size: 0.75rem;
+              font-weight: 700;
+              letter-spacing: 0.1em;
+              text-transform: uppercase;
+              box-shadow: 0 4px 12px rgba(0, 168, 150, 0.3);
+            }
+            .featured-title {
+              color: #ffffff;
+              font-family: 'EB Garamond Custom', serif;
+              font-size: 2.5rem;
+              font-weight: 800;
+              line-height: 1.15;
+              margin: 0;
+            }
+            .featured-desc {
+              color: rgba(255, 255, 255, 0.8);
+              font-size: 1rem;
+              line-height: 1.5;
+              margin: 0;
+            }
+            .featured-meta-row {
+              display: flex;
+              gap: 0.75rem;
+              flex-wrap: wrap;
+              align-items: center;
+              margin-top: 0.25rem;
+            }
+            .featured-meta-item {
+              color: rgba(255, 255, 255, 0.7);
+              font-size: 0.85rem;
+              font-weight: 600;
+              background: rgba(255, 255, 255, 0.08);
+              padding: 0.25rem 0.75rem;
+              border-radius: 6px;
+            }
+            .featured-price-cta {
+              display: flex;
+              align-items: center;
+              gap: 1.5rem;
+              margin-top: 0.5rem;
+            }
+            .featured-price {
+              font-size: 1.8rem;
+              font-weight: 700;
+              color: #ffffff;
+              font-family: 'Inter', sans-serif;
+            }
+            .featured-cta-btn {
+              background: transparent;
+              color: #ffffff;
+              border: 1px solid rgba(255, 255, 255, 0.3);
+              padding: 0.7rem 1.5rem;
+              border-radius: 12px;
+              font-size: 0.9rem;
+              font-weight: 600;
+              cursor: pointer;
+              transition: all 0.3s ease;
+              backdrop-filter: blur(4px);
+            }
+            .featured-cta-btn:hover {
+              background: #ffffff;
+              color: var(--navy-900);
+              border-color: #ffffff;
+              box-shadow: 0 8px 24px rgba(255, 255, 255, 0.25);
+            }
+            .feat-arrow {
+              position: absolute;
+              top: 50%;
+              transform: translateY(-50%);
+              width: 44px;
+              height: 44px;
+              border-radius: 50%;
+              background: rgba(10, 24, 36, 0.4);
+              border: 1px solid rgba(255, 255, 255, 0.1);
+              color: #ffffff;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              cursor: pointer;
+              transition: all 0.3s ease;
+              z-index: 10;
+              backdrop-filter: blur(4px);
+              opacity: 0;
+            }
+            .featured-cinematic-carousel:hover .feat-arrow {
+              opacity: 1;
+            }
+            .feat-arrow:hover {
+              background: var(--teal-500);
+              border-color: var(--teal-500);
+              box-shadow: 0 8px 20px rgba(0, 168, 150, 0.3);
+            }
+            .feat-arrow.prev {
+              left: max(1.5rem, calc((100vw - 1160px) / 2 + 1.5rem));
+            }
+            .feat-arrow.next {
+              right: max(1.5rem, calc((100vw - 1160px) / 2 + 1.5rem));
+            }
+            .feat-dots {
+              position: absolute;
+              bottom: 2.5rem;
+              right: max(3rem, calc((100vw - 1160px) / 2 + 3rem));
+              display: flex;
+              gap: 0.5rem;
+              z-index: 10;
+            }
+            .feat-dot {
+              width: 20px;
+              height: 4px;
+              border-radius: 2px;
+              background: rgba(255, 255, 255, 0.3);
+              border: none;
+              cursor: pointer;
+              transition: all 0.3s ease;
+            }
+            .feat-dot.active {
+              background: var(--teal-500);
+              width: 36px;
+            }
+            @media (max-width: 768px) {
               .featured-cinematic-carousel {
-                position: relative;
-                width: 100%;
-                height: 480px;
-                border-radius: 24px;
-                overflow: hidden;
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-                margin-bottom: 4rem;
-                background: #0a1824;
-                border: 1px solid rgba(255, 255, 255, 0.08);
+                width: min(1160px, calc(100% - 2.5rem)) !important;
+                margin-inline: auto !important;
+                height: 240px !important;
+                border-radius: 24px !important;
+                margin-bottom: 2rem !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
               }
               [data-theme='light'] .featured-cinematic-carousel {
-                box-shadow: 0 20px 40px rgba(31, 57, 80, 0.12);
-                border-color: rgba(0, 0, 0, 0.05);
-              }
-              .featured-slides-container {
-                position: relative;
-                width: 100%;
-                height: 100%;
-              }
-              .featured-slide {
-                position: absolute;
-                inset: 0;
-                opacity: 0;
-                visibility: hidden;
-                transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
-                cursor: pointer;
-              }
-              .featured-slide.active {
-                opacity: 1;
-                visibility: visible;
-              }
-              .featured-slide-img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                transition: transform 6s ease-out;
-              }
-              .featured-slide.active .featured-slide-img {
-                transform: scale(1.08);
+                border-color: rgba(0, 0, 0, 0.05) !important;
               }
               .featured-slide-overlay {
-                position: absolute;
-                inset: 0;
-                background: linear-gradient(
-                  90deg,
-                  rgba(10, 24, 36, 0.95) 0%,
-                  rgba(10, 24, 36, 0.65) 50%,
-                  transparent 100%
-                );
-                display: flex;
-                align-items: center;
-                padding: 3rem;
-              }
-              @media (max-width: 768px) {
-                .featured-slide-overlay {
-                  background: linear-gradient(
-                    0deg,
-                    rgba(10, 24, 36, 0.95) 0%,
-                    rgba(10, 24, 36, 0.75) 70%,
-                    transparent 100%
-                  );
-                  align-items: flex-end;
-                  padding: 1.5rem;
-                }
+                padding: 1.25rem !important;
               }
               .featured-slide-content {
-                max-width: 540px;
-                display: flex;
-                flex-direction: column;
-                gap: 1rem;
-                z-index: 5;
-              }
-              .featured-badge {
-                display: inline-flex;
-                align-self: flex-start;
-                background: var(--teal-500);
-                color: #ffffff;
-                padding: 0.4rem 1rem;
-                border-radius: 50px;
-                font-size: 0.75rem;
-                font-weight: 700;
-                letter-spacing: 0.1em;
-                text-transform: uppercase;
-                box-shadow: 0 4px 12px rgba(0, 168, 150, 0.3);
+                gap: 0.4rem !important;
               }
               .featured-title {
-                color: #ffffff;
-                font-family: 'EB Garamond Custom', serif;
-                font-size: 2.5rem;
-                font-weight: 800;
-                line-height: 1.15;
-                margin: 0;
+                font-size: 1.35rem !important;
+                line-height: 1.2 !important;
               }
-              .featured-desc {
-                color: rgba(255, 255, 255, 0.8);
-                font-size: 1rem;
-                line-height: 1.5;
-                margin: 0;
+              .featured-badge {
+                font-size: 0.65rem !important;
+                padding: 0.15rem 0.5rem !important;
               }
-              .featured-meta-row {
-                display: flex;
-                gap: 0.75rem;
-                flex-wrap: wrap;
-                align-items: center;
-                margin-top: 0.25rem;
-              }
-              .featured-meta-item {
-                color: rgba(255, 255, 255, 0.7);
-                font-size: 0.85rem;
-                font-weight: 600;
-                background: rgba(255, 255, 255, 0.08);
-                padding: 0.25rem 0.75rem;
-                border-radius: 6px;
-              }
+              .featured-desc,
+              .featured-meta-row,
               .featured-price-cta {
-                display: flex;
-                align-items: center;
-                gap: 1.5rem;
-                margin-top: 0.5rem;
-              }
-              .featured-price {
-                font-size: 1.8rem;
-                font-weight: 700;
-                color: #ffffff;
-                font-family: 'Inter', sans-serif;
-              }
-              .featured-cta-btn {
-                background: transparent;
-                color: #ffffff;
-                border: 1px solid rgba(255, 255, 255, 0.3);
-                padding: 0.7rem 1.5rem;
-                border-radius: 12px;
-                font-size: 0.9rem;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                backdrop-filter: blur(4px);
-              }
-              .featured-cta-btn:hover {
-                background: #ffffff;
-                color: var(--navy-900);
-                border-color: #ffffff;
-                box-shadow: 0 8px 24px rgba(255, 255, 255, 0.25);
+                display: none !important;
               }
               .feat-arrow {
-                position: absolute;
-                top: 50%;
-                transform: translateY(-50%);
-                width: 44px;
-                height: 44px;
-                border-radius: 50%;
-                background: rgba(10, 24, 36, 0.4);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                color: #ffffff;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                z-index: 10;
-                backdrop-filter: blur(4px);
-                opacity: 0;
-              }
-              .featured-cinematic-carousel:hover .feat-arrow {
-                opacity: 1;
-              }
-              .feat-arrow:hover {
-                background: var(--teal-500);
-                border-color: var(--teal-500);
-                box-shadow: 0 8px 20px rgba(0, 168, 150, 0.3);
-              }
-              .feat-arrow.prev {
-                left: 1.5rem;
-              }
-              .feat-arrow.next {
-                right: 1.5rem;
+                display: none !important;
               }
               .feat-dots {
-                position: absolute;
-                bottom: 1.5rem;
-                right: 3rem;
-                display: flex;
-                gap: 0.5rem;
-                z-index: 10;
+                right: 50% !important;
+                transform: translateX(50%) !important;
+                bottom: 0.6rem !important;
               }
-              .feat-dot {
-                width: 20px;
-                height: 4px;
-                border-radius: 2px;
-                background: rgba(255, 255, 255, 0.3);
-                border: none;
-                cursor: pointer;
-                transition: all 0.3s ease;
-              }
-              .feat-dot.active {
-                background: var(--teal-500);
-                width: 36px;
-              }
-              @media (max-width: 768px) {
-                .featured-cinematic-carousel {
-                  height: 240px !important;
-                  margin-bottom: 2rem !important;
-                }
-                .featured-slide-overlay {
-                  padding: 1.25rem !important;
-                }
-                .featured-slide-content {
-                  gap: 0.4rem !important;
-                }
-                .featured-title {
-                  font-size: 1.35rem !important;
-                  line-height: 1.2 !important;
-                }
-                .featured-badge {
-                  font-size: 0.65rem !important;
-                  padding: 0.15rem 0.5rem !important;
-                }
-                .featured-desc,
-                .featured-meta-row,
-                .featured-price-cta {
-                  display: none !important;
-                }
-                .feat-arrow {
-                  display: none !important;
-                }
-                .feat-dots {
-                  right: 50% !important;
-                  transform: translateX(50%) !important;
-                  bottom: 0.6rem !important;
-                }
-              }
-            `}</style>
+            }
+          `}</style>
 
-            <div className="featured-slides-container">
-              {featuredProjects.map((item, idx) => (
-                <div 
-                  key={`feat-${item.id}`} 
-                  className={`featured-slide ${currentIndex === idx ? 'active' : ''}`}
-                  onClick={() => setSelectedProperty(item)}
-                >
-                  <img src={item.image} alt={item.title} className="featured-slide-img" />
-                  <div className="featured-slide-overlay">
-                    <div className="featured-slide-content">
-                      <span className="featured-badge">{item.status || 'Featured'}</span>
-                      <h3 className="featured-title">{item.title}</h3>
-                      <p className="featured-desc">{item.description}</p>
-                      
-                      <div className="featured-meta-row">
-                        <span className="featured-meta-item">{item.beds} BHK</span>
-                        <span className="featured-meta-item">{item.area} SQFT</span>
-                        <span className="featured-meta-item">{item.location} Corridor</span>
-                        <span className="featured-meta-item">By {item.developer}</span>
-                      </div>
+          <div className="featured-slides-container">
+            {featuredProjects.map((item, idx) => (
+              <div 
+                key={`feat-${item.id}`} 
+                className={`featured-slide ${currentIndex === idx ? 'active' : ''}`}
+                onClick={() => setSelectedProperty(item)}
+              >
+                <img src={item.image} alt={item.title} className="featured-slide-img" />
+                <div className="featured-slide-overlay">
+                  <div className="featured-slide-content">
+                    <span className="featured-badge">{item.status || 'Featured'}</span>
+                    <h3 className="featured-title">{item.title}</h3>
+                    <p className="featured-desc">{item.description}</p>
+                    
+                    <div className="featured-meta-row">
+                      <span className="featured-meta-item">{item.beds} BHK</span>
+                      <span className="featured-meta-item">{item.area} SQFT</span>
+                      <span className="featured-meta-item">{item.location} Corridor</span>
+                      <span className="featured-meta-item">By {item.developer}</span>
+                    </div>
 
-                      <div className="featured-price-cta">
-                        <span className="featured-price">{item.price}</span>
-                        <div style={{ display: 'flex', gap: '0.75rem' }}>
-                          <button className="featured-cta-btn" type="button">
-                            Explore Details
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onToggleCompare(item.id);
-                            }}
-                            style={{
-                              background: compareIds.includes(item.id) ? 'var(--teal-500)' : 'rgba(255, 255, 255, 0.1)',
-                              border: 'none',
-                              color: '#ffffff',
-                              borderRadius: '12px',
-                              padding: '0 1rem',
-                              height: '44px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              cursor: 'pointer',
-                              transition: 'all 0.3s ease',
-                              fontSize: '0.85rem',
-                              fontWeight: 700,
-                            }}
-                          >
-                            {compareIds.includes(item.id) ? '✓ Compare' : '+ Compare'}
-                          </button>
-                          <button
-                            type="button"
-                            className={favorites.has(item.id) ? 'feat-fav-btn active' : 'feat-fav-btn'}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onToggleFavorite(item.id);
-                            }}
-                            style={{
-                              background: favorites.has(item.id) ? 'var(--teal-500)' : 'rgba(255, 255, 255, 0.1)',
-                              border: 'none',
-                              color: '#ffffff',
-                              width: '44px',
-                              height: '44px',
-                              borderRadius: '12px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              cursor: 'pointer',
-                              transition: 'all 0.3s ease',
-                              fontSize: '1.2rem',
-                              lineHeight: 1
-                            }}
-                          >
-                            {favorites.has(item.id) ? '♥' : '♡'}
-                          </button>
-                        </div>
+                    <div className="featured-price-cta">
+                      <span className="featured-price">{item.price}</span>
+                      <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        <button className="featured-cta-btn" type="button">
+                          Explore Details
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleCompare(item.id);
+                          }}
+                          style={{
+                            background: compareIds.includes(item.id) ? 'var(--teal-500)' : 'rgba(255, 255, 255, 0.1)',
+                            border: 'none',
+                            color: '#ffffff',
+                            borderRadius: '12px',
+                            padding: '0 1rem',
+                            height: '44px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            fontSize: '0.85rem',
+                            fontWeight: 700,
+                          }}
+                        >
+                          {compareIds.includes(item.id) ? '✓ Compare' : '+ Compare'}
+                        </button>
+                        <button
+                          type="button"
+                          className={favorites.has(item.id) ? 'feat-fav-btn active' : 'feat-fav-btn'}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleFavorite(item.id);
+                          }}
+                          style={{
+                            background: favorites.has(item.id) ? 'var(--teal-500)' : 'rgba(255, 255, 255, 0.1)',
+                            border: 'none',
+                            color: '#ffffff',
+                            width: '44px',
+                            height: '44px',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            fontSize: '1.2rem',
+                            lineHeight: 1
+                          }}
+                        >
+                          {favorites.has(item.id) ? '♥' : '♡'}
+                        </button>
                       </div>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-
-            {featuredProjects.length > 1 && (
-              <>
-                <button 
-                  className="feat-arrow prev" 
-                  onClick={(e) => { e.stopPropagation(); handlePrev(); }}
-                  aria-label="Previous Slide"
-                  type="button"
-                >
-                  <ChevronLeft size={22} />
-                </button>
-                <button 
-                  className="feat-arrow next" 
-                  onClick={(e) => { e.stopPropagation(); handleNext(); }}
-                  aria-label="Next Slide"
-                  type="button"
-                >
-                  <ChevronRight size={22} />
-                </button>
-
-                <div className="feat-dots">
-                  {featuredProjects.map((_, idx) => (
-                    <button
-                      key={`feat-dot-${idx}`}
-                      className={`feat-dot ${currentIndex === idx ? 'active' : ''}`}
-                      onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx); }}
-                      aria-label={`Go to slide ${idx + 1}`}
-                      type="button"
-                    />
-                  ))}
-                </div>
-              </>
-            )}
+              </div>
+            ))}
           </div>
-        )}
 
-        {/* SECTION 2: FILTERED / ALL LISTINGS */}
+          {featuredProjects.length > 1 && (
+            <>
+              <button 
+                className="feat-arrow prev" 
+                onClick={(e) => { e.stopPropagation(); handlePrev(); }}
+                aria-label="Previous Slide"
+                type="button"
+              >
+                <ChevronLeft size={22} />
+              </button>
+              <button 
+                className="feat-arrow next" 
+                onClick={(e) => { e.stopPropagation(); handleNext(); }}
+                aria-label="Next Slide"
+                type="button"
+              >
+                <ChevronRight size={22} />
+              </button>
+
+              <div className="feat-dots">
+                {featuredProjects.map((_, idx) => (
+                  <button
+                    key={`feat-dot-${idx}`}
+                    className={`feat-dot ${currentIndex === idx ? 'active' : ''}`}
+                    onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx); }}
+                    aria-label={`Go to slide ${idx + 1}`}
+                    type="button"
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      <div className="container">
         <div id="our-properties" className="section-head" style={{ marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '3rem' }}>
           <div>
             <h2 style={{ fontSize: '1.8rem', fontFamily: '"EB Garamond Custom", serif', fontWeight: 800 }}>

@@ -285,7 +285,7 @@
    LIGHT THEME
 ═══════════════════════════════════════════════ */
 .page[data-theme='light'] .team-innovative {
-  background: #f8fafc;
+  background: transparent;
 }
 
 .page[data-theme='light'] .team-innovative::before {
@@ -293,7 +293,7 @@
 }
 
 .page[data-theme='light'] .team-card-v3 {
-  background: #ffffff;
+  background: var(--card-bg);
   border: 1px solid #e2e8f0;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
 }
@@ -312,12 +312,12 @@
 }
 
 .page[data-theme='light'] .card-info {
-  background: linear-gradient(to bottom, #ffffff, #f8fafc);
+  background: linear-gradient(to bottom, var(--card-bg), #eeeae1);
 }
 
 .page[data-theme='light'] .team-card-v3.ceo-card {
   border: 2px solid rgba(249, 115, 22, 0.3);
-  background: linear-gradient(145deg, rgba(249, 115, 22, 0.08) 0%, #ffffff 70%);
+  background: linear-gradient(145deg, rgba(249, 115, 22, 0.08) 0%, var(--card-bg) 70%);
   box-shadow: 0 12px 40px rgba(249, 115, 22, 0.08);
 }
 

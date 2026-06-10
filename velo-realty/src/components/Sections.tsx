@@ -11,6 +11,7 @@ type SectionsProps = {
   aboutStats: Array<{ value: string; label: string }>
   onDeveloperClick: (name: string) => void
   projectStats: { devCounts: Record<number, number>, corrCounts: Record<number, number> }
+  onBlogClick?: (blog: { title: string; description: string }) => void
 }
 
 export function Sections({ 
@@ -20,7 +21,8 @@ export function Sections({
   partners, 
   aboutStats: _aboutStats, 
   onDeveloperClick,
-  projectStats
+  projectStats,
+  onBlogClick
 }: SectionsProps) {
   const [showAllPartners, setShowAllPartners] = useState(false);
 
@@ -571,6 +573,12 @@ export function Sections({
                     className="blog-card premium-card carousel-item" 
                     key={`${item.title}-${idx}`}
                     style={{ flex: '0 0 350px', width: '350px', textDecoration: 'none' }}
+                    onClick={(e) => {
+                      if (onBlogClick) {
+                        e.preventDefault();
+                        onBlogClick(item);
+                      }
+                    }}
                   >
                     <div className="card-inner">
                       <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem', color: 'var(--heading-color)' }}>{item.title}</h3>

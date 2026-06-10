@@ -14,6 +14,7 @@ type NavbarProps = {
   onDeveloperClick?: (name: string) => void;
   setSelectedProperty?: (prop: any | null) => void;
   setLocation?: (value: string) => void;
+  onCompareClick?: () => void;
 };
 
 type NavItem = {
@@ -103,7 +104,8 @@ export function Navbar({
   properties = [],
   onDeveloperClick,
   setSelectedProperty,
-  setLocation
+  setLocation,
+  onCompareClick
 }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeGroupLabel, setActiveGroupLabel] = useState<string | null>(null);
@@ -245,7 +247,54 @@ export function Navbar({
             {NAV_GROUPS.map((group) => (
               <DropdownGroup key={group.label} group={group} onClose={closeMobile} onFilterSelect={onFilterSelect} />
             ))}
+            <button 
+              type="button" 
+              className="nav-compare-btn"
+              onClick={onCompareClick}
+            >
+              Compare Projects
+            </button>
           </nav>
+
+          <style>{`
+            .nav-compare-btn {
+              background: none;
+              border: none;
+              color: var(--teal-500);
+              font-weight: 700;
+              font-size: 15px;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              padding: 0.5rem 0.75rem;
+              border-radius: 8px;
+              transition: all 0.2s ease;
+              border: 1px dashed rgba(0, 168, 150, 0.3);
+            }
+            .nav-compare-btn:hover {
+              background: rgba(0, 168, 150, 0.08);
+              border-color: var(--teal-500);
+              transform: translateY(-1px);
+            }
+            .nav-mobile-compare-btn {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              width: 100%;
+              padding: 1.25rem 2rem;
+              background: none;
+              border: none;
+              border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+              color: var(--teal-500) !important;
+              font-weight: 700 !important;
+              font-size: 1.1rem;
+              text-align: left;
+              cursor: pointer;
+            }
+            [data-theme='light'] .nav-mobile-compare-btn {
+              border-bottom-color: rgba(0, 0, 0, 0.05);
+            }
+          `}</style>
 
           {/* ACTIONS */}
           <div className="nav-actions">
@@ -304,6 +353,18 @@ export function Navbar({
                     <span className="nav-mobile-arrow">→</span>
                   </button>
                 ))}
+
+                <button
+                  type="button"
+                  className="nav-mobile-compare-btn"
+                  onClick={() => {
+                    closeMobile();
+                    if (onCompareClick) onCompareClick();
+                  }}
+                >
+                  <span>Compare Projects</span>
+                  <span className="nav-mobile-arrow">→</span>
+                </button>
                 
                 {/* Contact Us button inside the menu */}
                 <div className="nav-mobile-contact-container">
