@@ -2330,7 +2330,7 @@ a.blog-card * {
   }
 }
 
-.page[data-theme="light"] {
+.page[data-theme='light'] {
   /* Brand Variables */
   --bg-page: #F8F8F3;
   --bg-surface: #FFFFFF;
@@ -2395,6 +2395,17 @@ a.blog-card * {
     linear-gradient(180deg, var(--bg-page) 0%, var(--bg-surface-alt) 100%);
 }
 
+.page[data-theme='light'] .alt {
+  background: var(--bg-surface-alt);
+}
+
+.page[data-theme='light'] .about-content,
+.page[data-theme='light'] .about-visual {
+  background: var(--bg-surface);
+  border-color: var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+}
+
 .page[data-theme='light'] input,
 .page[data-theme='light'] textarea,
 .page[data-theme='light'] select {
@@ -2424,50 +2435,50 @@ a.blog-card * {
 }
 
 .page[data-theme="light"] .navbar {
-  background: var(--card-bg);
-  box-shadow: 0 4px 20px rgba(22, 40, 58, 0.06);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
 }
 
 .page[data-theme="light"] .navbar::before {
-  box-shadow: 20px -20px 0 20px var(--card-bg);
+  box-shadow: 20px -20px 0 20px var(--bg-surface);
 }
 
 .page[data-theme="light"] .navbar::after {
-  box-shadow: -20px -20px 0 20px var(--card-bg);
+  box-shadow: -20px -20px 0 20px var(--bg-surface);
 }
 
 .page[data-theme="light"] .nav-dropdown-panel {
-  background: var(--card-bg);
-  border-color: #e2e8f0;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  background: var(--bg-elevated);
+  border-color: var(--border-subtle);
+  box-shadow: var(--shadow-md);
 }
 
 .page[data-theme="light"] .nav-dropdown-item {
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .page[data-theme="light"] .nav-dropdown-item:hover {
-  background: #f1f5f9;
-  color: var(--teal-500);
+  background: var(--bg-surface-alt);
+  color: var(--primary);
 }
 
 .page[data-theme="light"] .nav-dropdown-trigger {
-  color: #475569;
+  color: var(--text-secondary);
 }
 
 .page[data-theme='light'] .nav-mobile-panel {
-  background: var(--card-bg);
-  color: #0f172a;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
 }
 
 .page[data-theme='light'] .theme-toggle-btn,
 .page[data-theme='light'] .nav-hamburger {
-  color: #0f172a;
-  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
+  background: var(--bg-surface-alt);
 }
 
 .page[data-theme='light'] .nav-mobile-footer {
-  border-color: #e2e8f0;
+  border-color: var(--border-subtle);
 }
 
 .page[data-theme="dark"] .alt {
@@ -2610,10 +2621,30 @@ a.blog-card * {
   color: #64748b;
 }
 
+.page[data-theme="light"] .cta {
+  background: linear-gradient(150deg, var(--bg-page), var(--bg-surface-alt));
+}
+
 .page[data-theme="light"] .lead-form {
-  background: var(--card-bg);
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-md);
+}
+
+.lead-form-select {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.8rem;
+  border-radius: 8px;
+  margin-top: 0.4rem;
+  width: 100%;
+}
+
+.page[data-theme="light"] .lead-form-select {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border-default);
 }
 
 .page[data-theme="light"] .lead-form label {
@@ -3187,9 +3218,9 @@ body.modal-open {
   }
 
   .page[data-theme='light'] .nav-mobile-panel {
-    background: var(--card-bg);
-    border-color: rgba(0, 0, 0, 0.08);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    background: var(--bg-elevated);
+    border-color: var(--border-subtle);
+    box-shadow: var(--shadow-lg);
   }
 
   /* Multi-level drill down styles */
@@ -3218,9 +3249,9 @@ body.modal-open {
   }
 
   .page[data-theme='light'] .nav-mobile-menu-group-btn {
-    background: rgba(0, 0, 0, 0.02);
-    border-color: rgba(0, 0, 0, 0.05);
-    color: #0f172a;
+    background: var(--bg-surface);
+    border-color: var(--border-subtle);
+    color: var(--text-primary);
   }
 
   .nav-mobile-menu-group-btn:hover,
@@ -3250,9 +3281,9 @@ body.modal-open {
   }
 
   .page[data-theme='light'] .nav-mobile-back-btn {
-    background: rgba(0, 0, 0, 0.05);
-    border-color: rgba(0, 0, 0, 0.1);
-    color: #0f172a;
+    background: var(--bg-surface-alt);
+    border-color: var(--border-subtle);
+    color: var(--text-primary);
   }
 
   .nav-mobile-group-title {
@@ -3285,9 +3316,9 @@ body.modal-open {
   }
 
   .page[data-theme='light'] .nav-mobile-item {
-    color: #334155;
-    background: rgba(0, 0, 0, 0.01);
-    border-color: rgba(0, 0, 0, 0.03);
+    color: var(--text-secondary);
+    background: var(--bg-surface);
+    border-color: var(--border-subtle);
   }
 
   .nav-mobile-item:hover,

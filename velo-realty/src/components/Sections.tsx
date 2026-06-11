@@ -654,7 +654,7 @@ export function TestimonialsSection({ testimonials: apiTestimonials = [] }: { te
           overflow: hidden;
         }
         .page[data-theme='light'] .google-reviews-section {
-          background: #f8fafc;
+          background: var(--bg-surface-alt);
         }
         .google-reviews-grid-container {
           display: grid;
@@ -687,9 +687,9 @@ export function TestimonialsSection({ testimonials: apiTestimonials = [] }: { te
           top: 100px;
         }
         .page[data-theme='light'] .google-brand-summary-card {
-          background: #ffffff;
-          border-color: #e2e8f0;
-          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
+          background: var(--bg-surface);
+          border-color: var(--border-subtle);
+          box-shadow: var(--shadow-md);
         }
         .google-brand-title {
           font-size: 1.5rem;
@@ -700,7 +700,7 @@ export function TestimonialsSection({ testimonials: apiTestimonials = [] }: { te
           gap: 0.5rem;
         }
         .page[data-theme='light'] .google-brand-title {
-          color: #0f172a;
+          color: var(--text-primary);
         }
         .google-brand-logo-g {
           font-weight: 800;
@@ -715,7 +715,7 @@ export function TestimonialsSection({ testimonials: apiTestimonials = [] }: { te
           letter-spacing: -0.02em;
         }
         .page[data-theme='light'] .google-score-large {
-          color: #0f172a;
+          color: var(--text-primary);
         }
         .google-rating-subtext {
           font-size: 0.875rem;
@@ -723,7 +723,7 @@ export function TestimonialsSection({ testimonials: apiTestimonials = [] }: { te
           font-weight: 500;
         }
         .page[data-theme='light'] .google-rating-subtext {
-          color: #64748b;
+          color: var(--text-muted);
         }
         .google-action-buttons {
           display: flex;
@@ -762,16 +762,16 @@ export function TestimonialsSection({ testimonials: apiTestimonials = [] }: { te
           border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .page[data-theme='light'] .google-btn-outline {
-          background: #f8fafc;
-          color: #0f172a !important;
-          border-color: #cbd5e1;
+          background: var(--bg-surface-alt);
+          color: var(--text-primary) !important;
+          border-color: var(--border-default);
         }
         .google-btn-outline:hover {
           background: rgba(255, 255, 255, 0.08);
           border-color: rgba(255, 255, 255, 0.2);
         }
         .page[data-theme='light'] .google-btn-outline:hover {
-          background: #f1f5f9;
+          background: var(--border-default);
         }
         /* Review Grid items */
         .google-reviews-grid-items {
@@ -793,9 +793,9 @@ export function TestimonialsSection({ testimonials: apiTestimonials = [] }: { te
           position: relative;
         }
         .page[data-theme='light'] .google-review-card {
-          background: #ffffff;
-          border-color: #e2e8f0;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+          background: var(--bg-surface);
+          border-color: var(--border-subtle);
+          box-shadow: var(--shadow-sm);
         }
         .google-review-card:hover {
           transform: translateY(-5px);
@@ -840,7 +840,7 @@ export function TestimonialsSection({ testimonials: apiTestimonials = [] }: { te
           font-size: 1.05rem;
         }
         .page[data-theme='light'] .google-user-name {
-          color: #0f172a;
+          color: var(--text-primary);
         }
         .google-verified-check {
           color: #14b8a6;
@@ -853,7 +853,7 @@ export function TestimonialsSection({ testimonials: apiTestimonials = [] }: { te
           font-weight: 500;
         }
         .page[data-theme='light'] .google-user-role {
-          color: #64748b;
+          color: var(--text-muted);
         }
         .google-stars-row {
           display: flex;
@@ -867,7 +867,7 @@ export function TestimonialsSection({ testimonials: apiTestimonials = [] }: { te
           font-weight: 500;
         }
         .page[data-theme='light'] .google-rating-time {
-          color: #94a3b8;
+          color: var(--text-muted);
         }
         .google-review-body {
           font-size: 0.95rem;
@@ -877,7 +877,7 @@ export function TestimonialsSection({ testimonials: apiTestimonials = [] }: { te
           flex-grow: 1;
         }
         .page[data-theme='light'] .google-review-body {
-          color: #334155;
+          color: var(--text-secondary);
         }
         .google-empty-state {
           display: flex;
@@ -893,8 +893,8 @@ export function TestimonialsSection({ testimonials: apiTestimonials = [] }: { te
           width: 100%;
         }
         .page[data-theme='light'] .google-empty-state {
-          background: #ffffff;
-          border-color: #cbd5e1;
+          background: var(--bg-surface);
+          border-color: var(--border-subtle);
         }
         .google-empty-title {
           font-size: 1.25rem;
@@ -902,7 +902,7 @@ export function TestimonialsSection({ testimonials: apiTestimonials = [] }: { te
           color: #ffffff;
         }
         .page[data-theme='light'] .google-empty-title {
-          color: #0f172a;
+          color: var(--text-primary);
         }
         .google-empty-text {
           font-size: 0.95rem;
@@ -911,7 +911,7 @@ export function TestimonialsSection({ testimonials: apiTestimonials = [] }: { te
           line-height: 1.6;
         }
         .page[data-theme='light'] .google-empty-text {
-          color: #64748b;
+          color: var(--text-secondary);
         }
       `}</style>
 

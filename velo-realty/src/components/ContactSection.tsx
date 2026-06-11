@@ -78,11 +78,11 @@ export function ContactSection({ properties = [] }: { properties?: any[] }) {
             <select 
               value={formData.message.split('Interested in: ')[1] || ''} 
               onChange={e => setFormData({...formData, message: e.target.value ? `Interested in: ${e.target.value}. ${formData.message.replace(/Interested in:.*?\./, '').trim()}` : formData.message})}
-              style={{background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '0.8rem', borderRadius: '8px', marginTop: '0.4rem'}}
+              className="lead-form-select"
             >
-              <option value="">General Enquiry</option>
+              <option value="" style={{ background: 'var(--bg-surface, #152232)', color: 'var(--text-primary, #fff)' }}>General Enquiry</option>
               {properties.map((p: any) => (
-                <option key={p.id} value={p.name}>{p.name}</option>
+                <option key={p.id} value={p.name} style={{ background: 'var(--bg-surface, #152232)', color: 'var(--text-primary, #fff)' }}>{p.name}</option>
               ))}
             </select>
           </label>
