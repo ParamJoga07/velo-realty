@@ -585,9 +585,9 @@
 
 /* Light Theme support override style definitions */
 .page[data-theme='light'] .sv-panel {
-  background: #faf8f5;
-  border-color: rgba(15, 23, 42, 0.08);
-  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.15);
+  background: var(--bg-elevated);
+  border-color: var(--border-subtle);
+  box-shadow: var(--shadow-lg);
 }
 
 .page[data-theme='light'] .sv-overlay {
@@ -638,7 +638,7 @@
 .page[data-theme='light'] .sv-select:focus, 
 .page[data-theme='light'] .sv-input:focus, 
 .page[data-theme='light'] .sv-textarea:focus {
-  background: #faf8f5;
+  background: var(--bg-surface);
 }
 
 .page[data-theme='light'] .sv-project-card {

@@ -12,9 +12,9 @@
 
 .subpage-container[data-theme='light'] {
   background: 
-    radial-gradient(circle at 5% 8%, rgba(0, 168, 150, 0.04), transparent 25%),
-    radial-gradient(circle at 96% 2%, rgba(249, 115, 22, 0.04), transparent 20%),
-    linear-gradient(180deg, #f5f3ef 0%, #dcd6cd 100%);
+    radial-gradient(circle at 5% 8%, rgba(47, 93, 80, 0.04), transparent 25%),
+    radial-gradient(circle at 96% 2%, rgba(194, 154, 69, 0.04), transparent 20%),
+    linear-gradient(180deg, var(--bg-page) 0%, var(--bg-surface-alt) 100%);
 }
 
 /* SubPage Header */
@@ -293,9 +293,9 @@
 }
 
 .subpage-container[data-theme='light'] .advisory-card-widget {
-  background: #faf8f5;
-  border-color: #cbd5e1;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  background: var(--bg-surface);
+  border-color: var(--border-subtle);
+  box-shadow: var(--shadow-sm);
 }
 
 .advisory-card-widget h3 {
@@ -460,8 +460,8 @@
 }
 
 .subpage-container[data-theme='light'] .pillar-card {
-  background: #faf8f5;
-  border-color: #cbd5e1;
+  background: var(--bg-surface);
+  border-color: var(--border-subtle);
 }
 
 .pillar-card:hover {
@@ -633,8 +633,8 @@
 }
 
 .subpage-container[data-theme='light'] .subpage-footer {
-  background: #e5dfd5;
-  border-top-color: #cbd5e1;
+  background: var(--bg-surface-alt);
+  border-top-color: var(--border-subtle);
 }
 
 .subpage-footer p {
@@ -665,9 +665,9 @@
 }
 
 .subpage-container[data-theme='light'] .contact-card-glass {
-  background: #faf8f5;
-  border-color: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+  background: var(--bg-surface);
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-md);
 }
 
 .contact-property-banner {
@@ -779,9 +779,9 @@
 }
 
 .subpage-container[data-theme='light'] .premium-subpage-form input:focus {
-  background: #faf8f5 !important;
-  border-color: var(--teal-500) !important;
-  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+  background: var(--bg-surface) !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(47, 93, 80, 0.1);
 }
 
 .subpage-container[data-theme='light'] .premium-subpage-form label {

@@ -26,6 +26,7 @@ import { BlogDetailPage, AboutStoryPage, ContactAgentPage } from './components/S
 import { DirectCompare } from './components/DirectCompare'
 import { BlogModal } from './components/BlogModal'
 import { SmartPropertyCare } from './components/SmartPropertyCare'
+import { ColorPreview } from './components/ColorPreview'
 import API_BASE_URL from './config'
 
 const DEFAULT_PROJECT_IMAGES = [
@@ -42,12 +43,13 @@ function App() {
     return savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : 'dark'
   })
   
-  const [currentView] = useState<'main' | 'blog' | 'about-story' | 'contact-agent'>(() => {
+  const [currentView] = useState<'main' | 'blog' | 'about-story' | 'contact-agent' | 'color-preview'>(() => {
     const params = new URLSearchParams(window.location.search);
     const view = params.get('view');
     if (view === 'blog') return 'blog';
     if (view === 'about-story') return 'about-story';
     if (view === 'contact-agent') return 'contact-agent';
+    if (view === 'color-preview') return 'color-preview';
     return 'main';
   });
 
@@ -656,6 +658,10 @@ function App() {
 
   if (currentView === 'contact-agent') {
     return <ContactAgentPage theme={theme} onThemeToggle={toggleTheme} properties={allMappedProperties} />;
+  }
+
+  if (currentView === 'color-preview') {
+    return <ColorPreview theme={theme} onThemeToggle={toggleTheme} />;
   }
 
   return (

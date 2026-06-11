@@ -119,9 +119,9 @@
 }
 
 [data-theme='light'] .care-feat-icon {
-  background: #faf8f5;
-  border-color: rgba(0, 168, 150, 0.15);
-  box-shadow: 0 4px 10px rgba(0, 168, 150, 0.05);
+  background: var(--bg-surface);
+  border-color: rgba(47, 93, 80, 0.15);
+  box-shadow: 0 4px 10px rgba(47, 93, 80, 0.05);
 }
 
 .care-feat-details h4 {
@@ -287,9 +287,9 @@
 }
 
 [data-theme='light'] .care-floating-badge {
-  background: rgba(250, 248, 245, 0.9);
-  border-color: rgba(0, 168, 150, 0.15);
-  box-shadow: 0 10px 25px rgba(0, 168, 150, 0.08);
+  background: rgba(250, 251, 248, 0.9);
+  border-color: rgba(47, 93, 80, 0.15);
+  box-shadow: 0 10px 25px rgba(47, 93, 80, 0.08);
 }
 
 .care-floating-badge.top-right {

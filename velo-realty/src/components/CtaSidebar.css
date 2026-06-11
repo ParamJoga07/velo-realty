@@ -127,7 +127,7 @@
 }
 
 [data-theme='light'] .cta-tooltip {
-  background: #faf8f5;
+  background: var(--bg-surface);
   color: var(--navy-900);
   border-color: #e2e8f0;
 }
